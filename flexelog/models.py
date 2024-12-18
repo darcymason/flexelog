@@ -8,7 +8,7 @@ class Entry(models.Model):
     rowid = models.AutoField(primary_key=True, blank=True)
     lb = models.TextField(blank=True)
     id = models.IntegerField(blank=True, null=True)
-    date = models.DateField(blank=True, null=True)
+    date = models.TextField(blank=True, null=True)
     attrs = models.JSONField(blank=True, null=True)
     reply_to = models.IntegerField(blank=True, null=True)
     encoding = models.TextField(blank=True, null=True)

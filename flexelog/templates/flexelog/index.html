@@ -1,0 +1,9 @@
+{% if lb_list %}
+    <ul>
+    {% for lb_name in lb_list %}
+        <li><a href="/{{ lb_name }}/">{{ lb_name }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No logbooks are available.</p>
+{% endif %}
