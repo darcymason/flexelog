@@ -1,9 +1,37 @@
-{% if lb_list %}
-    <ul>
-    {% for lb_name in lb_list %}
-        <li><a href="/{{ lb_name }}/">{{ lb_name }}</a></li>
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="ROBOTS" content="NOINDEX, NOFOLLOW">
+    <title>FlexElog Logbook Selection</title>
+    <link rel="stylesheet" href="{% static 'flexelog/elog.css' %}">
+    <link rel="shortcut icon" href="{% static 'flexelog/favicon.ico' %}">
+    <link rel="icon" href="{% static 'flexelog/favicon.png' %}" type="image/png">
+</meta>
+</head>
+</html>
+<body>
+<table class="selframe" cellspacing="0" align="center">
+    <tr>
+        <td colspan="13" class="dlgtitle">
+            Several logbooks are defined on this host<br>Please select the one to connect to
+        </td>
+    </tr>
+    <tr>
+        <th colspan="10" class="seltitle">Logbook</th>
+        <th class="seltitle">Entries</th>
+        <th class="seltitle">Last submission</th>
+    </tr>
+    {% for lb in logbooks %}
+        <tr>
+            <td colspan="10" class="sellogbook">
+                <a href="{{ lb.name }}">{{ lb.name }}</a><br>
+                <span class="selcomment">{{ lb.comment }}</span>
+            </td>
+            <td nowrap class="selentries">Lots</td>
+            <td nowrap class="selentries">Last date</td>
+        </tr>
     {% endfor %}
-    </ul>
-{% else %}
-    <p>No logbooks are available.</p>
-{% endif %}
+</table>
+</body>
