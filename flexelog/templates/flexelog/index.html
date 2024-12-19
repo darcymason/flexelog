@@ -1,17 +1,8 @@
-{% load static %}
+{% extends "flexelog/base.html" %}
 
-<!DOCTYPE html>
-<html>
-<head>
-<meta name="ROBOTS" content="NOINDEX, NOFOLLOW">
-    <title>FlexElog Logbook Selection</title>
-    <link rel="stylesheet" href="{% static 'flexelog/elog.css' %}">
-    <link rel="shortcut icon" href="{% static 'flexelog/favicon.ico' %}">
-    <link rel="icon" href="{% static 'flexelog/favicon.png' %}" type="image/png">
-</meta>
-</head>
-</html>
-<body>
+{% block title %}FlexElog Logbook Selection{% endblock %}
+
+{% block body %}
 <table class="selframe" cellspacing="0" align="center">
     <tr>
         <td colspan="13" class="dlgtitle">
@@ -34,4 +25,4 @@
         </tr>
     {% endfor %}
 </table>
-</body>
+{% endblock body %}
