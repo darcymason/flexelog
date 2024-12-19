@@ -26,7 +26,7 @@
     {% for lb in logbooks %}
         <tr>
             <td colspan="10" class="sellogbook">
-                <a href="{{ lb.name }}">{{ lb.name }}</a><br>
+                <a href="{% url 'flexelog:logbook' lb.name %}">{{ lb.name }}</a><br>
                 <span class="selcomment">{{ lb.comment }}</span>
             </td>
             <td nowrap class="selentries">Lots</td>

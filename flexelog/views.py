@@ -22,9 +22,12 @@ def index(request):
 
     return render(request, "flexelog/index.html", context)
 
+def logbook(request, lb):
+    return render(request, "flexelog/entry_list.html", {"lb": lb})
 
 def detail(request, lb, entry_id):
     entry = get_object_or_404(Entry, lb=lb, id=entry_id)
 
     return render(request, "flexelog/detail.html", {"entry": entry})
 
+    

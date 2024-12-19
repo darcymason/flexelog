@@ -1,8 +1,11 @@
 from django.db import models
+from django.conf import settings
 
 from textwrap import shorten
 
 # Create your models here.
+
+MAX_LOGBOOK_NAME = getattr(settings, "MAX_LOGBOOK_NAME", 50)
 
 class Entry(models.Model):
     rowid = models.AutoField(primary_key=True, blank=True)
@@ -24,6 +27,14 @@ class Entry(models.Model):
     class Meta:
         managed = False
         db_table = 'Entries'
+
+class Logbook(models.Model):
+    name = models.CharField(max_length=MAX_LOGBOOK_NAME, blank=False)
+    config = models.TextField(blank=True, null=True)
+    def __str__(self):
+        return (
+            f"'{self.name}':   {self.config}"
+        )
 
 def logbook_names():
     return list(Entry.objects.values_list("lb", flat=True).distinct())
