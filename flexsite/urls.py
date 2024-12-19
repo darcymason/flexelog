@@ -19,7 +19,8 @@ from django.contrib import admin
 from django.urls import include, path
 
 urlpatterns = [
+    path("admin/", admin.site.urls),
     path("", include("flexelog.urls")),  # flexelog 'takes over' the root url
     path("flexelog/", include("flexelog.urls")),
-    path("admin/", admin.site.urls),
+   
 ]
