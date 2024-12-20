@@ -1,13 +1,39 @@
 from django.db import models
+from django.db.models.signals import post_save  # update config when logbook changed
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from textwrap import shorten
-
-# Create your models here.
+from configparser import ConfigParser, UNNAMED_SECTION
 
 MAX_LOGBOOK_NAME = getattr(settings, "MAX_LOGBOOK_NAME", 50)
+
+
+def validate_config_section(value):
+    # Make sure is readable as ConfigParser lines, without section headers
+    cp = ConfigParser(allow_unnamed_section=True, interpolation=None)
+    cp.optionxform = str  # strings are case sensitive
+    error = ""
+    try:
+        cp.read_string(value)
+    except Exception as e:
+        raise ValidationError(
+            f'{_("Syntax error in config file")}: {str(e)}'
+        )
+    if len(cp.sections() > 1):
+        raise ValidationError(f"Cannot have section headings like '[{cp.sections()[1]}]'")
+
+
+class GeneralConfig(models.Model):
+    section = models.CharField(
+        max_length=20, 
+        choices = [("global", "global defaults for all logbooks")], 
+        unique=True,
+        validators=[validate_config_section],
+    )
+    config = models.TextField(blank=True)
+
 
 def validate_logbook_name(value):
     if value.lower() in ['admin', 'user']:
@@ -15,6 +41,7 @@ def validate_logbook_name(value):
             _("'%(value)s' is reserved, it cannot be used for a logbook name"),
             params={"value": value.lower()},
         )
+
 
 class Logbook(models.Model):
     name = models.CharField(
@@ -29,12 +56,20 @@ class Logbook(models.Model):
         return (
             f"'{self.name}':   {self.comment}"
         )
+    
+
+def config_changed(sender, **kwargs):
+    print("Got to logbook change")
+    pass
+
+post_save.connect(config_changed, sender=Logbook)
+post_save.connect(config_changed, sender=GeneralConfig)
 
 
 class Entry(models.Model):
     rowid = models.AutoField(primary_key=True, blank=True)
     lb = models.ForeignKey(Logbook, on_delete=models.PROTECT)
-    id = models.IntegerField(blank=True, null=True)
+    id = models.IntegerField(blank=False, null=False)
     date = models.TextField(blank=True, null=True)
     attrs = models.JSONField(blank=True, null=True)
     reply_to = models.IntegerField(blank=True, null=True)
@@ -56,3 +91,8 @@ class Entry(models.Model):
 
 def logbook_names():
     return list(Entry.objects.values_list("lb", flat=True).distinct())
+
+
+if __name__ == "__main__":
+    s = "Test = 1"
+    validate_config_section(s)
