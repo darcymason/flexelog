@@ -24,6 +24,7 @@ def logbook(request, lb_name):
 def detail(request, lb_name, entry_id):
     try:
         logbook = Logbook.objects.get(name=lb_name)
+        logbooks = Logbook.objects.all()
     except Entry.DoesNotExist:
         # 'Logbook "%s" does not exist on remote server'
         raise  # XXX
@@ -32,6 +33,7 @@ def detail(request, lb_name, entry_id):
     context = {
         "entry": entry,
         "logbook": logbook,
+        "logbooks": logbooks,
     }
     return render(request, "flexelog/detail.html", context)
 

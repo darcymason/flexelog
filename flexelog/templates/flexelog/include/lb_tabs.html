@@ -1,0 +1,11 @@
+<table class="frame" cellpadding="0" cellspacing="0">
+    <tr>
+        <td class="tabs">
+            {% for lb in logbooks %}
+                <span class={% if lb.name == logbook.name %}"sltab"{% else %}"ltab"{% endif %}></span>
+                    <a href="{% url 'flexelog:logbook' lb.name %}" title="{{ lb.comment }}">{{ lb.name }}</a>
+                </span>
+            {% endfor %}
+        </td>
+    </tr>
+</table>

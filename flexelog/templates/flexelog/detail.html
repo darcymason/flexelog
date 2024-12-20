@@ -4,7 +4,10 @@
 
 {% block body %}
 
-
+<form name="form1" method="GET" action="{{ entry.id }}">
+    <input type="hidden" name="page_type" value="{{ page_type }}" />
+    {% include "flexelog/include/lb_tabs.html" %}
+</form>
 {{ entry }}
 
-{% endblock %}
+{% endblock body %}
