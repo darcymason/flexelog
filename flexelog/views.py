@@ -6,11 +6,9 @@ from django.http import HttpResponse
 
 
 def index(request):
-
     context = {
         "logbooks": Logbook.objects.all()
     }
-
     return render(request, "flexelog/index.html", context)
 
 def logbook(request, lb_name):
@@ -19,21 +17,23 @@ def logbook(request, lb_name):
     except Entry.DoesNotExist:
         # 'Logbook "%s" does not exist on remote server'
         raise  # XXX
-    return render(request, "flexelog/entry_list.html", {"logbook": logbook})
+    context = {
+        "logbook": logbook,
+        "logbooks": Logbook.objects.all(),
+    }
+    return render(request, "flexelog/entry_list.html", context)
 
 def detail(request, lb_name, entry_id):
     try:
         logbook = Logbook.objects.get(name=lb_name)
-        logbooks = Logbook.objects.all()
     except Entry.DoesNotExist:
         # 'Logbook "%s" does not exist on remote server'
         raise  # XXX
     entry = get_object_or_404(Entry, lb=logbook, id=entry_id)
-
     context = {
         "entry": entry,
         "logbook": logbook,
-        "logbooks": logbooks,
+        "logbooks": Logbook.objects.all(),
     }
     return render(request, "flexelog/detail.html", context)
 

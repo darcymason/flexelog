@@ -1,11 +1,20 @@
 <table class="frame" cellpadding="0" cellspacing="0">
-    <tr>
-        <td class="tabs">
-            {% for lb in logbooks %}
-                <span class={% if lb.name == logbook.name %}"sltab"{% else %}"ltab"{% endif %}></span>
-                    <a href="{% url 'flexelog:logbook' lb.name %}" title="{{ lb.comment }}">{{ lb.name }}</a>
-                </span>
-            {% endfor %}
-        </td>
-    </tr>
+
+{# Logbook tabs across the top #}
+<tr>
+    <td class="tabs">
+    {% for lb in logbooks %}
+        <span class="{% if lb.name == logbook.name %}s{% endif %}ltab">
+        <a href="{% url 'flexelog:logbook' lb.name %}" title="{{ lb.comment }}">{{ lb.name }}</a>
+        </span>
+    {% endfor %}
+    </td>
+</tr>
+
+{# Bar for this logbook comment #}
+<tr><td>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+  <tr><td class="title1">&nbsp;&nbsp;{{ logbook.comment }}&nbsp;</td></tr>
+</table>
+</td></tr>
 </table>
