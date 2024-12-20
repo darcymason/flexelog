@@ -1,5 +1,5 @@
 flexelog/__pycache__/*
 flexelog/migrations/__pycache__/*
 flexsite/__pycache__/*
-db.sqlite3
 flexelog/migrations/*
+flexdj.code-workspace

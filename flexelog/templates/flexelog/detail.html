@@ -1,73 +1,10 @@
 {% extends "flexelog/base.html" %}
 
-{% block title %}F'log {{ entry.attrs.Subject }}{% endblock %}
+{% block title %}F'log {{ entry.attrs.Subject }}{% endblock title %}
 
 {% block body %}
 
-<form name="form1" method="GET" action="./" enctype="multipart/form-data">
-    <input type="hidden" name="page_type" value="{{ page_type }}">
-    <table class="frame" cellpadding="0" cellspacing="0">
-        <tr>
-            <td class="tabs">
-                {% for lb in logbooks %}
-                    {% if lb.name == logbook.name %}
-                        <span class="sltab">
-                    {% else %}
-                        <span class="ltab">
-                    {% endif %}
-                        <a href="../{{ lb.name }}/" title="{{ lb.comment }}">{{ lb.name }}</a>
-                    </span>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <table width="100%" border="0" cellpadding="0" cellspacing="0">
-                    <tr>
-                        <td class="title1">&nbsp;&nbsp;{{ logbook.comment }}&nbsp;</td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-        <tr>
-            <td class="menuframe"><span class="menu1">
-                    &nbsp;<a href=".?id=1">List</a>&nbsp;|&nbsp;<a href="1?cmd=New">New</a>&nbsp;|&nbsp;<a
-                        href="1?cmd=Edit">Edit</a>&nbsp;|&nbsp;<a href="1?cmd=Delete">Delete</a>&nbsp;|&nbsp;<a
-                        href="1?cmd=Reply">Reply</a>&nbsp;|&nbsp;<a href="1?cmd=Duplicate">Duplicate</a>&nbsp;|&nbsp;<a
-                        href="1?cmd=Find">Find</a>&nbsp;|&nbsp;<a href="1?cmd=Config">Config</a>&nbsp;|&nbsp;<a
-                        href="1?cmd=Help">Help</a>
-                </span></td>
-        </tr>
-        <table class="listframe" width="100%" cellspacing="0" cellpadding="0">
-            <tr>
-                <td class="attribhead">Message ID:&nbsp;<b>1</b>&nbsp;&nbsp;&nbsp;&nbsp;Entry time:&nbsp;<b>2008-04-06
-                        22:37:32</b></td>
-            </tr>
-            <tr>
-                <td>
-                    <table width="100%" cellpadding="0" cellspacing="0">
-                        <tr>
-                            <td class="attribname" nowrap>Category:</td>
-                            <td class="attribvalue">Health</td>
-                        </tr>
-                        <tr>
-                            <td class="attribname" nowrap>Subject:</td>
-                            <td class="attribvalue">Bad reflux lately</td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-            <tr>
-                <td class="messageframe"><textarea hidden name="editor_markdown" id="editor_markdown"><p>Have had many bad episodes of reflux lately. Friday after work I felt like an Aliens movie parasite was trying to come out of my chest. Having many burps and huge farts but didn't give relief. Through course of evening chewed two Rolaids several times. At one point late at night, almost went to emerg the pain was so intense, but just for minutes at a time. Chewing the Rolaids did bring it down to a tolerable level.</p>
-    <p>&nbsp;</p>
-    </textarea>
-                    <div id="viewer"></div>
-                </td>
-            </tr>
 
-        </table>
-    </table>
-    <center><a class="bottomlink" title="Goto FlexElog home page" href="https://github.com/darcymason/flexelog">FlexElog
-            home page</a></center>
-</form>
+{{ entry }}
 
-{% endblock body %}
+{% endblock %}

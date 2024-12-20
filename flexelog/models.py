@@ -17,7 +17,12 @@ def validate_logbook_name(value):
         )
 
 class Logbook(models.Model):
-    name = models.CharField(max_length=MAX_LOGBOOK_NAME, blank=False, validators=[validate_logbook_name])
+    name = models.CharField(
+        max_length=MAX_LOGBOOK_NAME,
+        blank=False,
+        validators=[validate_logbook_name],
+        unique=True,
+    )
     comment = models.CharField(max_length=50, blank=True)
     config = models.TextField(blank=True, null=True)
     def __str__(self):
@@ -44,6 +49,10 @@ class Entry(models.Model):
             f"{shorten(self.text, 50)}"
         )
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields = ("lb", "id"), name="id in logbook")
+        ]
 
 def logbook_names():
     return list(Entry.objects.values_list("lb", flat=True).distinct())

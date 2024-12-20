@@ -1,5 +1,6 @@
 {% extends "flexelog/base.html" %}
 
 {% block body %}
-{{ lb.name }} List
+{{ logbook.name }}: {{ logbook.comment }}
+<p>{{ logbook.entry_set.all }}</p>
 {% endblock body %}
