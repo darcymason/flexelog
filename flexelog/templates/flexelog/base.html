@@ -4,14 +4,16 @@
 <html>
 <head>
     <meta name="ROBOTS" content="NOINDEX, NOFOLLOW">
-        <title>{% block title %}FlexElog{% endblock %}</title>
-        <link rel="stylesheet" type="text/css" href="{% static 'flexelog/elog.css' %}">
-        <link rel="shortcut icon" href="{% static 'flexelog/favicon.ico' %}">
-        <link rel="icon" href="{% static 'flexelog/favicon.png' %}" type="image/png">
+        <title>{% block title %}FlexElog{% endblock %}</title>     
     </meta>
+    <link rel="stylesheet" type="text/css" href="{% static 'flexelog/elog.css' %}">
+    <link rel="shortcut icon" href="{% static 'flexelog/favicon.ico' %}">
+    <link rel="icon" href="{% static 'flexelog/favicon.png' %}" type="image/png">
+    {% block morelinks %}
+    {% endblock %}
 </head>
 
-<body>
+<body onload="body_onload()">
   {% block body %}
   {% endblock %}
 </body>
