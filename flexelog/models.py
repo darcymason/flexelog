@@ -1,11 +1,11 @@
 from django.db import models
-from django.db.models.signals import post_save  # update config when logbook changed
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from textwrap import shorten
 from configparser import ConfigParser, UNNAMED_SECTION
+
 
 MAX_LOGBOOK_NAME = getattr(settings, "MAX_LOGBOOK_NAME", 50)
 
@@ -18,25 +18,25 @@ def validate_config_section(value):
     try:
         cp.read_string(value)
     except Exception as e:
-        raise ValidationError(
-            f'{_("Syntax error in config file")}: {str(e)}'
-        )
-    if len(cp.sections() > 1):
-        raise ValidationError(f"Cannot have section headings like '[{cp.sections()[1]}]'")
+        raise ValidationError(f'{_("Syntax error in config file")}: {str(e)}')
 
 
-class GeneralConfig(models.Model):
-    section = models.CharField(
-        max_length=20, 
-        choices = [("global", "global defaults for all logbooks")], 
-        unique=True,
-        validators=[validate_config_section],
+class ElogConfig(models.Model):
+    name = models.CharField(
+        max_length=50,
+        choices=[
+            ("default", "Default config")
+        ],  # XX later could have different configs
+        
     )
-    config = models.TextField(blank=True)
+    config_text = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.name}"
 
 
 def validate_logbook_name(value):
-    if value.lower() in ['admin', 'user']:
+    if value.lower() in ["admin", "user"]:
         raise ValidationError(
             _("'%(value)s' is reserved, it cannot be used for a logbook name"),
             params={"value": value.lower()},
@@ -52,18 +52,9 @@ class Logbook(models.Model):
     )
     comment = models.CharField(max_length=50, blank=True)
     config = models.TextField(blank=True, null=True)
+
     def __str__(self):
-        return (
-            f"'{self.name}':   {self.comment}"
-        )
-    
-
-def config_changed(sender, **kwargs):
-    print("Got to logbook change")
-    pass
-
-post_save.connect(config_changed, sender=Logbook)
-post_save.connect(config_changed, sender=GeneralConfig)
+        return f"'{self.name}':   {self.comment}"
 
 
 class Entry(models.Model):
@@ -86,13 +77,10 @@ class Entry(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields = ("lb", "id"), name="id in logbook")
+            models.UniqueConstraint(fields=("lb", "id"), name="id in logbook")
         ]
+
 
 def logbook_names():
     return list(Entry.objects.values_list("lb", flat=True).distinct())
 
-
-if __name__ == "__main__":
-    s = "Test = 1"
-    validate_config_section(s)
