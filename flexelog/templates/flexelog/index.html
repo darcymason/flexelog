@@ -1,4 +1,5 @@
 {% extends "flexelog/base.html" %}
+{% load l10n %}
 
 {% block title %}FlexElog Logbook Selection{% endblock %}
 
@@ -18,10 +19,10 @@
         <tr>
             <td colspan="10" class="sellogbook">
                 <a href="{% url 'flexelog:logbook' lb.name %}">{{ lb.name }}</a><br>
-                <span class="selcomment">{{ lb.comment }}</span>
+                <span class="selcomment"></span>
             </td>
-            <td nowrap class="selentries">Lots</td>
-            <td nowrap class="selentries">Last date</td>
+            <td nowrap class="selentries">{{ lb.entry_set.count }}</td>
+            <td nowrap class="selentries">{{ lb.latest_date|localize}}</td>
         </tr>
     {% endfor %}
 </table>

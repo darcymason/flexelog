@@ -56,12 +56,14 @@ class Logbook(models.Model):
     def __str__(self):
         return f"'{self.name}':   {self.comment}"
 
+    def latest_date(self):
+        return self.entry_set.latest("date").date  # XXX need to check if no entries
 
 class Entry(models.Model):
     rowid = models.AutoField(primary_key=True, blank=True)
     lb = models.ForeignKey(Logbook, on_delete=models.PROTECT)
     id = models.IntegerField(blank=False, null=False)
-    date = models.TextField(blank=True, null=True)
+    date = models.DateTimeField()
     attrs = models.JSONField(blank=True, null=True)
     reply_to = models.IntegerField(blank=True, null=True)
     encoding = models.TextField(blank=True, null=True)

@@ -9,6 +9,7 @@ import functools
 from django.db.models.signals import post_save  # update config when logbook changed
 from flexelog.models import ElogConfig
 
+import logging
 
 
 _cfg = None  # to be set later
@@ -188,9 +189,15 @@ class LogbookConfig:
         self._lb_attrs = {}
         for lb_name in self._cfg:
             # don't include global sections, doing logbooks only
-            if lb_name.startswith("global"):
+            if lb_name.lower().startswith("global"):
                 continue
-
+            if lb_name.lower().startswith("group "):
+                logging.warning(
+                    f"Found section [{lb_name}] in ElogConfig: "
+                    "[Group xxx] sections are ignored in this "
+                    "version of FlexElog"
+                )
+                
             attrs = {
                 name: Attribute(name)
                 for name in self.get(lb_name, "Attributes", as_list=True)
@@ -213,7 +220,8 @@ class LogbookConfig:
             # Set Extendable Options (attributes)
             for attr in self.get(lb_name, "Extendable Options", as_list=True):
                 if attr not in attrs:
-                    warnings.warn(
+                    logging.warning(
+                        f"In config for logbook '{lb_name}', "
                         f"Extendable Options '{attr}' is not listed in Attributes line and is ignored"
                     )
                 else:
@@ -222,7 +230,7 @@ class LogbookConfig:
             # Set the Option Types (Text by default)
             # Logic here means if repeated, last one spec'd wins
             for attr_name, attr in attrs.items():
-                for option_type in ["Options", "MOptions", "ROptions"]:
+                for option_type in ["Options", "MOptions", "ROptions"]:  # XX IOptions
                     # XX below is specific to single space, could make whitespace tolerant
                     options = self.get(
                         lb_name, f"{option_type} {attr_name}", as_list=True
@@ -264,7 +272,7 @@ class LogbookConfig:
 
         First looks in elogd.cfg logbook section, then global section,
         then the passed default (e.g. from request.args), if not None,
-        then in DEFAULTS in elog_config.py.
+        then in DEFAULTS in elog_cfg.py.
 
         If `valtype` specified, return the DEFAULTS value if conversion gives an error
         """

@@ -82,3 +82,8 @@ class TestConditionalConfig(TestCase):
             cfg.add_condition("US")
             where2 = cfg.get("Travel", "MOptions Where2", as_list=True)
             assert where2 == "FL NY Other".split()            
+
+
+# XXX TO DO:
+# * logbook name "urlsafe" - spaces, etc.
+# * check index page when latest_date has no entries 
