@@ -1,0 +1,162 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-12-24 15:00-0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: .\flexsite\settings.py:110
+msgid "English"
+msgstr ""
+
+#: .\flexsite\settings.py:111
+msgid "Bulgarian"
+msgstr ""
+
+#: .\flexsite\settings.py:112
+msgid "Brazilian"
+msgstr ""
+
+#: .\flexsite\settings.py:113
+msgid "Czech"
+msgstr ""
+
+#: .\flexsite\settings.py:114
+msgid "German"
+msgstr ""
+
+#: .\flexsite\settings.py:115
+msgid "Danish"
+msgstr ""
+
+#: .\flexsite\settings.py:116
+msgid "Spanish"
+msgstr ""
+
+#: .\flexsite\settings.py:117
+msgid "French"
+msgstr ""
+
+#: .\flexsite\settings.py:118
+msgid "Indonesia"
+msgstr ""
+
+#: .\flexsite\settings.py:119
+msgid "Italian"
+msgstr ""
+
+#: .\flexsite\settings.py:120
+msgid "Japanese"
+msgstr ""
+
+#: .\flexsite\settings.py:121
+msgid "Dutch"
+msgstr ""
+
+#: .\flexsite\settings.py:122
+msgid "Polish"
+msgstr ""
+
+#: .\flexsite\settings.py:123
+msgid "Russian"
+msgstr ""
+
+#: .\flexsite\settings.py:124
+msgid "Swedish"
+msgstr ""
+
+#: .\flexsite\settings.py:125
+msgid "Slowak"
+msgstr ""
+
+#: .\flexsite\settings.py:126
+msgid "Turkish"
+msgstr ""
+
+#: .\flexsite\settings.py:127
+msgid "Chinese"
+msgstr ""
+
+#: .\flexelog\models.py:21
+msgid "Syntax error in config file"
+msgstr "Синтактична грешка във файл с настройки"
+
+#: .\flexelog\models.py:42
+#, python-format
+msgid "'%(value)s' is reserved, it cannot be used for a logbook name"
+msgstr ""
+
+#: .\flexelog\templates\flexelog\index.html:11 .\flexelog\views.py:18
+msgid "Several logbooks are defined on this host"
+msgstr "На този хост са дефинирани няколко дневника"
+
+#: .\flexelog\templates\flexelog\index.html:12 .\flexelog\views.py:19
+msgid "Please select the one to connect to"
+msgstr "Моля, изберете към кой да бъдете свързан"
+
+#: .\flexelog\templates\flexelog\index.html:16
+msgid "Logbook"
+msgstr "Дневник"
+
+#: .\flexelog\templates\flexelog\index.html:17
+msgid "Entries"
+msgstr "Записи"
+
+#: .\flexelog\templates\flexelog\index.html:18
+msgid "Last submission"
+msgstr "Последна промяна"
+
+#: .\flexelog\templates\flexelog\show_error.html:17
+msgid "Please use your browser's back button to go back"
+msgstr "Моля, използвайте бутона Back на браузъра, за да се върнете назад"
+
+#: .\flexelog\views.py:33
+#, python-format
+msgid "Logbook \"%s\" does not exist on remote server"
+msgstr "Дневникът \"%s\" не съществува на отдалечения сървър"
+
+#: .\flexelog\views.py:57
+msgid "New"
+msgstr "Създаване"
+
+#: .\flexelog\views.py:57
+msgid "Find"
+msgstr "Търсене"
+
+#: .\flexelog\views.py:57 .\flexelog\views.py:61
+msgid "Select"
+msgstr "Избиране"
+
+#: .\flexelog\views.py:57
+msgid "Import"
+msgstr "Импортиране"
+
+#: .\flexelog\views.py:57
+msgid "Config"
+msgstr "Настройване"
+
+#: .\flexelog\views.py:57 .\flexelog\views.py:62
+msgid "Last day"
+msgstr "Последен ден"
+
+#: .\flexelog\views.py:57
+msgid "Help"
+msgstr "Помощ"
+
+#: .\flexelog\views.py:68
+#, python-format
+msgid "Error: Command \"<b>%s</b>\" not allowed"
+msgstr "Грешка: Командата \"<b>%s</b>\" не е позволена"
