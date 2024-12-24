@@ -1,0 +1,22 @@
+{% extends "flexelog/base.html" %}
+
+
+<% block title %>{% translate "ELOG error" %><% endblock %>
+
+<% block body %>
+<center>
+<table class="dlgframe" width="50%" cellpadding="1" cellspacing="0"
+    <tr>
+        <td class="errormsg">{{ message }}</td>
+    </tr>
+    <tr>
+        <td class="errormsg">
+            <script language="javascript" type="text/javascript">
+                document.write("<button type=button onClick=history.back()>{% translate 'Back' %></button>"); 
+            </script>
+        <noscript>{% translate "Please use your browser's back button to go back" %}</noscript>
+        </td>
+    </tr>
+</table>
+</center>
+<% endblock body %>

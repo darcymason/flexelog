@@ -18,7 +18,8 @@ def validate_config_section(value):
     try:
         cp.read_string(value)
     except Exception as e:
-        raise ValidationError(f'{_("Syntax error in config file")}: {str(e)}')
+        msg = _("Syntax error in config file")
+        raise ValidationError(f'{msg}: {str(e)}')
 
 
 class ElogConfig(models.Model):

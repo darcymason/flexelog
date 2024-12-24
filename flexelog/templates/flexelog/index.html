@@ -1,5 +1,6 @@
 {% extends "flexelog/base.html" %}
 {% load l10n %}
+{% load i18n %}
 
 {% block title %}FlexElog Logbook Selection{% endblock %}
 
@@ -7,13 +8,14 @@
 <table class="selframe" cellspacing="0" align="center">
     <tr>
         <td colspan="13" class="dlgtitle">
-            Several logbooks are defined on this host<br>Please select the one to connect to
+            {% translate "Several logbooks are defined on this host" %}<br>
+            {% translate "Please select the one to connect to" %}
         </td>
     </tr>
     <tr>
-        <th colspan="10" class="seltitle">Logbook</th>
-        <th class="seltitle">Entries</th>
-        <th class="seltitle">Last submission</th>
+        <th colspan="10" class="seltitle">{% translate "Logbook" %}</th>
+        <th class="seltitle">{% translate "Entries" %}</th>
+        <th class="seltitle">{% translate "Last submission" %}</th>
     </tr>
     {% for lb in logbooks %}
         <tr>
