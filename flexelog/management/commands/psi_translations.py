@@ -88,11 +88,11 @@ class Command(BaseCommand):
                     continue
                 po_filepath = Path(locale_path) / lang_code / "LC_MESSAGES" / PO_FILENAME
                 po = polib.pofile(po_filepath)
-                translation = eloglang_translations(lang_code)
+                translations = eloglang_translations(lang_code)
                 updated = False
                 for entry in po.untranslated_entries():
-                    if translation.get(entry.msgid):  # don't update if missing or empty value
-                        entry.msgstr = translation[entry.msgid]
+                    if translations.get(entry.msgid):  # don't update if missing or empty value
+                        entry.msgstr = translations[entry.msgid]
                         updated = True
                         self.stdout.write(
                             self.style.SUCCESS(f"{lang_code}: {entry.msgid}  -->  {entry.msgstr}")
