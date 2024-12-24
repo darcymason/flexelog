@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+from django.utils.translation import gettext_lazy as _
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -105,6 +106,26 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
+LANGUAGES = [
+    ('en', _("English")),
+    ('bg', _("Bulgarian")),
+    ('br', _("Brazilian")),
+    ('cz', _("Czech")),
+    ('de', _("German")),
+    ('dk', _("Danish")),
+    ('es', _("Spanish")),
+    ('fr', _("French")),
+    ('id', _("Indonesia")),
+    ('it', _("Italian")),
+    ('jp', _("Japanese")),
+    ('nl', _("Dutch")),
+    ('pl', _("Polish")),
+    ('ru', _("Russian")),
+    ('se', _("Swedish")),
+    ('sk', _("Slowak")),
+    ('tr', _("Turkish")),
+    ('zh', _("Chinese")),
+]
 LANGUAGE_CODE = "en-us"
 
 TIME_ZONE = "UTC"
@@ -113,9 +134,9 @@ USE_I18N = True
 
 USE_TZ = True
 
-LOCALE_PATHS = [
-    BASE_DIR / "common_files" / "locale",
-]
+# LOCALE_PATHS = [
+#     BASE_DIR / "common_files" / "locale",
+# ]
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
