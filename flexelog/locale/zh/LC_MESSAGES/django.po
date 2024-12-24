@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-24 17:01-0500\n"
+"POT-Creation-Date: 2024-12-24 17:24-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,7 +16,6 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: .\flexsite\settings.py:110
 msgid "English"
@@ -92,7 +91,7 @@ msgstr ""
 
 #: .\flexelog\models.py:21
 msgid "Syntax error in config file"
-msgstr "Syntax-Fehler in Konfigurationsdatei"
+msgstr ""
 
 #: .\flexelog\models.py:42
 #, python-format
@@ -101,62 +100,62 @@ msgstr ""
 
 #: .\flexelog\templates\flexelog\index.html:11 .\flexelog\views.py:18
 msgid "Several logbooks are defined on this host"
-msgstr "Mehrere Logbücher sind auf diesem Computer eingerichtet"
+msgstr ""
 
 #: .\flexelog\templates\flexelog\index.html:12 .\flexelog\views.py:19
 msgid "Please select the one to connect to"
-msgstr "Bitte wählen Sie eines aus"
+msgstr ""
 
 #: .\flexelog\templates\flexelog\index.html:16
 msgid "Logbook"
-msgstr "Logbuch"
+msgstr ""
 
 #: .\flexelog\templates\flexelog\index.html:17
 msgid "Entries"
-msgstr "Einträge"
+msgstr ""
 
 #: .\flexelog\templates\flexelog\index.html:18
 msgid "Last submission"
-msgstr "Letzter Eintrag"
+msgstr ""
 
 #: .\flexelog\templates\flexelog\show_error.html:17
 msgid "Please use your browser's back button to go back"
-msgstr "Bitte die Zurück-Taste Ihres Browsers betätigen"
+msgstr ""
 
 #: .\flexelog\views.py:33
 #, python-format
 msgid "Logbook \"%s\" does not exist on remote server"
-msgstr "Logbuch \"%s\" existiert nicht auf entferntem Server"
+msgstr ""
 
 #: .\flexelog\views.py:57
 msgid "New"
-msgstr "Neu"
+msgstr ""
 
 #: .\flexelog\views.py:57
 msgid "Find"
-msgstr "Finden"
+msgstr ""
 
 #: .\flexelog\views.py:57 .\flexelog\views.py:61
 msgid "Select"
-msgstr "Auswählen"
+msgstr ""
 
 #: .\flexelog\views.py:57
 msgid "Import"
-msgstr "Import"
+msgstr ""
 
 #: .\flexelog\views.py:57
 msgid "Config"
-msgstr "Konfigurieren"
+msgstr ""
 
 #: .\flexelog\views.py:57 .\flexelog\views.py:62
 msgid "Last day"
-msgstr "Letzter Tag"
+msgstr ""
 
 #: .\flexelog\views.py:57
 msgid "Help"
-msgstr "Hilfe"
+msgstr ""
 
 #: .\flexelog\views.py:68
 #, python-format
 msgid "Error: Command \"<b>%s</b>\" not allowed"
-msgstr "Fehler: Befehl \"<b>%s</b>\" nicht erlaubt"
+msgstr ""

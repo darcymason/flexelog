@@ -21,9 +21,9 @@ LANGUAGES = {
     "pl": "polish",
     "ru": "russian",
     "se": "swedish",
-    "sk": "slowak",
+    "sk": "slovak",
     "tr": "turkish",
-    "zh": "chinese",
+    "zh_CN": "chinese",
 }
 
 
@@ -34,6 +34,8 @@ def eloglang_translations(lang_code) -> dict:
         raise IOError(f"Language file path '{PSI_LANG_PATH}' does not exist")
     lang_name = LANGUAGES.get(lang_code)
     matches = list(PSI_LANG_PATH.glob(f"eloglang.{lang_name}*"))
+    matches += list(PSI_LANG_PATH.glob(f"eloglang.{lang_code}*"))
+
     if not matches:
         return {}
     # Prefer utf8 translation file if available
