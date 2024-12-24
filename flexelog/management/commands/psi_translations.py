@@ -86,17 +86,16 @@ class Command(BaseCommand):
                 if not lang_code_path.is_dir() or lang_code not in LANGUAGES:
                     self.stdout.write(f"Folder '{lang_code}' is not a known language code")
                     continue
-                self.stdout.write(f"Processing language code '{lang_code}'")
                 po_filepath = Path(locale_path) / lang_code / "LC_MESSAGES" / PO_FILENAME
                 po = polib.pofile(po_filepath)
                 translation = eloglang_translations(lang_code)
                 updated = False
                 for entry in po.untranslated_entries():
-                    if entry.msgid in translation:
+                    if translation.get(entry.msgid):  # don't update if missing or empty value
                         entry.msgstr = translation[entry.msgid]
                         updated = True
                         self.stdout.write(
-                           self.style.SUCCESS(f"{lang_code}: {entry.msgid}  -->  {entry.msgstr}")
+                            self.style.SUCCESS(f"{lang_code}: {entry.msgid}  -->  {entry.msgstr}")
                         )
                 if updated:
                     po.save(po_filepath)

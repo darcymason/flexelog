@@ -16,7 +16,15 @@ Then run
 ```
 python manage.py psi_translations
 ```
-That script reads the translation files from PSI (copies in flexelog/resources/psi_elog_lang),
+
+If necessary, further edit the django.po files to add additional translations.
+Finally, run
+```
+python manage.py compilemessages
+```
+which produces the final .mo files used by Django's internationalization/localization.
+
+The `psi_translations` script reads the translation files from PSI (copies in flexelog/psi_elog/lang).  NOTE: some of those files were renamed to put the charset into the file extension, where it was not `latin1`.  If the files are later updated from the PSI elog source code, remember to rename them appropriately.
 
 NOTE: if do *not* want users to be able to each have their own language (set by the browser),
 then remove the line
