@@ -19,6 +19,13 @@ This will install the django server and various other packages
 * python manage.py migrate
 * set up an admin user: ...
 
+### Activate language support
+Many translation documents (gettext .po files) are in the distribution.  To compile them and make them visible to Django, run:
+* python manage.py compilemessages
+Then if you set a non-English language first in your browser Settings | Language list, many text instructions, table headers, error messages etc. will be displayed in that language.
+
+For more information about language support, see the [Translation](translation.md) document.
+
 ### Migrating an existing elog
 * if you have an existing PSI Elog set up, and wish to port it, then run:
   <XXX migration commands>
