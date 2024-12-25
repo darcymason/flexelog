@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-24 23:40-0500\n"
+"POT-Creation-Date: 2024-12-25 12:05-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -122,47 +122,47 @@ msgstr "Sidste Indlæg"
 msgid "Please use your browser's back button to go back"
 msgstr "Brug tilbage knappen på din browser"
 
-#: .\flexelog\views.py:48 .\flexelog\views.py:91
+#: .\flexelog\views.py:45
+#, python-format
+msgid "Logbook \"%s\" does not exist on remote server"
+msgstr "Logbog \"%s\" eksisterer ikke på remote server"
+
+#: .\flexelog\views.py:53 .\flexelog\views.py:91
 msgid "New"
 msgstr "Ny"
 
-#: .\flexelog\views.py:48 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:91
 msgid "Find"
 msgstr "Find"
 
-#: .\flexelog\views.py:48 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:91
 msgid "Import"
 msgstr "Import"
 
-#: .\flexelog\views.py:48 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:91
 msgid "Config"
 msgstr "Konfigurer"
 
-#: .\flexelog\views.py:48 .\flexelog\views.py:50 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:55 .\flexelog\views.py:91
 #: .\flexelog\views.py:95
 msgid "Last day"
 msgstr "Sidste Dag"
 
-#: .\flexelog\views.py:48 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:91
 msgid "Help"
 msgstr "Hjælp"
 
-#: .\flexelog\views.py:54
+#: .\flexelog\views.py:59
 msgid "Full"
 msgstr "Fuld"
 
-#: .\flexelog\views.py:55
+#: .\flexelog\views.py:60
 msgid "Summary"
 msgstr "Beskrivelse"
 
-#: .\flexelog\views.py:56
+#: .\flexelog\views.py:61
 msgid "Threaded"
 msgstr "Vis som Tråde"
-
-#: .\flexelog\views.py:62
-#, python-format
-msgid "Logbook \"%s\" does not exist on remote server"
-msgstr "Logbog \"%s\" eksisterer ikke på remote server"
 
 #: .\flexelog\views.py:101
 #, python-format

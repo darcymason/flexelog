@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-24 23:40-0500\n"
+"POT-Creation-Date: 2024-12-25 12:05-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -123,47 +123,47 @@ msgstr "Son gönderme"
 msgid "Please use your browser's back button to go back"
 msgstr "Lütfen tarayýcýnýzýn geri tuþunu, geri gitmek için kullanýn"
 
-#: .\flexelog\views.py:48 .\flexelog\views.py:91
+#: .\flexelog\views.py:45
+#, python-format
+msgid "Logbook \"%s\" does not exist on remote server"
+msgstr "\"%s\" kayýt defteri uzak sunucu üzerinde mevcut deðil"
+
+#: .\flexelog\views.py:53 .\flexelog\views.py:91
 msgid "New"
 msgstr "Yeni"
 
-#: .\flexelog\views.py:48 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:91
 msgid "Find"
 msgstr "Bul"
 
-#: .\flexelog\views.py:48 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:91
 msgid "Import"
 msgstr "Ýçeri aktar"
 
-#: .\flexelog\views.py:48 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:91
 msgid "Config"
 msgstr "Ayarla"
 
-#: .\flexelog\views.py:48 .\flexelog\views.py:50 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:55 .\flexelog\views.py:91
 #: .\flexelog\views.py:95
 msgid "Last day"
 msgstr "Dün"
 
-#: .\flexelog\views.py:48 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:91
 msgid "Help"
 msgstr "Yardým"
 
-#: .\flexelog\views.py:54
+#: .\flexelog\views.py:59
 msgid "Full"
 msgstr "Tüm"
 
-#: .\flexelog\views.py:55
+#: .\flexelog\views.py:60
 msgid "Summary"
 msgstr "Özet"
 
-#: .\flexelog\views.py:56
+#: .\flexelog\views.py:61
 msgid "Threaded"
 msgstr "Ýlmekler"
-
-#: .\flexelog\views.py:62
-#, python-format
-msgid "Logbook \"%s\" does not exist on remote server"
-msgstr "\"%s\" kayýt defteri uzak sunucu üzerinde mevcut deðil"
 
 #: .\flexelog\views.py:101
 #, python-format

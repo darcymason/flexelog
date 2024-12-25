@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 from pathlib import Path
 import polib
+from html import unescape
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 PSI_LANG_PATH = BASE_DIR / "psi_elog" / "lang"
@@ -59,7 +60,7 @@ def eloglang_translations(lang_code) -> dict:
                 continue
             split = [x.strip() for x in line.split("=")]
             val = None if len(split) == 1 else split[1]
-            translations[split[0]] = val
+            translations[unescape(split[0])] = unescape(val)
 
     return translations
 
@@ -68,8 +69,10 @@ class Command(BaseCommand):
     help = "Use PSI elogs eloglang.* files to translate messages"
 
     def add_arguments(self, parser):
-        pass
-        # parser.add_argument("-l", nargs="*", type=str) # specific languages
+        parser.add_argument("--overwrite",
+            action="store_true",
+            help="Overwrite any existing translations",
+        )
 
     def handle(self, *args, **options):
         locale_paths = getattr(settings, "LOCALE_PATHS", [])
@@ -79,6 +82,15 @@ class Command(BaseCommand):
                 self.style.ERROR("No LOCALE_PATHS set in settings.py")
             )
             return
+        
+        overwriting = options["overwrite"]
+        if overwriting:
+            check = input("Confirm overwrite all existing translations with PSI translations where available (type yes): ")
+            if check.lower() != "yes":
+                overwriting = False
+                self.stdout.write("Not overwriting")
+        if overwriting:
+            self.stdout.write("PSI translations (where available) will replace any existing ones")
         self.stdout.write("Going through locale_paths")
         any_updated = False
         for locale_path in locale_paths:
@@ -92,7 +104,9 @@ class Command(BaseCommand):
                 po = polib.pofile(po_filepath)
                 translations = eloglang_translations(lang_code)
                 updated = False
-                for entry in po.untranslated_entries():
+
+                entries = po if overwriting else po.untranslated_entries()
+                for entry in entries:
                     if translations.get(entry.msgid):  # don't update if missing or empty value
                         entry.msgstr = translations[entry.msgid]
                         updated = True
