@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-24 17:06-0500\n"
+"POT-Creation-Date: 2024-12-24 23:40-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -98,11 +98,11 @@ msgstr "Syntaxfel i konfigurationsfilen"
 msgid "'%(value)s' is reserved, it cannot be used for a logbook name"
 msgstr ""
 
-#: .\flexelog\templates\flexelog\index.html:11 .\flexelog\views.py:18
+#: .\flexelog\templates\flexelog\index.html:11 .\flexelog\views.py:30
 msgid "Several logbooks are defined on this host"
 msgstr "Flera loggböcker är definerade på denna server"
 
-#: .\flexelog\templates\flexelog\index.html:12 .\flexelog\views.py:19
+#: .\flexelog\templates\flexelog\index.html:12 .\flexelog\views.py:31
 msgid "Please select the one to connect to"
 msgstr "Välj vilken du vill öppna"
 
@@ -122,40 +122,52 @@ msgstr "Senaste post"
 msgid "Please use your browser's back button to go back"
 msgstr "Använd tillbaka knappen i din webbläsare för att gå tillbaka"
 
-#: .\flexelog\views.py:33
+#: .\flexelog\views.py:48 .\flexelog\views.py:91
+msgid "New"
+msgstr "Ny"
+
+#: .\flexelog\views.py:48 .\flexelog\views.py:91
+msgid "Find"
+msgstr "Sök"
+
+#: .\flexelog\views.py:48 .\flexelog\views.py:91
+msgid "Import"
+msgstr "Importera"
+
+#: .\flexelog\views.py:48 .\flexelog\views.py:91
+msgid "Config"
+msgstr "Konfigurera"
+
+#: .\flexelog\views.py:48 .\flexelog\views.py:50 .\flexelog\views.py:91
+#: .\flexelog\views.py:95
+msgid "Last day"
+msgstr "Idag"
+
+#: .\flexelog\views.py:48 .\flexelog\views.py:91
+msgid "Help"
+msgstr "Hjälp"
+
+#: .\flexelog\views.py:54
+msgid "Full"
+msgstr "Fullständig"
+
+#: .\flexelog\views.py:55
+msgid "Summary"
+msgstr "Kortfattad"
+
+#: .\flexelog\views.py:56
+msgid "Threaded"
+msgstr "Visa som trådar"
+
+#: .\flexelog\views.py:62
 #, python-format
 msgid "Logbook \"%s\" does not exist on remote server"
 msgstr "Loggboken \"%s\" existerer inte på den fjärranslutna server"
 
-#: .\flexelog\views.py:57
-msgid "New"
-msgstr "Ny"
-
-#: .\flexelog\views.py:57
-msgid "Find"
-msgstr "Sök"
-
-#: .\flexelog\views.py:57 .\flexelog\views.py:61
-msgid "Select"
-msgstr "Välj"
-
-#: .\flexelog\views.py:57
-msgid "Import"
-msgstr "Importera"
-
-#: .\flexelog\views.py:57
-msgid "Config"
-msgstr "Konfigurera"
-
-#: .\flexelog\views.py:57 .\flexelog\views.py:62
-msgid "Last day"
-msgstr "Idag"
-
-#: .\flexelog\views.py:57
-msgid "Help"
-msgstr "Hjälp"
-
-#: .\flexelog\views.py:68
+#: .\flexelog\views.py:101
 #, python-format
 msgid "Error: Command \"<b>%s</b>\" not allowed"
 msgstr "Kommandot \"<b>%s</b>\" är inte tillåtet"
+
+#~ msgid "Select"
+#~ msgstr "Välj"

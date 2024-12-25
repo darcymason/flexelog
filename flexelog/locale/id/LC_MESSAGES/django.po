@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-24 15:18-0500\n"
+"POT-Creation-Date: 2024-12-24 23:40-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -99,11 +99,11 @@ msgstr "Kesalahan sintaks di file configurasi"
 msgid "'%(value)s' is reserved, it cannot be used for a logbook name"
 msgstr ""
 
-#: .\flexelog\templates\flexelog\index.html:11 .\flexelog\views.py:18
+#: .\flexelog\templates\flexelog\index.html:11 .\flexelog\views.py:30
 msgid "Several logbooks are defined on this host"
 msgstr "Beberapa logbook didefinisikan di host ini"
 
-#: .\flexelog\templates\flexelog\index.html:12 .\flexelog\views.py:19
+#: .\flexelog\templates\flexelog\index.html:12 .\flexelog\views.py:31
 msgid "Please select the one to connect to"
 msgstr "Silahkan pilih salah satu untuk dihubungkan"
 
@@ -123,40 +123,52 @@ msgstr "Pengajuan terakhir"
 msgid "Please use your browser's back button to go back"
 msgstr "Silahkan gunakan tombol kembali browser anda untuk kembali"
 
-#: .\flexelog\views.py:33
+#: .\flexelog\views.py:48 .\flexelog\views.py:91
+msgid "New"
+msgstr "Baru"
+
+#: .\flexelog\views.py:48 .\flexelog\views.py:91
+msgid "Find"
+msgstr "Temukan"
+
+#: .\flexelog\views.py:48 .\flexelog\views.py:91
+msgid "Import"
+msgstr "Impor"
+
+#: .\flexelog\views.py:48 .\flexelog\views.py:91
+msgid "Config"
+msgstr "Konfigurasi"
+
+#: .\flexelog\views.py:48 .\flexelog\views.py:50 .\flexelog\views.py:91
+#: .\flexelog\views.py:95
+msgid "Last day"
+msgstr "Hari terakhir"
+
+#: .\flexelog\views.py:48 .\flexelog\views.py:91
+msgid "Help"
+msgstr "Bantuan"
+
+#: .\flexelog\views.py:54
+msgid "Full"
+msgstr "Penuh"
+
+#: .\flexelog\views.py:55
+msgid "Summary"
+msgstr "Ringkasan"
+
+#: .\flexelog\views.py:56
+msgid "Threaded"
+msgstr "Rangkaian"
+
+#: .\flexelog\views.py:62
 #, python-format
 msgid "Logbook \"%s\" does not exist on remote server"
 msgstr "Logbook \"%s\" tidak ada pada server remote"
 
-#: .\flexelog\views.py:57
-msgid "New"
-msgstr "Baru"
-
-#: .\flexelog\views.py:57
-msgid "Find"
-msgstr "Temukan"
-
-#: .\flexelog\views.py:57 .\flexelog\views.py:61
-msgid "Select"
-msgstr "Pilih"
-
-#: .\flexelog\views.py:57
-msgid "Import"
-msgstr "Impor"
-
-#: .\flexelog\views.py:57
-msgid "Config"
-msgstr "Konfigurasi"
-
-#: .\flexelog\views.py:57 .\flexelog\views.py:62
-msgid "Last day"
-msgstr "Hari terakhir"
-
-#: .\flexelog\views.py:57
-msgid "Help"
-msgstr "Bantuan"
-
-#: .\flexelog\views.py:68
+#: .\flexelog\views.py:101
 #, python-format
 msgid "Error: Command \"<b>%s</b>\" not allowed"
 msgstr "Kesalahan: Perintah \"<b>%s</b>\" tidak diizinkan"
+
+#~ msgid "Select"
+#~ msgstr "Pilih"

@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 from django.shortcuts import render, get_object_or_404
 from django.utils.translation import gettext as _
 
@@ -7,6 +8,17 @@ from django.utils.translation import gettext as _
 from django.http import HttpResponse
 from .models import Logbook, Entry
 from .elog_cfg import get_config
+
+
+def get_param(request, key: str, *, valtype: type = str, default: Any = None) -> Any:
+    """Return the GET query value for key, but default if not found or not of right type"""
+    val = request.GET.get(key, default)
+    if val is not default:
+        try:
+            val = valtype(val)
+        except ValueError:
+            val = default
+    return val
 
 
 def index(request):
@@ -32,36 +44,57 @@ def logbook(request, lb_name):
     except Entry.DoesNotExist:
         context = {"message": _('Logbook "%s" does not exist on remote server')}
         return render(request, "flexelog/show_error.html", context)
+    
+    selected_id = get_param(request, "id", valtype=int)
+    query_id = f"?id={selected_id}&amp;" if selected_id else ""
+    
+    # XX Adjust available commands according to config
+    # XX Select command not implemented
+    command_names = [_("New"), _("Find"), _("Import"), _("Config"), _("Last day"), _("Help") ]
+    commands = [(cmd, f"?cmd={cmd}") for cmd in command_names]
+    commands[4] = (_("Last day"), "past1?mode=Summary")
+
+    modes = (  # First text is translated url param is not
+        # XX need to carry over other url params
+        (_("Full"), "?mode=full"), 
+        (_("Summary"), "?mode=summary"),
+        (_("Threaded"), "?mode=threaded"),
+    )
+    current_mode = _(get_param(request, "mode", default="Summary").capitalize())
 
     entries = logbook.entry_set.all()
-    headers = logbook.attrs.keys()
-    rows = [
-        entry.attrs[key]
-        for key in headers
-        for entry in entries
-    ]
+    headers = cfg.lb_attrs[logbook.name]
+    # rows = [
+    #     entry.attrs[key]
+    #     for key in headers
+    #     for entry in entries
+    # ]
 
     context = {
         "logbook": logbook,
         "logbooks": Logbook.objects.all(),
         "headers": headers,
-        "rows": rows,
+        "commands": commands,
+        "modes": modes,
+        "current_mode": current_mode,
+        # "rows": rows,
     }
     return render(request, "flexelog/entry_list.html", context)
+
 
 def detail(request, lb_name, entry_id):
     # Commands
     # XXX need to take from config file, not just default
     # New |  Find |  Select |  Import |  Config |  Last day |  Help
     # Make assuming standard url, fix after for those that differ
-    command_names = [_("New"), _("Find"), _("Select"), _("Import"), _("Config"), _("Last day"), _("Help") ]
-    # Translate command names
+    # XX _("Select") (multi-select editing) not offered currently
+    command_names = [_("New"), _("Find"), _("Import"), _("Config"), _("Last day"), _("Help") ]
     commands = [(cmd, f"?cmd={cmd}") for cmd in command_names]
-    query_id = f"?id={selected_id}&amp;" if selected_id else ""
-    commands[2] = (_("Select"), query_id + "?select=1")
-    commands[5] = (_("Last day"), "past1?mode=Summary")
 
-    command = request.get("cmd")
+    # commands[2] = (_("Select"), query_id + "?select=1")
+    commands[4] = (_("Last day"), "past1?mode=Summary")
+
+    command = get_param(request, "cmd")
     if command:
         if command not in command_names:
             context = {

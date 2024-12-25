@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-24 17:01-0500\n"
+"POT-Creation-Date: 2024-12-24 23:40-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -99,11 +99,11 @@ msgstr "Syntax-Fehler in Konfigurationsdatei"
 msgid "'%(value)s' is reserved, it cannot be used for a logbook name"
 msgstr ""
 
-#: .\flexelog\templates\flexelog\index.html:11 .\flexelog\views.py:18
+#: .\flexelog\templates\flexelog\index.html:11 .\flexelog\views.py:30
 msgid "Several logbooks are defined on this host"
 msgstr "Mehrere Logbücher sind auf diesem Computer eingerichtet"
 
-#: .\flexelog\templates\flexelog\index.html:12 .\flexelog\views.py:19
+#: .\flexelog\templates\flexelog\index.html:12 .\flexelog\views.py:31
 msgid "Please select the one to connect to"
 msgstr "Bitte wählen Sie eines aus"
 
@@ -123,40 +123,52 @@ msgstr "Letzter Eintrag"
 msgid "Please use your browser's back button to go back"
 msgstr "Bitte die Zurück-Taste Ihres Browsers betätigen"
 
-#: .\flexelog\views.py:33
+#: .\flexelog\views.py:48 .\flexelog\views.py:91
+msgid "New"
+msgstr "Neu"
+
+#: .\flexelog\views.py:48 .\flexelog\views.py:91
+msgid "Find"
+msgstr "Finden"
+
+#: .\flexelog\views.py:48 .\flexelog\views.py:91
+msgid "Import"
+msgstr "Import"
+
+#: .\flexelog\views.py:48 .\flexelog\views.py:91
+msgid "Config"
+msgstr "Konfigurieren"
+
+#: .\flexelog\views.py:48 .\flexelog\views.py:50 .\flexelog\views.py:91
+#: .\flexelog\views.py:95
+msgid "Last day"
+msgstr "Letzter Tag"
+
+#: .\flexelog\views.py:48 .\flexelog\views.py:91
+msgid "Help"
+msgstr "Hilfe"
+
+#: .\flexelog\views.py:54
+msgid "Full"
+msgstr "ausführlich"
+
+#: .\flexelog\views.py:55
+msgid "Summary"
+msgstr "zusammengefasst"
+
+#: .\flexelog\views.py:56
+msgid "Threaded"
+msgstr "mit&nbsp;Antwortketten"
+
+#: .\flexelog\views.py:62
 #, python-format
 msgid "Logbook \"%s\" does not exist on remote server"
 msgstr "Logbuch \"%s\" existiert nicht auf entferntem Server"
 
-#: .\flexelog\views.py:57
-msgid "New"
-msgstr "Neu"
-
-#: .\flexelog\views.py:57
-msgid "Find"
-msgstr "Finden"
-
-#: .\flexelog\views.py:57 .\flexelog\views.py:61
-msgid "Select"
-msgstr "Auswählen"
-
-#: .\flexelog\views.py:57
-msgid "Import"
-msgstr "Import"
-
-#: .\flexelog\views.py:57
-msgid "Config"
-msgstr "Konfigurieren"
-
-#: .\flexelog\views.py:57 .\flexelog\views.py:62
-msgid "Last day"
-msgstr "Letzter Tag"
-
-#: .\flexelog\views.py:57
-msgid "Help"
-msgstr "Hilfe"
-
-#: .\flexelog\views.py:68
+#: .\flexelog\views.py:101
 #, python-format
 msgid "Error: Command \"<b>%s</b>\" not allowed"
 msgstr "Fehler: Befehl \"<b>%s</b>\" nicht erlaubt"
+
+#~ msgid "Select"
+#~ msgstr "Auswählen"
