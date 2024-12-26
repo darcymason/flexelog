@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-25 12:05-0500\n"
+"POT-Creation-Date: 2024-12-25 21:44-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -119,6 +119,14 @@ msgstr "Entradas"
 msgid "Last submission"
 msgstr "Ultimo envio"
 
+#: .\flexelog\templates\flexelog\show_error.html:4
+msgid "ELOG error"
+msgstr "error de ELOG"
+
+#: .\flexelog\templates\flexelog\show_error.html:15
+msgid "Back"
+msgstr "Atras"
+
 #: .\flexelog\templates\flexelog\show_error.html:17
 msgid "Please use your browser's back button to go back"
 msgstr "Por favor vuelva atras con el boton de su browser"
@@ -128,28 +136,28 @@ msgstr "Por favor vuelva atras con el boton de su browser"
 msgid "Logbook \"%s\" does not exist on remote server"
 msgstr "El logbook \"%s\" no existe en el server remoto"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:96
 msgid "New"
 msgstr "Nuevo"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:96
 msgid "Find"
 msgstr "Encontrar"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:96
 msgid "Import"
 msgstr "Importar"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:96
 msgid "Config"
 msgstr "Configurar"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:55 .\flexelog\views.py:91
-#: .\flexelog\views.py:95
+#: .\flexelog\views.py:53 .\flexelog\views.py:55 .\flexelog\views.py:96
+#: .\flexelog\views.py:100
 msgid "Last day"
 msgstr "Ultimo dia"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:96
 msgid "Help"
 msgstr "Ayuda"
 
@@ -165,7 +173,7 @@ msgstr "Resumen"
 msgid "Threaded"
 msgstr "Hilo"
 
-#: .\flexelog\views.py:101
+#: .\flexelog\views.py:106
 #, python-format
 msgid "Error: Command \"<b>%s</b>\" not allowed"
 msgstr "Error: Comando \"<b>%s</b>\" no permitido"

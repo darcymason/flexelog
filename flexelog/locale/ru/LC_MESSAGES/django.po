@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-25 12:05-0500\n"
+"POT-Creation-Date: 2024-12-25 21:44-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -119,6 +119,14 @@ msgstr "Записи"
 msgid "Last submission"
 msgstr "Last submission"
 
+#: .\flexelog\templates\flexelog\show_error.html:4
+msgid "ELOG error"
+msgstr ""
+
+#: .\flexelog\templates\flexelog\show_error.html:15
+msgid "Back"
+msgstr "Назад"
+
 #: .\flexelog\templates\flexelog\show_error.html:17
 msgid "Please use your browser's back button to go back"
 msgstr "Используйте кнопку \"Назад\" вашего браузера, чтобы вернуться"
@@ -128,28 +136,28 @@ msgstr "Используйте кнопку \"Назад\" вашего брау
 msgid "Logbook \"%s\" does not exist on remote server"
 msgstr "Журнал \"%s\" не существует на удаленном сервере"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:96
 msgid "New"
 msgstr "Создать"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:96
 msgid "Find"
 msgstr "Поиск"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:96
 msgid "Import"
 msgstr "Импортировать"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:96
 msgid "Config"
 msgstr "Конфигурация"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:55 .\flexelog\views.py:91
-#: .\flexelog\views.py:95
+#: .\flexelog\views.py:53 .\flexelog\views.py:55 .\flexelog\views.py:96
+#: .\flexelog\views.py:100
 msgid "Last day"
 msgstr "Последний день"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:96
 msgid "Help"
 msgstr "Помощь"
 
@@ -165,7 +173,7 @@ msgstr "Суммарный"
 msgid "Threaded"
 msgstr "По темам"
 
-#: .\flexelog\views.py:101
+#: .\flexelog\views.py:106
 #, python-format
 msgid "Error: Command \"<b>%s</b>\" not allowed"
 msgstr "Ошибка: Команда \"<b>%s</b>\" не разрешена"

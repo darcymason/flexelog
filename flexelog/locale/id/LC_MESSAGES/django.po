@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-25 12:05-0500\n"
+"POT-Creation-Date: 2024-12-25 21:44-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -119,6 +119,14 @@ msgstr "Entri"
 msgid "Last submission"
 msgstr "Pengajuan terakhir"
 
+#: .\flexelog\templates\flexelog\show_error.html:4
+msgid "ELOG error"
+msgstr "Kesalahan ELOG"
+
+#: .\flexelog\templates\flexelog\show_error.html:15
+msgid "Back"
+msgstr "Kembali"
+
 #: .\flexelog\templates\flexelog\show_error.html:17
 msgid "Please use your browser's back button to go back"
 msgstr "Silahkan gunakan tombol kembali browser anda untuk kembali"
@@ -128,28 +136,28 @@ msgstr "Silahkan gunakan tombol kembali browser anda untuk kembali"
 msgid "Logbook \"%s\" does not exist on remote server"
 msgstr "Logbook \"%s\" tidak ada pada server remote"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:96
 msgid "New"
 msgstr "Baru"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:96
 msgid "Find"
 msgstr "Temukan"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:96
 msgid "Import"
 msgstr "Impor"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:96
 msgid "Config"
 msgstr "Konfigurasi"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:55 .\flexelog\views.py:91
-#: .\flexelog\views.py:95
+#: .\flexelog\views.py:53 .\flexelog\views.py:55 .\flexelog\views.py:96
+#: .\flexelog\views.py:100
 msgid "Last day"
 msgstr "Hari terakhir"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:96
 msgid "Help"
 msgstr "Bantuan"
 
@@ -165,7 +173,7 @@ msgstr "Ringkasan"
 msgid "Threaded"
 msgstr "Rangkaian"
 
-#: .\flexelog\views.py:101
+#: .\flexelog\views.py:106
 #, python-format
 msgid "Error: Command \"<b>%s</b>\" not allowed"
 msgstr "Kesalahan: Perintah \"<b>%s</b>\" tidak diizinkan"

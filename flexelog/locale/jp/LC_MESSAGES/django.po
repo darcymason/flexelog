@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-25 12:05-0500\n"
+"POT-Creation-Date: 2024-12-25 21:44-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -118,6 +118,14 @@ msgstr "件の記事"
 msgid "Last submission"
 msgstr "最後の投稿"
 
+#: .\flexelog\templates\flexelog\show_error.html:4
+msgid "ELOG error"
+msgstr ""
+
+#: .\flexelog\templates\flexelog\show_error.html:15
+msgid "Back"
+msgstr "戻る"
+
 #: .\flexelog\templates\flexelog\show_error.html:17
 msgid "Please use your browser's back button to go back"
 msgstr "前のページに戻るにはブラウザの「戻る」を押してください。"
@@ -127,28 +135,28 @@ msgstr "前のページに戻るにはブラウザの「戻る」を押してく
 msgid "Logbook \"%s\" does not exist on remote server"
 msgstr "ログブック \"%s\"はリモートサーバーに存在しません"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:96
 msgid "New"
 msgstr "新規"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:96
 msgid "Find"
 msgstr "検索"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:96
 msgid "Import"
 msgstr "インポート"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:96
 msgid "Config"
 msgstr "設定"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:55 .\flexelog\views.py:91
-#: .\flexelog\views.py:95
+#: .\flexelog\views.py:53 .\flexelog\views.py:55 .\flexelog\views.py:96
+#: .\flexelog\views.py:100
 msgid "Last day"
 msgstr "最終日"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:96
 msgid "Help"
 msgstr "ヘルプ"
 
@@ -164,7 +172,7 @@ msgstr "概要"
 msgid "Threaded"
 msgstr "スレッド"
 
-#: .\flexelog\views.py:101
+#: .\flexelog\views.py:106
 #, python-format
 msgid "Error: Command \"<b>%s</b>\" not allowed"
 msgstr "エラー：コマンド\"<b>%s</b>\"は許可されていません。"

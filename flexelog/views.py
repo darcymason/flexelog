@@ -41,8 +41,8 @@ def logbook(request, lb_name):
     cfg = get_config()
     try:
         logbook = Logbook.objects.get(name=lb_name)
-    except Entry.DoesNotExist:
-        context = {"message": _('Logbook "%s" does not exist on remote server')}
+    except Logbook.DoesNotExist:
+        context = {"message": _('Logbook "%s" does not exist on remote server') % lb_name }
         return render(request, "flexelog/show_error.html", context)
     
     selected_id = get_param(request, "id", valtype=int)
@@ -62,8 +62,12 @@ def logbook(request, lb_name):
     )
     current_mode = _(get_param(request, "mode", default="Summary").capitalize())
 
-    entries = logbook.entry_set.all()
-    headers = cfg.lb_attrs[logbook.name]
+    attrs = list(cfg.lb_attrs[logbook.name].keys())
+    col_names = ["id"] + attrs + ["Text"]
+    attr_args = (f"attrs__{attr}" for attr in attrs)
+    objects = logbook.entry_set.values_list("id", *attr_args, "text")
+
+    
     # rows = [
     #     entry.attrs[key]
     #     for key in headers
@@ -73,10 +77,11 @@ def logbook(request, lb_name):
     context = {
         "logbook": logbook,
         "logbooks": Logbook.objects.all(),
-        "headers": headers,
         "commands": commands,
         "modes": modes,
         "current_mode": current_mode,
+        "col_names": col_names,
+        "objects": objects,
         # "rows": rows,
     }
     return render(request, "flexelog/entry_list.html", context)

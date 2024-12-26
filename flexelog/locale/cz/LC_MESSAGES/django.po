@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-25 12:05-0500\n"
+"POT-Creation-Date: 2024-12-25 21:44-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -118,6 +118,14 @@ msgstr "Položky"
 msgid "Last submission"
 msgstr "Poslední podání"
 
+#: .\flexelog\templates\flexelog\show_error.html:4
+msgid "ELOG error"
+msgstr ""
+
+#: .\flexelog\templates\flexelog\show_error.html:15
+msgid "Back"
+msgstr "Zpět"
+
 #: .\flexelog\templates\flexelog\show_error.html:17
 msgid "Please use your browser's back button to go back"
 msgstr "Použijte tlačítka Zpět vašeho prohlížeče"
@@ -127,28 +135,28 @@ msgstr "Použijte tlačítka Zpět vašeho prohlížeče"
 msgid "Logbook \"%s\" does not exist on remote server"
 msgstr "Logbook \"%s\" neexistuje na vzdáleném serveru"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:96
 msgid "New"
 msgstr "Nový"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:96
 msgid "Find"
 msgstr "Najít"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:96
 msgid "Import"
 msgstr "Import"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:96
 msgid "Config"
 msgstr "Konfigurace"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:55 .\flexelog\views.py:91
-#: .\flexelog\views.py:95
+#: .\flexelog\views.py:53 .\flexelog\views.py:55 .\flexelog\views.py:96
+#: .\flexelog\views.py:100
 msgid "Last day"
 msgstr "Poslední den"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:91
+#: .\flexelog\views.py:53 .\flexelog\views.py:96
 msgid "Help"
 msgstr "Pomoc"
 
@@ -164,7 +172,7 @@ msgstr "Souhrn"
 msgid "Threaded"
 msgstr "Zřetězeně"
 
-#: .\flexelog\views.py:101
+#: .\flexelog\views.py:106
 #, python-format
 msgid "Error: Command \"<b>%s</b>\" not allowed"
 msgstr "Chyba: Příkaz \"<b>%s</b>\" není dovolen"
