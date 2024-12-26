@@ -63,9 +63,9 @@ def logbook(request, lb_name):
     current_mode = _(get_param(request, "mode", default="Summary").capitalize())
 
     attrs = list(cfg.lb_attrs[logbook.name].keys())
-    col_names = ["id"] + attrs + ["Text"]
+    col_names = ["ID", "Date"] + attrs + ["Text"]
     attr_args = (f"attrs__{attr}" for attr in attrs)
-    objects = logbook.entry_set.values_list("id", *attr_args, "text")
+    objects = logbook.entry_set.values("id", "date", *attr_args, "text")
 
     
     # rows = [

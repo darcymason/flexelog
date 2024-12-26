@@ -14,7 +14,7 @@
           <tr>
             {% for col_name in col_names %}
             {# XX need urlencoded version of col_name for url #}
-            {% if forloop.last %} {# Text -- XX translate needed #}
+            {% if forloop.last %} {# Text -- XX translate needed for col title #}
             <th class="listtitle2">Text</th>
             {% else %}
             <th class="listtitle"><a href="?rsort={{col_name}}">{{ col_name }}</a></th>
@@ -25,11 +25,11 @@
 
           {% for object in objects %}
           <tr>
-            {% for val in object %}
-            <td class="{% if forloop.last %}summary{% else %}list2{% endif %}">
-              {% if not forloop.last %}
-              <a href="../{{logbook.name}}/{{ object.0 }}">
-                {% if forloop.first %}&nbsp;&nbsp;{% endif %}
+            {% for key, val in object.items %}
+            <td class="{% if key ==   'text' %}summary{% else %}list2{% endif %}"{% if key == "date" %} nowrap{% endif %}>
+              {% if not key == "text" %}
+              <a href="../{{logbook.name}}/{{ object.id }}">
+                {% if key == "id" %}&nbsp;&nbsp;{% endif %}
                 {{ val }}
                 {% if forloop.first %}&nbsp;&nbsp;{% endif %}
               </a>
