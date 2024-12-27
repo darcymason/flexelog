@@ -1,0 +1,25 @@
+{% load i18n %}
+
+{% if page_obj.has_other_pages %}
+{% translate "Goto page" %}
+{% if page_obj.has_previous %}
+  <a href="{% querystring page=page_obj.previous_page_number %}">{% translate "Previous" %}</a>
+{% endif %}
+{% for i in page_range %}
+  {% if page_obj.number == i %}
+    {{ i }}
+  {% elif i == page_obj.paginator.ELLIPSIS %}
+    &nbsp;...&nbsp;
+  {% else %}
+    <a href="{% querystring page=i %}">{{ i }}</a>
+  {% endif %}
+  {% if not forloop.last and not i == page_obj.paginator.ELLIPSIS %}, {% endif %}
+{% endfor %}
+
+{% if page_obj.has_next %}
+  <a href="{% querystring page=page_obj.next_page_number %}">&nbsp;&nbsp;{% translate "Next" %}</a>
+{% endif %}
+
+
+  <a href="{% querystring page='all' npp=None %}">&nbsp;&nbsp;{% translate "All" %}</a>
+{% endif %}

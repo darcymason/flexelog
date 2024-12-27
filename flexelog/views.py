@@ -7,88 +7,12 @@ from django.utils.translation import gettext_lazy as _
 # Create your views here.
 
 from django.http import HttpResponse, QueryDict
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, Page
 from .models import Logbook, Entry
 from .elog_cfg import get_config
 
 from htmlobj import HTML
 from urllib.parse import urlencode
-
-
-def paging_offered(page_num: int, page_count: int) -> list[int | None]:
-    """List the pages offered for top/bottom of listing page
-
-    List will have None where an ellipsis is needed
-    e.g. if 15 pages, page_num is 6, then return
-        [1, 2, 3, None, 5, 6, 7, None, 13, 14, 15]
-
-    """
-
-    if page_count == 1:
-        return []
-    if page_count <= 7:
-        return list(range(1, page_count + 1))
-    s = set((1, 2, 3))
-    s.update((max(page_num - 1, 1), page_num, min(page_num + 1, page_count)))
-    s.update((page_count - 2, page_count - 1, page_count))
-    li = sorted(s)
-    for i, val in enumerate(li):
-        if i < 3:
-            continue
-        if (prev := li[i - 1]) is not None and val != prev + 1:
-            li.insert(i, None)
-    return li
-
-
-def pagination_html(
-    page_num: int | None, page_count: int, query_dict: QueryDict = None
-) -> str:
-    if page_num is None:
-        page_num = 1
-
-    pages = paging_offered(page_num, page_count)
-    pages_len = len(pages)
-    if pages_len < 2:
-        return "\n"
-    if query_dict is None:
-        query_dict = QueryDict()
-    query_args = copy(query_dict)
-
-    h = HTML()
-    with h.td(class_="menuframe"):
-        with h.span(class_="menu3"):
-            h.text(_("Goto page"))
-            # Add Previous if not first page
-            if page_num != 1:
-                query_args["page"] = page_num - 1
-                h.a(
-                    _("Previous"),
-                    href=f"?{query_args.urlencode(safe="&")}",
-                )
-                h.raw_text("&nbsp;&nbsp;")
-            for i, pg in enumerate(pages):
-                comma = "," if i != pages_len - 1 and pages[i + 1] is not None else ""
-                if pg is None:
-                    h.raw_text("&nbsp;...&nbsp;")
-                elif pg is page_num:
-                    h.raw_text(str(pg) + comma)
-                else:
-                    query_args["page"] = pg
-                    h.a(str(pg) + comma, href=f"?{query_args.urlencode(safe="&")}")
-
-            # Add Next if not on last page
-            if page_num != page_count:
-                h.raw_text("&nbsp;&nbsp;")
-                query_args["page"] = page_num + 1
-                h.a(_("Next"), href=f"?{query_args.urlencode(safe="&")}")
-
-            # Add All option
-            # XX need to check config file for max limit to offer this
-            h.raw_text("&nbsp;&nbsp;")
-            query_args["page"] = "all"
-            query_args.pop("npp", None)
-            h.a(_("All"), href=f"?{query_args.urlencode(safe="&")}")
-    return str(h)
 
 
 def get_param(request, key: str, *, valtype: type = str, default: Any = None) -> Any:
@@ -106,9 +30,6 @@ def index(request):
     cfg = get_config()
     logbooks = [lb for lb in Logbook.objects.all() if lb.name in cfg.logbook_names()]
 
-    instruct1 = _("Several logbooks are defined on this host")
-    instruct2 = _("Please select the one to connect to")
-    logging.warning(logbooks[0].latest_date())
     context = {
         "cfg": cfg,
         "logbooks": logbooks,
@@ -129,7 +50,6 @@ def logbook(request, lb_name):
 
     selected_id = get_param(request, "id", valtype=int)
     query_dict = request.GET
-    query_id = f"?id={selected_id}&amp;" if selected_id else ""
 
     # XX Adjust available commands according to config
     # XX Select command not implemented
@@ -144,8 +64,7 @@ def logbook(request, lb_name):
     commands = [(cmd, f"?cmd={cmd}") for cmd in command_names]
     commands[4] = (_("Last day"), "past1?mode=Summary")
 
-    modes = (  # First text is translated url param is not
-        # XX need to carry over other url params
+    modes = (  # First text is translated, url param is not
         (_("Full"), "?mode=full"),
         (_("Summary"), "?mode=summary"),
         (_("Threaded"), "?mode=threaded"),
@@ -166,24 +85,14 @@ def logbook(request, lb_name):
     else:
         per_page = get_param(request, "npp", valtype=int) or cfg.get(lb_name, "entries per page")
 
-    
-
     paginator = Paginator(entries, per_page=per_page)
     page_obj = paginator.get_page(page_number)
-    num_pages = page_obj.paginator.num_pages 
+    num_pages = paginator.num_pages 
     if num_pages > 1:
         page_n_of_N = _("Page %d of %d") % (page_obj.number, num_pages)
     else:
         page_n_of_N = None
     
-    paging_html = pagination_html(page_obj.number, num_pages, query_dict)
-
-    # rows = [
-    #     entry.attrs[key]
-    #     for key in headers
-    #     for entry in entries
-    # ]
-
     context = {
         "logbook": logbook,
         "logbooks": Logbook.objects.all(),
@@ -192,9 +101,8 @@ def logbook(request, lb_name):
         "current_mode": current_mode,
         "col_names": col_names,
         "page_obj": page_obj,
-        "paging_html": paging_html,
+        "page_range": list(paginator.get_elided_page_range(page_obj.number, on_each_side=1, on_ends=3)),
         "page_n_of_N": page_n_of_N,
-        # "rows": rows,
     }
     return render(request, "flexelog/entry_list.html", context)
 

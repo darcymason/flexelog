@@ -8,7 +8,9 @@
     {% include "flexelog/include/lb_tabs.html" %}
     {% include "flexelog/include/commands.html" %}
     {% include "flexelog/include/list_modes.html" %}
-
+    <tr><td class="menuframe"><span class="menu3">
+      {% include "flexelog/include/pagination.html" %}
+    </span></td></tr>
     <tr>
       <td>
         <table class="listframe" width="100%" cellspacing=0>
@@ -40,7 +42,9 @@
           </tr>
           {% endfor %}
         </table>
-        <tr>{{ paging_html|safe }}</tr>
+        <tr><td class="menuframe"><span class="menu3">
+          {% include "flexelog/include/pagination.html" %}
+        </span></td></tr>
   </table>
 </form>
 {% endblock body %}
