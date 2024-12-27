@@ -78,15 +78,27 @@ def logbook(request, lb_name):
         "-date"
     )  # XX need to allow different orders
     
-    page_number = request.GET.get("page") or "1"
-    if page_number.lower() == "all":
-        page_number = 1
+    # Get page requested with "?id=#" in url, used when click "List" from detail page
+    req_page_number = request.GET.get("page") or "1"
+    if req_page_number.lower() == "all":
+        req_page_number = 1
         per_page = entries.count() + 1
     else:
         per_page = get_param(request, "npp", valtype=int) or cfg.get(lb_name, "entries per page")
 
     paginator = Paginator(entries, per_page=per_page)
-    page_obj = paginator.get_page(page_number)
+    # If query string has "id=#", then need to position to page with that id
+    # ... assuming it exists.  Check that first. If not, then ignore the setting
+    page_obj = paginator.get_page(req_page_number)
+    if selected_id and logbook.entry_set.filter(id=selected_id):
+        # go through each page to find one with the id.
+        # XX  Might be a faster way for very large logbooks
+        for page_obj in paginator:
+            if selected_id in page_obj.object_list.values_list("id", flat=True):
+                break
+        else:  # shouldn't be necessary since checked it exists already...
+            page_obj = paginator.get_page(req_page_number)
+    
     num_pages = paginator.num_pages 
     if num_pages > 1:
         page_n_of_N = _("Page %d of %d") % (page_obj.number, num_pages)
@@ -103,6 +115,7 @@ def logbook(request, lb_name):
         "page_obj": page_obj,
         "page_range": list(paginator.get_elided_page_range(page_obj.number, on_each_side=1, on_ends=3)),
         "page_n_of_N": page_n_of_N,
+        "selected_id": selected_id,
     }
     return render(request, "flexelog/entry_list.html", context)
 

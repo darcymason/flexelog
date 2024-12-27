@@ -3,7 +3,7 @@
 {% if page_obj.has_other_pages %}
 {% translate "Goto page" %}
 {% if page_obj.has_previous %}
-  <a href="{% querystring page=page_obj.previous_page_number %}">{% translate "Previous" %}</a>
+  <a href="{% querystring page=page_obj.previous_page_number id=None %}">{% translate "Previous" %}</a>
 {% endif %}
 {% for i in page_range %}
   {% if page_obj.number == i %}
@@ -11,15 +11,14 @@
   {% elif i == page_obj.paginator.ELLIPSIS %}
     &nbsp;...&nbsp;
   {% else %}
-    <a href="{% querystring page=i %}">{{ i }}</a>
+    <a href="{% querystring page=i id=None %}">{{ i }}</a>
   {% endif %}
   {% if not forloop.last and not i == page_obj.paginator.ELLIPSIS %}, {% endif %}
 {% endfor %}
 
 {% if page_obj.has_next %}
-  <a href="{% querystring page=page_obj.next_page_number %}">&nbsp;&nbsp;{% translate "Next" %}</a>
+  &nbsp;&nbsp;<a href="{% querystring page=page_obj.next_page_number id=None%}">{% translate "Next" %}</a>
 {% endif %}
 
-
-  <a href="{% querystring page='all' npp=None %}">&nbsp;&nbsp;{% translate "All" %}</a>
+&nbsp;&nbsp;<a href="{% querystring page='all' npp=None id=None %}">{% translate "All" %}</a>
 {% endif %}

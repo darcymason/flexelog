@@ -8,28 +8,33 @@
     {% include "flexelog/include/lb_tabs.html" %}
     {% include "flexelog/include/commands.html" %}
     {% include "flexelog/include/list_modes.html" %}
-    <tr><td class="menuframe"><span class="menu3">
-      {% include "flexelog/include/pagination.html" %}
-    </span></td></tr>
+    <tr>
+      <td class="menuframe"><span class="menu3">
+          {% include "flexelog/include/pagination.html" %}
+        </span></td>
+    </tr>
     <tr>
       <td>
         <table class="listframe" width="100%" cellspacing=0>
+          {# COLUMN HEADERS ------------ #}
           <tr>
             {% for col_name in col_names %}
             {# XX need urlencoded version of col_name for url #}
             {% if forloop.last %} {# Text -- XX translate needed for col title #}
-            <th class="listtitle2">{% translate "Text" %}</th>
+              <th class="listtitle2">{% translate "Text" %}</th>
             {% else %}
-            <th class="listtitle"><a href="?rsort={{col_name}}">{{ col_name }}</a></th>
+              <th class="listtitle"><a href="?rsort={{col_name}}">{{ col_name }}</a></th>
             {% endif %}
             {% endfor %}
             {# <th class="listtitle3"><img src="attachment.png" alt="Attachments" title="Attachments" </th> #}
           </tr>
 
+          {# ENTRIES --------------- #}
           {% for entry in page_obj %}
+          {% cycle 'list2' 'list1' as listX %}
           <tr>
             {% for key, val in entry.items %}
-            <td class="{% if key == 'text' %}summary{% else %}list2{% endif %}"{% if key == "date" %} nowrap{% endif %}>
+            <td class="{% if key == 'text' %}summary{% else %}{{ listX }}{% if entry.id == selected_id %}h{% endif %}{% endif %}" {% if key == "date" %} nowrap{% endif %}>
               {% if not key == "text" %}
               <a href="{% url 'flexelog:detail' logbook.name entry.id %}">
                 {% if key == "id" %}&nbsp;&nbsp;{% endif %}{{ val }}{% if key == "id" %}&nbsp;&nbsp;{% endif %}
@@ -42,9 +47,11 @@
           </tr>
           {% endfor %}
         </table>
-        <tr><td class="menuframe"><span class="menu3">
+    <tr>
+      <td class="menuframe"><span class="menu3">
           {% include "flexelog/include/pagination.html" %}
-        </span></td></tr>
+        </span></td>
+    </tr>
   </table>
 </form>
 {% endblock body %}
