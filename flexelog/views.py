@@ -2,7 +2,7 @@ from copy import copy
 import logging
 from typing import Any
 from django.shortcuts import render, get_object_or_404
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 
 # Create your views here.
 
@@ -86,6 +86,7 @@ def pagination_html(
             # XX need to check config file for max limit to offer this
             h.raw_text("&nbsp;&nbsp;")
             query_args["page"] = "all"
+            query_args.pop("npp", None)
             h.a(_("All"), href=f"?{query_args.urlencode(safe="&")}")
     return str(h)
 
@@ -158,17 +159,24 @@ def logbook(request, lb_name):
         "-date"
     )  # XX need to allow different orders
     
-    page_number = request.GET.get("page") or 1
+    page_number = request.GET.get("page") or "1"
     if page_number.lower() == "all":
         page_number = 1
         per_page = entries.count() + 1
     else:
         per_page = get_param(request, "npp", valtype=int) or cfg.get(lb_name, "entries per page")
 
+    
+
     paginator = Paginator(entries, per_page=per_page)
     page_obj = paginator.get_page(page_number)
+    num_pages = page_obj.paginator.num_pages 
+    if num_pages > 1:
+        page_n_of_N = _("Page %d of %d") % (page_obj.number, num_pages)
+    else:
+        page_n_of_N = None
     
-    paging_html = pagination_html(page_obj.number, page_obj.paginator.num_pages, query_dict)
+    paging_html = pagination_html(page_obj.number, num_pages, query_dict)
 
     # rows = [
     #     entry.attrs[key]
@@ -185,6 +193,7 @@ def logbook(request, lb_name):
         "col_names": col_names,
         "page_obj": page_obj,
         "paging_html": paging_html,
+        "page_n_of_N": page_n_of_N,
         # "rows": rows,
     }
     return render(request, "flexelog/entry_list.html", context)

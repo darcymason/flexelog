@@ -1,3 +1,5 @@
+{% load i18n %}
+
 {# Table containing tabs and comment bar #}
 {# Logbook tabs across the top #}
 <tr>
@@ -13,6 +15,10 @@
 {# Bar for this logbook comment #}
 <tr><td>
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
-  <tr><td class="title1">&nbsp;&nbsp;{{ logbook.comment }}&nbsp;</td></tr>
+  <tr><td class="title1">&nbsp;&nbsp;{{ logbook.comment }}
+    {% if page_n_of_N %}
+        , {{ page_n_of_N }}
+    {% endif %}
+    &nbsp;</td></tr>
 </table>
 </td></tr>

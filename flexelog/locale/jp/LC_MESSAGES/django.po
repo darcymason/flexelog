@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-25 21:44-0500\n"
+"POT-Creation-Date: 2024-12-27 10:48-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -98,21 +98,33 @@ msgstr ""
 msgid "'%(value)s' is reserved, it cannot be used for a logbook name"
 msgstr ""
 
-#: .\flexelog\templates\flexelog\index.html:11 .\flexelog\views.py:30
+#: .\flexelog\models.py:85
+#, fuzzy
+#| msgid "Entries"
+msgid "Entry"
+msgstr "件の記事"
+
+#: .\flexelog\models.py:86
+#: .\flexelog\templates\flexelog\include\list_modes.html:23
+#: .\flexelog\templates\flexelog\index.html:17
+msgid "Entries"
+msgstr "件の記事"
+
+#: .\flexelog\templates\flexelog\entry_list.html:19
+msgid "Text"
+msgstr "本文"
+
+#: .\flexelog\templates\flexelog\index.html:11 .\flexelog\views.py:109
 msgid "Several logbooks are defined on this host"
 msgstr "このホストには複数のログブックが定義されています"
 
-#: .\flexelog\templates\flexelog\index.html:12 .\flexelog\views.py:31
+#: .\flexelog\templates\flexelog\index.html:12 .\flexelog\views.py:110
 msgid "Please select the one to connect to"
 msgstr "接続するものを一つ選んでください"
 
 #: .\flexelog\templates\flexelog\index.html:16
 msgid "Logbook"
 msgstr "ログブック"
-
-#: .\flexelog\templates\flexelog\index.html:17
-msgid "Entries"
-msgstr "件の記事"
 
 #: .\flexelog\templates\flexelog\index.html:18
 msgid "Last submission"
@@ -130,49 +142,70 @@ msgstr "戻る"
 msgid "Please use your browser's back button to go back"
 msgstr "前のページに戻るにはブラウザの「戻る」を押してください。"
 
-#: .\flexelog\views.py:45
+#: .\flexelog\views.py:60
+msgid "Goto page"
+msgstr "ページへ移動"
+
+#: .\flexelog\views.py:65
+msgid "Previous"
+msgstr "前の記事"
+
+#: .\flexelog\views.py:83
+msgid "Next"
+msgstr "次の記事"
+
+#: .\flexelog\views.py:90
+msgid "All"
+msgstr "全て"
+
+#: .\flexelog\views.py:126
 #, python-format
 msgid "Logbook \"%s\" does not exist on remote server"
 msgstr "ログブック \"%s\"はリモートサーバーに存在しません"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:96
+#: .\flexelog\views.py:137 .\flexelog\views.py:209
 msgid "New"
 msgstr "新規"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:96
+#: .\flexelog\views.py:138 .\flexelog\views.py:210
 msgid "Find"
 msgstr "検索"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:96
+#: .\flexelog\views.py:139 .\flexelog\views.py:211
 msgid "Import"
 msgstr "インポート"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:96
+#: .\flexelog\views.py:140 .\flexelog\views.py:212
 msgid "Config"
 msgstr "設定"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:55 .\flexelog\views.py:96
-#: .\flexelog\views.py:100
+#: .\flexelog\views.py:141 .\flexelog\views.py:145 .\flexelog\views.py:213
+#: .\flexelog\views.py:219
 msgid "Last day"
 msgstr "最終日"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:96
+#: .\flexelog\views.py:142 .\flexelog\views.py:214
 msgid "Help"
 msgstr "ヘルプ"
 
-#: .\flexelog\views.py:59
+#: .\flexelog\views.py:149
 msgid "Full"
 msgstr "全文"
 
-#: .\flexelog\views.py:60
+#: .\flexelog\views.py:150
 msgid "Summary"
 msgstr "概要"
 
-#: .\flexelog\views.py:61
+#: .\flexelog\views.py:151
 msgid "Threaded"
 msgstr "スレッド"
 
-#: .\flexelog\views.py:106
+#: .\flexelog\views.py:175
+#, python-format
+msgid "Page %d of %d"
+msgstr "%d ページ（全 %d ページ）"
+
+#: .\flexelog\views.py:224
 #, python-format
 msgid "Error: Command \"<b>%s</b>\" not allowed"
 msgstr "エラー：コマンド\"<b>%s</b>\"は許可されていません。"

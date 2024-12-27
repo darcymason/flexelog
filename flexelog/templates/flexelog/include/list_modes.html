@@ -1,24 +1,28 @@
+{% load i18n %}
 <tr>
-<td class="menuframe">
-<table width="100%" border=0 cellpadding="0" cellspacing="0">
-<tr>
-    <td class="menu2a">
-        {% for mode in modes %}
-        {% if mode.0 == current_mode %}
-        &nbsp;{{ mode.0 }}&nbsp;
-        {% else %}
-        &nbsp;<a href="{% url 'flexelog:logbook' logbook.name %}{{ mode.1 }}">{{ mode.0 }}</a>&nbsp;
-        {% endif %}
-        {% if not forloop.last %}|{% endif %}
-        {% endfor %}
-    {% comment %}
-    <td class="menu2b">
-        <a href="?new_entries=1"><img align="middle" border="0" src="new_entry.png"
-                alt="Show only new entries"
-                title="Show only new entries"></a>&nbsp;&nbsp;&nbsp;<b>3 Entries</b>&nbsp;
-    </td>
-    {% endcomment %}
-</tr>
-</table>
-</td>
+  <td class="menuframe">
+    <table width="100%" border=0 cellpadding="0" cellspacing="0">
+      <tr>
+        <td class="menu2a">
+          {% for mode in modes %}
+          {% if mode.0 == current_mode %}
+          &nbsp;{{ mode.0 }}&nbsp;
+          {% else %}
+          &nbsp;<a href="{% url 'flexelog:logbook' logbook.name %}{{ mode.1 }}">{{ mode.0 }}</a>&nbsp;
+          {% endif %}
+          {% if not forloop.last %}|{% endif %}
+          {% endfor %}
+
+        <td class="menu2b">
+          {% comment %}
+          <a href="?new_entries=1"><img align="middle" border="0" src="new_entry.png" alt="Show only new entries"
+              title="Show only new entries"></a>
+          {% endcomment %}
+          &nbsp;&nbsp;&nbsp;
+          {% if page_obj %}<b>{{ page_obj.paginator.count }} {% translate "Entries" %}</b>&nbsp;{% endif %}
+        </td>
+
+      </tr>
+    </table>
+  </td>
 </tr>

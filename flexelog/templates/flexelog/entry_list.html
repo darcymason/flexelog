@@ -1,4 +1,5 @@
 {% extends "flexelog/base.html" %}
+{% load i18n %}
 
 {% block body %}
 
@@ -15,7 +16,7 @@
             {% for col_name in col_names %}
             {# XX need urlencoded version of col_name for url #}
             {% if forloop.last %} {# Text -- XX translate needed for col title #}
-            <th class="listtitle2">Text</th>
+            <th class="listtitle2">{% translate "Text" %}</th>
             {% else %}
             <th class="listtitle"><a href="?rsort={{col_name}}">{{ col_name }}</a></th>
             {% endif %}

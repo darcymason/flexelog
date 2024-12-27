@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-25 21:44-0500\n"
+"POT-Creation-Date: 2024-12-27 10:48-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -99,21 +99,33 @@ msgstr "Erreur de syntaxe dans le fichier de configuration"
 msgid "'%(value)s' is reserved, it cannot be used for a logbook name"
 msgstr ""
 
-#: .\flexelog\templates\flexelog\index.html:11 .\flexelog\views.py:30
+#: .\flexelog\models.py:85
+#, fuzzy
+#| msgid "Entries"
+msgid "Entry"
+msgstr "Entrées"
+
+#: .\flexelog\models.py:86
+#: .\flexelog\templates\flexelog\include\list_modes.html:23
+#: .\flexelog\templates\flexelog\index.html:17
+msgid "Entries"
+msgstr "Entrées"
+
+#: .\flexelog\templates\flexelog\entry_list.html:19
+msgid "Text"
+msgstr "Texte"
+
+#: .\flexelog\templates\flexelog\index.html:11 .\flexelog\views.py:109
 msgid "Several logbooks are defined on this host"
 msgstr "Il y a plusieurs registres sur ce serveur"
 
-#: .\flexelog\templates\flexelog\index.html:12 .\flexelog\views.py:31
+#: .\flexelog\templates\flexelog\index.html:12 .\flexelog\views.py:110
 msgid "Please select the one to connect to"
 msgstr "Choisissez celui auquel vous souhaitez vous connecter"
 
 #: .\flexelog\templates\flexelog\index.html:16
 msgid "Logbook"
 msgstr "Registre"
-
-#: .\flexelog\templates\flexelog\index.html:17
-msgid "Entries"
-msgstr "Entrées"
 
 #: .\flexelog\templates\flexelog\index.html:18
 msgid "Last submission"
@@ -133,49 +145,70 @@ msgstr ""
 "Utilisez le bouton \"page précédente\" de votre navigateur pour revenir en "
 "arrière"
 
-#: .\flexelog\views.py:45
+#: .\flexelog\views.py:60
+msgid "Goto page"
+msgstr "Aller à la page"
+
+#: .\flexelog\views.py:65
+msgid "Previous"
+msgstr "Précédente"
+
+#: .\flexelog\views.py:83
+msgid "Next"
+msgstr "Suivante"
+
+#: .\flexelog\views.py:90
+msgid "All"
+msgstr "Tous"
+
+#: .\flexelog\views.py:126
 #, python-format
 msgid "Logbook \"%s\" does not exist on remote server"
 msgstr "Le registre \"%s\" n'existe pas sur le serveur distant"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:96
+#: .\flexelog\views.py:137 .\flexelog\views.py:209
 msgid "New"
 msgstr "Créer"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:96
+#: .\flexelog\views.py:138 .\flexelog\views.py:210
 msgid "Find"
 msgstr "Chercher"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:96
+#: .\flexelog\views.py:139 .\flexelog\views.py:211
 msgid "Import"
 msgstr "Importation"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:96
+#: .\flexelog\views.py:140 .\flexelog\views.py:212
 msgid "Config"
 msgstr "Configuration"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:55 .\flexelog\views.py:96
-#: .\flexelog\views.py:100
+#: .\flexelog\views.py:141 .\flexelog\views.py:145 .\flexelog\views.py:213
+#: .\flexelog\views.py:219
 msgid "Last day"
 msgstr "Dernier jour"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:96
+#: .\flexelog\views.py:142 .\flexelog\views.py:214
 msgid "Help"
 msgstr "Aide"
 
-#: .\flexelog\views.py:59
+#: .\flexelog\views.py:149
 msgid "Full"
 msgstr "Détail"
 
-#: .\flexelog\views.py:60
+#: .\flexelog\views.py:150
 msgid "Summary"
 msgstr "Résumé"
 
-#: .\flexelog\views.py:61
+#: .\flexelog\views.py:151
 msgid "Threaded"
 msgstr "Arborescence"
 
-#: .\flexelog\views.py:106
+#: .\flexelog\views.py:175
+#, python-format
+msgid "Page %d of %d"
+msgstr "Page %d sur %d"
+
+#: .\flexelog\views.py:224
 #, python-format
 msgid "Error: Command \"<b>%s</b>\" not allowed"
 msgstr "Erreur : commande \"<b>%s</b>\" non autorisée"

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-25 21:44-0500\n"
+"POT-Creation-Date: 2024-12-27 10:48-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -98,21 +98,33 @@ msgstr "Indtastningsfejl i konfigurationsfilen"
 msgid "'%(value)s' is reserved, it cannot be used for a logbook name"
 msgstr ""
 
-#: .\flexelog\templates\flexelog\index.html:11 .\flexelog\views.py:30
+#: .\flexelog\models.py:85
+#, fuzzy
+#| msgid "Entries"
+msgid "Entry"
+msgstr "Indlæg"
+
+#: .\flexelog\models.py:86
+#: .\flexelog\templates\flexelog\include\list_modes.html:23
+#: .\flexelog\templates\flexelog\index.html:17
+msgid "Entries"
+msgstr "Indlæg"
+
+#: .\flexelog\templates\flexelog\entry_list.html:19
+msgid "Text"
+msgstr "Tekst"
+
+#: .\flexelog\templates\flexelog\index.html:11 .\flexelog\views.py:109
 msgid "Several logbooks are defined on this host"
 msgstr "Flere logbøger er defineret på denne host"
 
-#: .\flexelog\templates\flexelog\index.html:12 .\flexelog\views.py:31
+#: .\flexelog\templates\flexelog\index.html:12 .\flexelog\views.py:110
 msgid "Please select the one to connect to"
 msgstr "Vælg hvilken du vil have adgang til"
 
 #: .\flexelog\templates\flexelog\index.html:16
 msgid "Logbook"
 msgstr "Logbog"
-
-#: .\flexelog\templates\flexelog\index.html:17
-msgid "Entries"
-msgstr "Indlæg"
 
 #: .\flexelog\templates\flexelog\index.html:18
 msgid "Last submission"
@@ -130,49 +142,70 @@ msgstr "Tilbage"
 msgid "Please use your browser's back button to go back"
 msgstr "Brug tilbage knappen på din browser"
 
-#: .\flexelog\views.py:45
+#: .\flexelog\views.py:60
+msgid "Goto page"
+msgstr "Gå til"
+
+#: .\flexelog\views.py:65
+msgid "Previous"
+msgstr "Forrige"
+
+#: .\flexelog\views.py:83
+msgid "Next"
+msgstr "Næste"
+
+#: .\flexelog\views.py:90
+msgid "All"
+msgstr "Alle"
+
+#: .\flexelog\views.py:126
 #, python-format
 msgid "Logbook \"%s\" does not exist on remote server"
 msgstr "Logbog \"%s\" eksisterer ikke på remote server"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:96
+#: .\flexelog\views.py:137 .\flexelog\views.py:209
 msgid "New"
 msgstr "Ny"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:96
+#: .\flexelog\views.py:138 .\flexelog\views.py:210
 msgid "Find"
 msgstr "Find"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:96
+#: .\flexelog\views.py:139 .\flexelog\views.py:211
 msgid "Import"
 msgstr "Import"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:96
+#: .\flexelog\views.py:140 .\flexelog\views.py:212
 msgid "Config"
 msgstr "Konfigurer"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:55 .\flexelog\views.py:96
-#: .\flexelog\views.py:100
+#: .\flexelog\views.py:141 .\flexelog\views.py:145 .\flexelog\views.py:213
+#: .\flexelog\views.py:219
 msgid "Last day"
 msgstr "Sidste Dag"
 
-#: .\flexelog\views.py:53 .\flexelog\views.py:96
+#: .\flexelog\views.py:142 .\flexelog\views.py:214
 msgid "Help"
 msgstr "Hjælp"
 
-#: .\flexelog\views.py:59
+#: .\flexelog\views.py:149
 msgid "Full"
 msgstr "Fuld"
 
-#: .\flexelog\views.py:60
+#: .\flexelog\views.py:150
 msgid "Summary"
 msgstr "Beskrivelse"
 
-#: .\flexelog\views.py:61
+#: .\flexelog\views.py:151
 msgid "Threaded"
 msgstr "Vis som Tråde"
 
-#: .\flexelog\views.py:106
+#: .\flexelog\views.py:175
+#, python-format
+msgid "Page %d of %d"
+msgstr "Side %d af %d"
+
+#: .\flexelog\views.py:224
 #, python-format
 msgid "Error: Command \"<b>%s</b>\" not allowed"
 msgstr "Fejl: kommando \"<b>%s</b>\" ikke tilladt"
