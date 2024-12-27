@@ -59,6 +59,11 @@ class Logbook(models.Model):
 
     def latest_date(self):
         return self.entry_set.latest("date").date  # XXX need to check if no entries
+    class Meta:
+        indexes = [
+            models.Index(fields=["name"]),
+        ]
+
 
 class Entry(models.Model):
     rowid = models.AutoField(primary_key=True, blank=True)
@@ -81,6 +86,11 @@ class Entry(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=("lb", "id"), name="id in logbook")
+        ]
+        verbose_name = _("Entry")
+        verbose_name_plural = _("Entries")
+        indexes = [
+            models.Index(fields=["lb", "-id"]),
         ]
 
 
