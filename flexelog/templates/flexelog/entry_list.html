@@ -23,48 +23,23 @@
             {# <th class="listtitle3"><img src="attachment.png" alt="Attachments" title="Attachments" </th> #}
           </tr>
 
-          {% for object in objects %}
+          {% for entry in page_obj %}
           <tr>
-            {% for key, val in object.items %}
-            <td class="{% if key ==   'text' %}summary{% else %}list2{% endif %}"{% if key == "date" %} nowrap{% endif %}>
+            {% for key, val in entry.items %}
+            <td class="{% if key == 'text' %}summary{% else %}list2{% endif %}"{% if key == "date" %} nowrap{% endif %}>
               {% if not key == "text" %}
-              <a href="../{{logbook.name}}/{{ object.id }}">
-                {% if key == "id" %}&nbsp;&nbsp;{% endif %}
-                {{ val }}
-                {% if forloop.first %}&nbsp;&nbsp;{% endif %}
+              <a href="{% url 'flexelog:detail' logbook.name entry.id %}">
+                {% if key == "id" %}&nbsp;&nbsp;{% endif %}{{ val }}{% if key == "id" %}&nbsp;&nbsp;{% endif %}
               </a>
               {% else %}
               {{ val }}
               {% endif %}
             </td>
             {% endfor %}
-
-
-
-            {% comment %}
-            <td class="list2" nowrap><a href="../Travel/1">2023-11-14 09:11:07</a></td>
-
-            <td class="list2" nowrap><a href="../Travel/1">11/12/2023</a></td>
-            <td class="list2"><a href="../Travel/1">2 days</a></td>
-            <td class="list2"><a href="../Travel/1">Niagara Falls</a></td>
-            <td class="list2"><a href="../Travel/1"></a>&nbsp;</td>
-            <td class="list2"><a href="../Travel/1">Deb | Darc | SusanTom</a></td>
-            <td class="list2"><a href="../Travel/1">Couple great days in Niagara with S&amp;T</a></td>
-            <td class="summary">
-              Susan&nbsp;here&nbsp;for&nbsp;a&nbsp;myeloma&nbsp;conference&nbsp;(her&nbsp;mom<br>
-              has&nbsp;it&nbsp;and&nbsp;she&nbsp;leads&nbsp;a&nbsp;support&nbsp;group).&nbsp;&nbsp;Tom<br>
-              on&nbsp;his&nbsp;own&nbsp;for&nbsp;a&nbsp;couple&nbsp;of&nbsp;days;&nbsp;we&nbsp;drove
-            </td>
-            <td class="listatt">&nbsp;&nbsp;</td>
-            {% endcomment %}
-
-
           </tr>
           {% endfor %}
         </table>
-
-
-
+        <tr>{{ paging_html|safe }}</tr>
   </table>
 </form>
 {% endblock body %}

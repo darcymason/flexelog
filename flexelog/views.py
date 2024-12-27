@@ -1,3 +1,4 @@
+from copy import copy
 import logging
 from typing import Any
 from django.shortcuts import render, get_object_or_404
@@ -5,9 +6,88 @@ from django.utils.translation import gettext as _
 
 # Create your views here.
 
-from django.http import HttpResponse
+from django.http import HttpResponse, QueryDict
+from django.core.paginator import Paginator
 from .models import Logbook, Entry
 from .elog_cfg import get_config
+
+from htmlobj import HTML
+from urllib.parse import urlencode
+
+
+def paging_offered(page_num: int, page_count: int) -> list[int | None]:
+    """List the pages offered for top/bottom of listing page
+
+    List will have None where an ellipsis is needed
+    e.g. if 15 pages, page_num is 6, then return
+        [1, 2, 3, None, 5, 6, 7, None, 13, 14, 15]
+
+    """
+
+    if page_count == 1:
+        return []
+    if page_count <= 7:
+        return list(range(1, page_count + 1))
+    s = set((1, 2, 3))
+    s.update((max(page_num - 1, 1), page_num, min(page_num + 1, page_count)))
+    s.update((page_count - 2, page_count - 1, page_count))
+    li = sorted(s)
+    for i, val in enumerate(li):
+        if i < 3:
+            continue
+        if (prev := li[i - 1]) is not None and val != prev + 1:
+            li.insert(i, None)
+    return li
+
+
+def pagination_html(
+    page_num: int | None, page_count: int, query_dict: QueryDict = None
+) -> str:
+    if page_num is None:
+        page_num = 1
+
+    pages = paging_offered(page_num, page_count)
+    pages_len = len(pages)
+    if pages_len < 2:
+        return "\n"
+    if query_dict is None:
+        query_dict = QueryDict()
+    query_args = copy(query_dict)
+
+    h = HTML()
+    with h.td(class_="menuframe"):
+        with h.span(class_="menu3"):
+            h.text(_("Goto page"))
+            # Add Previous if not first page
+            if page_num != 1:
+                query_args["page"] = page_num - 1
+                h.a(
+                    _("Previous"),
+                    href=f"?{query_args.urlencode(safe="&")}",
+                )
+                h.raw_text("&nbsp;&nbsp;")
+            for i, pg in enumerate(pages):
+                comma = "," if i != pages_len - 1 and pages[i + 1] is not None else ""
+                if pg is None:
+                    h.raw_text("&nbsp;...&nbsp;")
+                elif pg is page_num:
+                    h.raw_text(str(pg) + comma)
+                else:
+                    query_args["page"] = pg
+                    h.a(str(pg) + comma, href=f"?{query_args.urlencode(safe="&")}")
+
+            # Add Next if not on last page
+            if page_num != page_count:
+                h.raw_text("&nbsp;&nbsp;")
+                query_args["page"] = page_num + 1
+                h.a(_("Next"), href=f"?{query_args.urlencode(safe="&")}")
+
+            # Add All option
+            # XX need to check config file for max limit to offer this
+            h.raw_text("&nbsp;&nbsp;")
+            query_args["page"] = "all"
+            h.a(_("All"), href=f"?{query_args.urlencode(safe="&")}")
+    return str(h)
 
 
 def get_param(request, key: str, *, valtype: type = str, default: Any = None) -> Any:
@@ -23,10 +103,8 @@ def get_param(request, key: str, *, valtype: type = str, default: Any = None) ->
 
 def index(request):
     cfg = get_config()
-    logbooks = [
-            lb for lb in Logbook.objects.all() if lb.name in cfg.logbook_names()
-        ]
-    
+    logbooks = [lb for lb in Logbook.objects.all() if lb.name in cfg.logbook_names()]
+
     instruct1 = _("Several logbooks are defined on this host")
     instruct2 = _("Please select the one to connect to")
     logging.warning(logbooks[0].latest_date())
@@ -37,26 +115,37 @@ def index(request):
     }
     return render(request, "flexelog/index.html", context)
 
+
 def logbook(request, lb_name):
     cfg = get_config()
     try:
         logbook = Logbook.objects.get(name=lb_name)
     except Logbook.DoesNotExist:
-        context = {"message": _('Logbook "%s" does not exist on remote server') % lb_name }
+        context = {
+            "message": _('Logbook "%s" does not exist on remote server') % lb_name
+        }
         return render(request, "flexelog/show_error.html", context)
-    
+
     selected_id = get_param(request, "id", valtype=int)
+    query_dict = request.GET
     query_id = f"?id={selected_id}&amp;" if selected_id else ""
-    
+
     # XX Adjust available commands according to config
     # XX Select command not implemented
-    command_names = [_("New"), _("Find"), _("Import"), _("Config"), _("Last day"), _("Help") ]
+    command_names = [
+        _("New"),
+        _("Find"),
+        _("Import"),
+        _("Config"),
+        _("Last day"),
+        _("Help"),
+    ]
     commands = [(cmd, f"?cmd={cmd}") for cmd in command_names]
     commands[4] = (_("Last day"), "past1?mode=Summary")
 
     modes = (  # First text is translated url param is not
         # XX need to carry over other url params
-        (_("Full"), "?mode=full"), 
+        (_("Full"), "?mode=full"),
         (_("Summary"), "?mode=summary"),
         (_("Threaded"), "?mode=threaded"),
     )
@@ -65,9 +154,22 @@ def logbook(request, lb_name):
     attrs = list(cfg.lb_attrs[logbook.name].keys())
     col_names = ["ID", "Date"] + attrs + ["Text"]
     attr_args = (f"attrs__{attr}" for attr in attrs)
-    objects = logbook.entry_set.values("id", "date", *attr_args, "text")
-
+    entries = logbook.entry_set.values("id", "date", *attr_args, "text").order_by(
+        "-date"
+    )  # XX need to allow different orders
     
+    page_number = request.GET.get("page") or 1
+    if page_number.lower() == "all":
+        page_number = 1
+        per_page = entries.count() + 1
+    else:
+        per_page = get_param(request, "npp", valtype=int) or cfg.get(lb_name, "entries per page")
+
+    paginator = Paginator(entries, per_page=per_page)
+    page_obj = paginator.get_page(page_number)
+    
+    paging_html = pagination_html(page_obj.number, page_obj.paginator.num_pages, query_dict)
+
     # rows = [
     #     entry.attrs[key]
     #     for key in headers
@@ -81,7 +183,8 @@ def logbook(request, lb_name):
         "modes": modes,
         "current_mode": current_mode,
         "col_names": col_names,
-        "objects": objects,
+        "page_obj": page_obj,
+        "paging_html": paging_html,
         # "rows": rows,
     }
     return render(request, "flexelog/entry_list.html", context)
@@ -93,7 +196,14 @@ def detail(request, lb_name, entry_id):
     # New |  Find |  Select |  Import |  Config |  Last day |  Help
     # Make assuming standard url, fix after for those that differ
     # XX _("Select") (multi-select editing) not offered currently
-    command_names = [_("New"), _("Find"), _("Import"), _("Config"), _("Last day"), _("Help") ]
+    command_names = [
+        _("New"),
+        _("Find"),
+        _("Import"),
+        _("Config"),
+        _("Last day"),
+        _("Help"),
+    ]
     commands = [(cmd, f"?cmd={cmd}") for cmd in command_names]
 
     # commands[2] = (_("Select"), query_id + "?select=1")
@@ -102,9 +212,7 @@ def detail(request, lb_name, entry_id):
     command = get_param(request, "cmd")
     if command:
         if command not in command_names:
-            context = {
-                "message": _('Error: Command "<b>%s</b>" not allowed')
-            }
+            context = {"message": _('Error: Command "<b>%s</b>" not allowed')}
             return render(request, "flexelog/show_error.html", context)
             # if command not in command_dispatch:
             #     return show_error(
@@ -112,7 +220,6 @@ def detail(request, lb_name, entry_id):
             #         + " (not currently implemented)"
             #     )
 
-    
     try:
         logbook = Logbook.objects.get(name=lb_name)
     except Entry.DoesNotExist:
@@ -125,5 +232,3 @@ def detail(request, lb_name, entry_id):
         "logbooks": Logbook.objects.all(),
     }
     return render(request, "flexelog/detail.html", context)
-
-    
