@@ -25,7 +25,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",    
     "Programming Language :: Python :: 3 :: Only",
     "Framework :: Django :: 5",
-    "License :: OSI Approved :: BSD License",
+    "License :: OSI Approved :: GNU General Public License (GPL)",
 ]
 
 dependencies = [
