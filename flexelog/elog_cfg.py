@@ -73,6 +73,7 @@ DEFAULTS = {
     "language": "english",
     #  "Page Title": "FlexElog Logbook Selection", if global section
     "show attachments": True,
+    "show text": True, # False = no Text attribute in logbook
     "summary lines": 3,
     # date-time displayed for logbook entries,
     # Default in PSI elog was e.g. "09/30/2023 12:57:03 pm"
@@ -283,7 +284,7 @@ class LogbookConfig:
             valtype = cfg_bool
 
         if lb_name not in self._cfg:
-            print(f"Unknown config section {lb_name}")
+            logging.warning(f"Unknown config section {lb_name}")
             return None
 
         param = param.lower()  # make case insensitive

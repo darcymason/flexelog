@@ -20,7 +20,7 @@
           <tr>
             {% for col_name in col_names %}
             {# XX need urlencoded version of col_name for url #}
-            {% if forloop.last %} {# Text -- XX translate needed for col title #}
+            {% if key == "text" %}
               <th class="listtitle2">{% translate "Text" %}</th>
             {% else %}
               <th class="listtitle"><a href="?rsort={{col_name}}">{{ col_name }}</a></th>

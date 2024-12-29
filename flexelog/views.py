@@ -71,10 +71,18 @@ def logbook(request, lb_name):
     )
     current_mode = _(get_param(request, "mode", default="Summary").capitalize())
 
-    attrs = list(cfg.lb_attrs[logbook.name].keys())
-    col_names = ["ID", "Date"] + attrs + ["Text"]
+    attrs = list(cfg.lb_attrs[logbook.name].keys())  # XX can also config Attributes shown
+    col_names = ["ID", "Date"] + attrs 
+    
     attr_args = (f"attrs__{attr}" for attr in attrs)
-    entries = logbook.entry_set.values("id", "date", *attr_args, "text").order_by(
+    summary_lines = cfg.get(lb_name, "Summary lines", valtype=int)
+    show_text = cfg.get(lb_name, "Show text", valtype=bool)
+    if show_text and summary_lines > 0:
+        col_names.append("Text")
+        text_arg = ["text"]
+    else:
+        text_arg = []
+    entries = logbook.entry_set.values("id", "date", *attr_args, *text_arg).order_by(
         "-date"
     )  # XX need to allow different orders
     
@@ -116,6 +124,7 @@ def logbook(request, lb_name):
         "page_range": list(paginator.get_elided_page_range(page_obj.number, on_each_side=1, on_ends=3)),
         "page_n_of_N": page_n_of_N,
         "selected_id": selected_id,
+        "summary_lines": summary_lines,
     }
     return render(request, "flexelog/entry_list.html", context)
 
