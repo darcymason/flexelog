@@ -3,7 +3,7 @@ import logging
 from typing import Any
 from django.shortcuts import render, get_object_or_404
 from django.utils.translation import gettext_lazy as _
-
+from django.contrib.auth.decorators import login_required
 # Create your views here.
 
 from django.http import HttpResponse, QueryDict
@@ -38,6 +38,7 @@ def index(request):
     return render(request, "flexelog/index.html", context)
 
 
+@login_required
 def logbook(request, lb_name):
     cfg = get_config()
     try:
@@ -52,6 +53,7 @@ def logbook(request, lb_name):
     query_dict = request.GET
 
     # XX Adjust available commands according to config
+    # XX then according to user auth
     # XX Select command not implemented
     command_names = [
         _("New"),
@@ -115,7 +117,7 @@ def logbook(request, lb_name):
     
     context = {
         "logbook": logbook,
-        "logbooks": Logbook.objects.all(),
+        "logbooks": Logbook.objects.all(),  # XX will need to restrict to what user auth is
         "commands": commands,
         "modes": modes,
         "current_mode": current_mode,

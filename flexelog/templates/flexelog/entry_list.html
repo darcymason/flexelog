@@ -31,7 +31,7 @@
 
           {# ENTRIES --------------- #}
           {% for entry in page_obj %}
-          {% cycle 'list2' 'list1' as listX %}
+          <div style="display: none;">{% cycle 'list2' 'list1' as listX %}</div>{# XXX kludge #}
           <tr>
             {% for key, val in entry.items %}
             <td class="{% if key == 'text' %}summary{% else %}{{ listX }}{% if entry.id == selected_id %}h{% endif %}{% endif %}" {% if key == "date" %} nowrap{% endif %}>
