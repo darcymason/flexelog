@@ -1,5 +1,13 @@
 {% load i18n %}
+{% load static %}
 
+{% block more_head_links %}
+  {% if cfg_css %}
+    {% with 'flexelog/'|add:cfg_css as static_link %}
+      <link rel="stylesheet" type="text/css" href="{% static static_link %}">
+    {% endwith %}
+  {% endif %}
+{% endblock %}
 {# Table containing tabs and comment bar #}
 {# Logbook tabs across the top #}
 <tr>
@@ -26,9 +34,14 @@
     {% endif %}
     &nbsp;</td>
     {% if request.user.is_authenticated %}
-    <td class="title2">{% translate "Logged in as" %} "{{ request.user.username }}"&nbsp;
-      <a href="{% url 'flexelog:do_logout' %}">{% translate "Logout" %}</a>
-    </td>
+      <td class="title2">{% translate "Logged in as" %} "{{ request.user.username }}"&nbsp;
+        &nbsp;&nbsp;<a href="{% url 'flexelog:do_logout' %}">{% translate "Logout" %}</a>
+        {% if request.user.is_staff %}
+          &nbsp;&nbsp;<a href="{% url 'admin:index' %}">{% translate "Admin" %}</a>
+        {% endif %}
+      </td>
+
+
     {% endif %}
   </tr>
 </table>

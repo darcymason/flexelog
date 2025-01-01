@@ -1,5 +1,6 @@
 {% extends "flexelog/base.html" %}
 {% load i18n %}
+{% load static %}
 
 {% block body %}
 
@@ -9,11 +10,13 @@
   {% include "flexelog/include/lb_tabs.html" %}
   {% include "flexelog/include/commands.html" %}
   {% include "flexelog/include/list_modes.html" %}
-  <tr>
-    <td class="menuframe"><span class="menu3">
-        {% include "flexelog/include/pagination.html" %}
-      </span></td>
-  </tr>
+  {% if page_obj.has_other_pages %}
+    <tr>
+      <td class="menuframe"><span class="menu3">
+          {% include "flexelog/include/pagination.html" %}
+        </span></td>
+    </tr>
+  {% endif %}
   <tr>
     <td>
       <table class="listframe" width="100%" cellspacing=0>
@@ -48,11 +51,13 @@
         </tr>
         {% endfor %}
       </table>
-  <tr>
-    <td class="menuframe"><span class="menu3">
-        {% include "flexelog/include/pagination.html" %}
-      </span></td>
-  </tr>
+  {% if page_obj.has_other_pages %}
+    <tr>
+      <td class="menuframe"><span class="menu3">
+          {% include "flexelog/include/pagination.html" %}
+        </span></td>
+    </tr>
+  {% endif %}
   </table>
 </form>
 {% endblock body %}

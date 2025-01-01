@@ -45,6 +45,7 @@ def index(request):
         "cfg": cfg,
         "logbooks": logbooks,
         "heading": "FlexElog Logbook Selection",
+        "cfg_css": cfg.get("global", "css", valtype=str, default=""), # XXX admin forces global since lb can't exist
     }
     return render(request, "flexelog/index.html", context)
 
@@ -142,7 +143,8 @@ def logbook(request, lb_name):
         "page_n_of_N": page_n_of_N,
         "selected_id": selected_id,
         "summary_lines": summary_lines,
-        "main_tab": cfg.get(lb_name, "main tab", valtype=str,default="")
+        "main_tab": cfg.get(lb_name, "main tab", valtype=str,default=""),
+        "cfg_css": cfg.get(lb_name, "css", valtype=str, default=""),
     }
     return render(request, "flexelog/entry_list.html", context)
 

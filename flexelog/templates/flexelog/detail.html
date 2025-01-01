@@ -1,9 +1,9 @@
 {% extends "flexelog/base.html" %}
 
 {% block title %}Fl'og {{ entry.attrs.Subject }}{% endblock title %}
-{% block morelinks %}
+{% block more_head_links %}
 {% include "flexelog/include/editor_tui.html" %}
-{% endblock morelinks %}
+{% endblock more_head_links %}
 
 {% block body %}
 <form name="form1" method="GET" action="{% url 'flexelog:detail' logbook.name entry.id %}">

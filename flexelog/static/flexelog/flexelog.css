@@ -1,0 +1,197 @@
+/* 
+Flexelog additional CSS
+*/
+   
+
+
+
+
+ 
+  
+  /* standard formatting for logbook tabs */
+  .tabs {
+    font-family:sans-serif;
+    font-size:12pt;
+    background-color:white;
+  }
+  
+  
+  
+  .seltitle {
+    border:1px solid #2168574a;
+    border-top:1px solid white;
+    border-left:1px solid white;
+    background-color: rgb(147, 208, 225); 
+    color:#486090;
+    text-align:center;
+  }
+  
+  
+ 
+  
+  .sellogbook {
+    border:1px solid #308000;
+    border-top:1px solid white;
+    border-left:1px solid white;
+    background-color:#ffffee;
+    padding:3px;
+    text-align:left;
+    font-weight:bold;
+  }
+  
+  .selcomment {
+    font-size:9pt;
+  }
+  
+  .selentries {
+    background-color:#ffffdd;
+    border:1px solid #0000FF;
+    border-top:1px solid white;
+    border-left:1px solid white;
+    text-align:center;
+    font-size:10pt;
+  }
+  
+  
+  
+  /* unselected and selected logbook tabs */
+  
+  .ltab a {
+    background-color:#E0E0E0;
+    padding-left:5px;
+    padding-right:5px;
+  }
+  
+  .ltab {
+    background-color:#E0E0E0;
+    border-top:1px solid white;
+    border-left:1px solid white;
+    border-right:1px solid gray;
+  }
+  
+  
+  
+  
+  /* logbook title, left, middle and right cell */
+  
+  .title1 {
+    padding:5px;
+    background-color:#b8cbf3;
+    border-bottom:1px solid black;
+    border-left:1px solid #E0E0E0;
+    color:white;
+    font-size:medium;
+    font-family:sans-serif;
+    text-align:left;
+  }
+  
+  
+  .title2 {
+    background-color:#b8cbf3;
+    border-bottom:1px solid black;
+    color:white;
+    font-size:medium;
+    font-family:sans-serif;
+    text-align:center;
+  }
+  
+
+  
+  
+  /* title row in listing */
+  .listtitle {
+    border:1px solid #0000FF;
+    border-top:1px solid white;
+    border-left:1px solid white;
+    background-color: lightgoldenrodyellow;
+    text-align:center;
+    width:0%;
+  }
+  
+  
+  
+  /* odd and even lines in message listing */
+  
+  .list1 {
+    border:1px solid darkgrey;
+    border-top:1px solid lightgrey;
+    border-left:1px solid lightgrey;
+    background-color:#e0e0e0;
+    text-align:center;
+  }
+  
+  .list2 {
+    border:1px solid darkgrey;
+    border-top:1px solid white;
+    border-left:1px solid white;
+    background-color:whitesmoke;
+    text-align:center;
+  }
+
+  .list1h {
+    border:1px solid #308000;
+    border-top:1px solid white;
+    border-left:1px solid white;
+    background-color:#FFFFB0;
+    text-align:center;
+    font-weight:bold;
+  }  
+
+  
+  
+  
+  .dlgtitle {
+    background-color:rgb(117, 150, 194);
+    color:white;
+    font-size:medium;
+    text-align:center;
+    padding:5px;
+  }
+  
+
+  
+  .dlgform {
+    background-color:cornsilk;
+    padding:5px;
+    text-align:center;
+  }
+  
+  
+  .quotetable {
+    width:98%;
+    background-color:black;
+    border:0px;
+    padding:0px;
+  }
+  
+  .quotetitle {
+    background-color:#486090; 
+    padding:3px;
+    font-size:12px;
+    font-weight:bold;
+    color:white;
+  }
+  
+  .quote {
+    background-color:#FFFFB0; 
+    padding:10px;
+  }
+  
+  .holder {
+     background-color: white;
+     border:6px dashed #ccc;
+     height:50px;
+     line-height:50px;
+     margin:5px;
+     color:#999;
+     font-size:2em;
+     text-align:center;
+  }
+  
+  /* ELOG home page link at bottom of page */
+  .bottomlink {
+    font-family:sans-serif; 
+    font-size:xx-small;
+  }
+  
+  

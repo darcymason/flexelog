@@ -1,8 +1,17 @@
 {% extends "flexelog/base.html" %}
 {% load l10n %}
 {% load i18n %}
+{% load static %}
 
 {% block title %}FlexElog Logbook Selection{% endblock %}
+
+{% block more_head_links %}
+  {% if cfg_css %}
+    {% with 'flexelog/'|add:cfg_css as static_link %}
+      <link rel="stylesheet" type="text/css" href="{% static static_link %}">
+    {% endwith %}
+  {% endif %}
+{% endblock %}
 
 {% block body %}
 <table class="selframe" cellspacing="0" align="center">
