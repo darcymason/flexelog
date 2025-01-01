@@ -1,0 +1,70 @@
+{% extends "flexelog/base.html" %}
+{% load i18n %}
+{% block title %}{% translate "FlexElog Login" %}{% endblock %}
+{% block body %}
+
+<form action="." method="post">
+    {% csrf_token %}
+    <table class="login_frame" cellspacing=0 align=center>
+        <tr><td class="login_title">{% translate "Please login" %}</td></tr>
+        {% for field in form %}
+        <tr><td class="login_form">
+            <span class="overlay_wrapper">
+            <div class="fieldWrapper">
+                {{ field.errors }}
+                {{ fiekd.label_tag }} {{ field }}
+            </div>
+            </span>
+        </td></tr>
+        {% endfor %}
+
+
+        {% comment %}
+        <tr><td class="login_form">
+            <span class="overlay_wrapper">
+            <div class="fieldWrapper">
+                {{ form.username.errors }}
+                {{ form.username.label_tag }} {{ form.username }}
+            </div>
+            </span>
+        </td></tr>
+        <tr><td class="login_form">
+            <span class="overlay_wrapper">
+            <div class="fieldWrapper">
+                {{ form.password.errors }}
+                {{ form.password.label_tag }} {{ form.password }}
+            </div>
+            </span>
+        </td></tr>
+        {% endcomment %}
+        <tr><td align=center class="login_form_bottom"><input type="submit" class="login_submit" value="{% translate 'Submit' %}">
+        </td></tr>
+    </table>
+</form>
+
+{% comment %}
+{# <body OnLoad="document.form1.uname.focus();"> #}
+<form name=form1 method="POST" action="./" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type=hidden name=redir value="">
+
+<tr><td class="login_form">
+<span class="overlay_wrapper">
+<label for="uname" id="uname" class="overlabel">{% translate "Username" %}</label>
+<input type="text" class="login_input" name="uname" value="" title="Username" onInput="document.getElementById('uname').style.display='none';">
+
+<tr><td class="login_form">
+<span class="overlay_wrapper">
+<label for="upassword" id="upassword" class="overlabel">{% translate "Password" %}</label>
+<input type="password" class="login_input" name="upassword" onInput="document.getElementById('upassword').style.display='none';">
+</span></td></tr>
+<tr><td align=center class="login_form"><input type=checkbox name=remember value=1>
+{% block translate %}Keep me logged in on this computer
+for the next 31 days or until I log out{% endblock %}</td></tr>
+<tr><td align=center class="login_form">
+<a href="?cmd=Forgot">{% translate "Forgot password?" %}</a><br><a href="?cmd=New+user">{% translate "Register as new user" %}</a></td></tr></td></tr>
+
+{% endcomment %}
+
+
+{% endblock body %}

@@ -4,10 +4,15 @@
 {# Logbook tabs across the top #}
 <tr>
     <td class="tabs">
+    {% if main_tab %}
+      <span class="ltab">
+        <a href="{% url 'flexelog:index' %}">{{ main_tab }}</a>
+      </span>
+    {% endif %}
     {% for lb in logbooks %}
-        <span class="{% if lb.name == logbook.name %}s{% endif %}ltab">
+      <span class="{% if lb.name == logbook.name %}s{% endif %}ltab">
         <a href="{% url 'flexelog:logbook' lb.name %}" title="{{ lb.comment }}">{{ lb.name }}</a>
-        </span>
+      </span>
     {% endfor %}
     </td>
 </tr>
@@ -19,6 +24,12 @@
     {% if page_n_of_N %}
         , {{ page_n_of_N }}
     {% endif %}
-    &nbsp;</td></tr>
+    &nbsp;</td>
+    {% if request.user.is_authenticated %}
+    <td class="title2">{% translate "Logged in as" %} "{{ request.user.username }}"&nbsp;
+      <a href="{% url 'flexelog:do_logout' %}">{% translate "Logout" %}</a>
+    </td>
+    {% endif %}
+  </tr>
 </table>
 </td></tr>

@@ -1,9 +1,11 @@
 from copy import copy
 import logging
 from typing import Any
-from django.shortcuts import render, get_object_or_404
+from django.conf import settings
+from django.shortcuts import redirect, render, get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login, logout
 # Create your views here.
 
 from django.http import HttpResponse, QueryDict
@@ -25,8 +27,17 @@ def get_param(request, key: str, *, valtype: type = str, default: Any = None) ->
             val = default
     return val
 
+def do_logout(request):
+    return render(request, "flexelog/do_logout.html")
+
 
 def index(request):
+    # XXX need to check Protect Selection page whether the list is shown only to registered users,
+    #   (or do equivalent permissions "view logbook index" or similar)
+    # OR Selection page = <file> / Guest Selection page = <file> equiv (latter if 'global' password file used in PSI elog) 
+    # Welcome Title = <html code> equivalent needed
+    # Page title from [global] section
+    # 
     cfg = get_config()
     logbooks = [lb for lb in Logbook.objects.all() if lb.name in cfg.logbook_names()]
 
@@ -38,8 +49,12 @@ def index(request):
     return render(request, "flexelog/index.html", context)
 
 
-@login_required
 def logbook(request, lb_name):
+    # XX Config to port over from PSI elog settings:
+    # Main Tab = <string> -- extra tab to go back to logbook selection page
+    #  ... and Main Tab URL = <string> to go to a different page instead
+    if not request.user.is_authenticated:
+        return redirect(f"{settings.LOGIN_URL}?next={request.path}")
     cfg = get_config()
     try:
         logbook = Logbook.objects.get(name=lb_name)
@@ -111,7 +126,7 @@ def logbook(request, lb_name):
     
     num_pages = paginator.num_pages 
     if num_pages > 1:
-        page_n_of_N = _("Page %d of %d") % (page_obj.number, num_pages)
+        page_n_of_N = _("Page {num:d} of {count:d}").format(num=page_obj.number, count=num_pages)
     else:
         page_n_of_N = None
     
@@ -127,6 +142,7 @@ def logbook(request, lb_name):
         "page_n_of_N": page_n_of_N,
         "selected_id": selected_id,
         "summary_lines": summary_lines,
+        "main_tab": cfg.get(lb_name, "main tab", valtype=str,default="")
     }
     return render(request, "flexelog/entry_list.html", context)
 

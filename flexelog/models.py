@@ -8,6 +8,8 @@ from configparser import ConfigParser, UNNAMED_SECTION
 
 
 MAX_LOGBOOK_NAME = getattr(settings, "MAX_LOGBOOK_NAME", 50)
+RESERVED_LB_NAMES = ["admin", "user", "accounts"]
+
 
 
 def validate_config_section(value):
@@ -37,7 +39,7 @@ class ElogConfig(models.Model):
 
 
 def validate_logbook_name(value):
-    if value.lower() in ["admin", "user"]:
+    if value.lower() in RESERVED_LB_NAMES:
         raise ValidationError(
             _("'%(value)s' is reserved, it cannot be used for a logbook name"),
             params={"value": value.lower()},

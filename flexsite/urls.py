@@ -15,12 +15,17 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
+from django.contrib.auth import views as auth_views
+from debug_toolbar.toolbar import debug_toolbar_urls
 
 urlpatterns = [
+    path("accounts/login/", auth_views.LoginView.as_view(), name="login"),
+    path("accounts/logout/", auth_views.LogoutView.as_view(), name="logout"),
     path("admin/", admin.site.urls),
     path("", include("flexelog.urls")),  # flexelog 'takes over' the root url
-    
-   
-]
+] 
+if not settings.TESTING:
+    urlpatterns += debug_toolbar_urls()
