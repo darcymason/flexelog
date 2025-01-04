@@ -5,7 +5,7 @@ import polib
 from html import unescape
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-PSI_LANG_PATH = BASE_DIR / "psi_elog" / "lang"
+PSI_UTF8_LANG_PATH = BASE_DIR / "psi_elog" / "lang"
 PO_FILENAME = "django.po"
 LANGUAGES = {
     "bg": "bulgarian",
@@ -31,29 +31,14 @@ LANGUAGES = {
 def eloglang_translations(lang_code) -> dict:
     """Return translation dict from a PSI elog's eloglang.<lang-code> file"""
     translations = {}
-    if not PSI_LANG_PATH.exists():
-        raise IOError(f"Language file path '{PSI_LANG_PATH}' does not exist")
+    if not PSI_UTF8_LANG_PATH.exists():
+        raise IOError(f"Language file path '{PSI_UTF8_LANG_PATH}' does not exist")
     lang_name = LANGUAGES.get(lang_code)
-    matches = list(PSI_LANG_PATH.glob(f"eloglang.{lang_name}*"))
-    matches += list(PSI_LANG_PATH.glob(f"eloglang.{lang_code}*"))
-
-    if not matches:
+    if not lang_name:
         return {}
-    # Prefer utf8 translation file if available
-    for lang_file in matches:
-        if "UTF8" in lang_file.suffix.upper():
-            break
-    else:
-        lang_file = matches[0]
+    lang_file = PSI_UTF8_LANG_PATH / f"{lang_name}.eloglang"
 
-    # Check if chosen file has an encoding in the suffix.
-    # e.g. "eloglang.zh_CN-UTF8", "eloglang.ru_CP1251"
-    if "_" in lang_file.suffix:
-        encoding = lang_file.suffix.split("_")[1].replace("CN-", "")
-    else:
-        encoding = "latin1"
-
-    with open(lang_file, "r", encoding=encoding) as f:
+    with open(lang_file, "r", encoding="utf8") as f:
         for line in f:
             line = line.strip()
             if not line or line.startswith(("#", ";")):

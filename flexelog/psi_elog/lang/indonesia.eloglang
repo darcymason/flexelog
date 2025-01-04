@@ -1,9 +1,6 @@
-#
-# Indonesia translation by Banata and SABO Team (sabo.pusair-pu.go.id)
-# Revision 1
-# A more recent version may be available at:
-# https://bitbucket.org/ritt/elog
-#
+# Language file converted from file 'eloglang.indonesia'
+# from PSI elog (https://elog.psi.ch/elog/) on 2025-01-04
+# by script eloglang_to_utf.py
 
 New = Baru
 Edit = Ubah

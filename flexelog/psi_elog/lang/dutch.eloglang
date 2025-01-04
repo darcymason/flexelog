@@ -1,9 +1,6 @@
-#
-# Dutch translation by djek@xs4all.nl
-# 31-01-2008
-# A more recent version may be available at :
-# http://savannah.psi.ch/websvn/listing.php?repname=elog&path=%2Ftrunk%2Fresources%2F
-#
+# Language file converted from file 'eloglang.dutch'
+# from PSI elog (https://elog.psi.ch/elog/) on 2025-01-04
+# by script eloglang_to_utf.py
 
 New = Nieuw
 Edit = Wijzig
@@ -22,7 +19,7 @@ First = Eerste
 Last = Laatste
 Previous = Vorige
 Next = Volgende
-Copy to =  Kopiëren naar
+Copy to =  KopiÃ«ren naar
 Move to = Verplaats naar
 Save = Opslaan
 Cancel = Annuleren
@@ -239,7 +236,7 @@ Semicolon = Punt Komma
 Preview import = Import voorbeeld
 ELOG CSV import = ELOG CSV import
 Too many attributes in CSV file = Te veel attributen in CSV bestand
-%d entries successfully imported = %d  berichten succesvol geïmporteerd
+%d entries successfully imported = %d  berichten succesvol geÃ¯mporteerd
 No 'Attributes' option present in %s = Geen 'Attributen' optie aanwezig in %s
 CSV ("," separated) = CSV (";" gescheiden)
 CSV (";" separated) = CSV (";" gescheiden)
@@ -348,8 +345,8 @@ Upload image = Afbeelding uploaden
 Please enter filename or URL = Geef een bestandsnaam of URL
 Maximum allowed file size is = Maximum bestandsgrootte is
 Enter filename or URL = Geef een bestandsnaam of URL
-Image uploaded successfully = Afbeelding met succes geüpload
-Image "%s" uploaded successfully = Afbeelding "%s" met succes geüpload
+Image uploaded successfully = Afbeelding met succes geÃ¼pload
+Image "%s" uploaded successfully = Afbeelding "%s" met succes geÃ¼pload
 HelpELCode = HelpELCode
 Cannot retrieve file from URL "%s" = Kan bestand niet ophalen van URL "%s"
 Enter name of hyperlink = Geef naam van de hyperlink

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-30 19:05-0500\n"
+"POT-Creation-Date: 2025-01-04 13:35-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,96 +17,96 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: .\flexsite\settings.py:125
+#: .\flexsite\settings.py:126
 msgid "English"
 msgstr ""
 
-#: .\flexsite\settings.py:126
+#: .\flexsite\settings.py:127
 msgid "Bulgarian"
 msgstr ""
 
-#: .\flexsite\settings.py:127
+#: .\flexsite\settings.py:128
 msgid "Brazilian"
 msgstr ""
 
-#: .\flexsite\settings.py:128
+#: .\flexsite\settings.py:129
 msgid "Czech"
 msgstr ""
 
-#: .\flexsite\settings.py:129
+#: .\flexsite\settings.py:130
 msgid "German"
 msgstr ""
 
-#: .\flexsite\settings.py:130
+#: .\flexsite\settings.py:131
 msgid "Danish"
 msgstr ""
 
-#: .\flexsite\settings.py:131
+#: .\flexsite\settings.py:132
 msgid "Spanish"
 msgstr ""
 
-#: .\flexsite\settings.py:132
+#: .\flexsite\settings.py:133
 msgid "French"
 msgstr ""
 
-#: .\flexsite\settings.py:133
+#: .\flexsite\settings.py:134
 msgid "Indonesia"
 msgstr ""
 
-#: .\flexsite\settings.py:134
+#: .\flexsite\settings.py:135
 msgid "Italian"
 msgstr ""
 
-#: .\flexsite\settings.py:135
+#: .\flexsite\settings.py:136
 msgid "Japanese"
 msgstr ""
 
-#: .\flexsite\settings.py:136
+#: .\flexsite\settings.py:137
 msgid "Dutch"
 msgstr ""
 
-#: .\flexsite\settings.py:137
+#: .\flexsite\settings.py:138
 msgid "Polish"
 msgstr ""
 
-#: .\flexsite\settings.py:138
+#: .\flexsite\settings.py:139
 msgid "Russian"
 msgstr ""
 
-#: .\flexsite\settings.py:139
+#: .\flexsite\settings.py:140
 msgid "Swedish"
 msgstr ""
 
-#: .\flexsite\settings.py:140
+#: .\flexsite\settings.py:141
 msgid "Slowak"
 msgstr ""
 
-#: .\flexsite\settings.py:141
+#: .\flexsite\settings.py:142
 msgid "Turkish"
 msgstr ""
 
-#: .\flexsite\settings.py:142
+#: .\flexsite\settings.py:143
 msgid "Chinese"
 msgstr ""
 
-#: .\flexelog\models.py:21
+#: .\flexelog\models.py:23
 msgid "Syntax error in config file"
 msgstr "配置文件中语法错误"
 
-#: .\flexelog\models.py:42
+#: .\flexelog\models.py:44
 #, python-format
 msgid "'%(value)s' is reserved, it cannot be used for a logbook name"
 msgstr ""
 
-#: .\flexelog\models.py:90
+#: .\flexelog\models.py:92
 #, fuzzy
 #| msgid "Entries"
 msgid "Entry"
 msgstr "记录"
 
-#: .\flexelog\models.py:91
+#: .\flexelog\models.py:93
 #: .\flexelog\templates\flexelog\include\list_modes.html:23
-#: .\flexelog\templates\flexelog\index.html:17
+#: .\flexelog\templates\flexelog\index.html:26
 msgid "Entries"
 msgstr "记录"
 
@@ -115,7 +115,7 @@ msgid "Login name"
 msgstr "登陆名称"
 
 #: .\flexelog\templates\flexelog\do_logout.html:14
-#: .\flexelog\templates\flexelog\include\lb_tabs.html:25
+#: .\flexelog\templates\flexelog\include\lb_tabs.html:38
 msgid "Logout"
 msgstr "注销"
 
@@ -127,13 +127,17 @@ msgstr "没有登陆"
 msgid "Login"
 msgstr "登陆"
 
-#: .\flexelog\templates\flexelog\entry_list.html:25
+#: .\flexelog\templates\flexelog\entry_list.html:28
 msgid "Text"
 msgstr "文本"
 
-#: .\flexelog\templates\flexelog\include\lb_tabs.html:24
+#: .\flexelog\templates\flexelog\include\lb_tabs.html:37
 msgid "Logged in as"
 msgstr "登陆者："
+
+#: .\flexelog\templates\flexelog\include\lb_tabs.html:40
+msgid "Admin"
+msgstr "管理"
 
 #: .\flexelog\templates\flexelog\include\pagination.html:4
 msgid "Goto page"
@@ -151,19 +155,19 @@ msgstr "下一条"
 msgid "All"
 msgstr "所有"
 
-#: .\flexelog\templates\flexelog\index.html:11
+#: .\flexelog\templates\flexelog\index.html:20
 msgid "Several logbooks are defined on this host"
 msgstr "该主机设置多个记录本"
 
-#: .\flexelog\templates\flexelog\index.html:12
+#: .\flexelog\templates\flexelog\index.html:21
 msgid "Please select the one to connect to"
 msgstr "请选择要打开的记录本"
 
-#: .\flexelog\templates\flexelog\index.html:16
+#: .\flexelog\templates\flexelog\index.html:25
 msgid "Logbook"
 msgstr "记录本"
 
-#: .\flexelog\templates\flexelog\index.html:18
+#: .\flexelog\templates\flexelog\index.html:27
 msgid "Last submission"
 msgstr "最近记录"
 
@@ -191,54 +195,54 @@ msgstr "请登陆"
 msgid "Submit"
 msgstr "提交"
 
-#: .\flexelog\views.py:54
+#: .\flexelog\views.py:64
 #, python-format
 msgid "Logbook \"%s\" does not exist on remote server"
 msgstr "记录本 \"%s\" 并不存在于远程服务器上"
 
-#: .\flexelog\views.py:65 .\flexelog\views.py:147
+#: .\flexelog\views.py:75 .\flexelog\views.py:159
 msgid "New"
 msgstr "新建"
 
-#: .\flexelog\views.py:66 .\flexelog\views.py:148
+#: .\flexelog\views.py:76 .\flexelog\views.py:160
 msgid "Find"
 msgstr "查找"
 
-#: .\flexelog\views.py:67 .\flexelog\views.py:149
+#: .\flexelog\views.py:77 .\flexelog\views.py:161
 msgid "Import"
 msgstr "导入"
 
-#: .\flexelog\views.py:68 .\flexelog\views.py:150
+#: .\flexelog\views.py:78 .\flexelog\views.py:162
 msgid "Config"
 msgstr "配置"
 
-#: .\flexelog\views.py:69 .\flexelog\views.py:73 .\flexelog\views.py:151
-#: .\flexelog\views.py:157
+#: .\flexelog\views.py:79 .\flexelog\views.py:83 .\flexelog\views.py:163
+#: .\flexelog\views.py:169
 msgid "Last day"
 msgstr "昨天"
 
-#: .\flexelog\views.py:70 .\flexelog\views.py:152
+#: .\flexelog\views.py:80 .\flexelog\views.py:164
 msgid "Help"
 msgstr "帮助"
 
-#: .\flexelog\views.py:76
+#: .\flexelog\views.py:86
 msgid "Full"
 msgstr "全文"
 
-#: .\flexelog\views.py:77
+#: .\flexelog\views.py:87
 msgid "Summary"
 msgstr "摘要"
 
-#: .\flexelog\views.py:78
+#: .\flexelog\views.py:88
 msgid "Threaded"
 msgstr "主题"
 
-#: .\flexelog\views.py:120
+#: .\flexelog\views.py:130
 #, python-brace-format
 msgid "Page {num:d} of {count:d}"
 msgstr "第 {num:d} 页/共 {count:d} 页"
 
-#: .\flexelog\views.py:162
+#: .\flexelog\views.py:174
 #, python-format
 msgid "Error: Command \"<b>%s</b>\" not allowed"
 msgstr "错误：命令 \"<b>%s</b>\" 被禁止"
