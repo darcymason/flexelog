@@ -12,7 +12,7 @@ from flexelog.models import ElogConfig
 import logging
 
 
-_cfg = None  # to be set later
+_cfg = None  # singleton of LogbookConfig class
 
 
 class ConfigError(Exception):
@@ -65,7 +65,8 @@ DEFAULT_ATTRIBUTES = {
 }
 
 
-DEFAULTS = {
+# Default settings for database ElogConfig settings if not specified
+ELOGCONFIG_DEFAULTS = {
     "attachment lines": 300,
     "charset": "UTF-8",  # PSI elog default was ISO-8859-1
     "entries per page": 20,
@@ -260,7 +261,6 @@ class LogbookConfig:
             #     subdir if subdir.is_absolute() else self.logbooks_dir / lb_name
             # )
 
-
     def get(
         self,
         lb_name: str,
@@ -273,9 +273,9 @@ class LogbookConfig:
 
         First looks in elogd.cfg logbook section, then global section,
         then the passed default (e.g. from request.args), if not None,
-        then in DEFAULTS in elog_cfg.py.
+        then in ELOGCONFIG_DEFAULTS in elog_cfg.py.
 
-        If `valtype` specified, return the DEFAULTS value if conversion gives an error
+        If `valtype` specified, return the ELOGCONFIG_DEFAULTS value if conversion gives an error
         """
         if as_list and default is None:
             default = []
@@ -299,7 +299,7 @@ class LogbookConfig:
             val_dict = self._cfg["global"][param]
         else:
             # defaults or `default` can't have conditions, so mock no-condition
-            val_dict = {"": DEFAULTS.get(param, default)}
+            val_dict = {"": ELOGCONFIG_DEFAULTS.get(param, default)}
 
         assert isinstance(
             val_dict, dict
@@ -367,3 +367,8 @@ def get_config() -> LogbookConfig:
     if _cfg is None:
         reload_config()
     return _cfg
+
+def cfg_context(request):
+    return {
+        "cfg": _cfg
+    }

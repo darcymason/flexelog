@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout
 # Create your views here.
-
+from django.db.models.functions import Lower
 from django.http import HttpResponse, QueryDict
 from django.core.paginator import Paginator, Page
 from .models import Logbook, Entry
@@ -100,9 +100,23 @@ def logbook(request, lb_name):
         text_arg = ["text"]
     else:
         text_arg = []
+    
+    # determine sort order of entries
+    # default is by date
+    # check if query args have sort specified
+    if sort_attr := request.GET.get("rsort"):
+        is_rsort = True
+    elif sort_attr := request.GET.get("sort"):
+        is_rsort = False
+    else:
+        is_rsort = cfg.get(lb_name, "Reverse sort")
+        sort_attr = "date"
+
+    if sort_attr in attrs:
+        sort_attr = f"attrs__{sort_attr}"
+    order_by = -Lower(sort_attr) if is_rsort else Lower(sort_attr)
     entries = logbook.entry_set.values("id", "date", *attr_args, *text_arg).order_by(
-        "-date"
-    )  # XX need to allow different orders
+        order_by)
     
     # Get page requested with "?id=#" in url, used when click "List" from detail page
     req_page_number = request.GET.get("page") or "1"
