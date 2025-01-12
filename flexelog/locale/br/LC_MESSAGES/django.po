@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-04 13:28-0500\n"
+"POT-Creation-Date: 2025-01-12 18:43-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -128,10 +128,6 @@ msgstr "Não está logado"
 msgid "Login"
 msgstr "Login"
 
-#: .\flexelog\templates\flexelog\entry_list.html:28
-msgid "Text"
-msgstr "Texto"
-
 #: .\flexelog\templates\flexelog\include\lb_tabs.html:37
 msgid "Logged in as"
 msgstr "Conectado como"
@@ -201,49 +197,61 @@ msgstr "Enviar"
 msgid "Logbook \"%s\" does not exist on remote server"
 msgstr "Logbook \"%s\" não existe no servidor remoto"
 
-#: .\flexelog\views.py:75 .\flexelog\views.py:159
+#: .\flexelog\views.py:74 .\flexelog\views.py:174
 msgid "New"
 msgstr "Novo"
 
-#: .\flexelog\views.py:76 .\flexelog\views.py:160
+#: .\flexelog\views.py:75 .\flexelog\views.py:175
 msgid "Find"
 msgstr "Procurar"
 
-#: .\flexelog\views.py:77 .\flexelog\views.py:161
+#: .\flexelog\views.py:76 .\flexelog\views.py:176
 msgid "Import"
 msgstr "Importar"
 
-#: .\flexelog\views.py:78 .\flexelog\views.py:162
+#: .\flexelog\views.py:77 .\flexelog\views.py:177
 msgid "Config"
 msgstr "Configurar"
 
-#: .\flexelog\views.py:79 .\flexelog\views.py:83 .\flexelog\views.py:163
-#: .\flexelog\views.py:169
+#: .\flexelog\views.py:78 .\flexelog\views.py:82 .\flexelog\views.py:178
+#: .\flexelog\views.py:184
 msgid "Last day"
 msgstr "Último dia"
 
-#: .\flexelog\views.py:80 .\flexelog\views.py:164
+#: .\flexelog\views.py:79 .\flexelog\views.py:179
 msgid "Help"
 msgstr "Ajuda"
 
-#: .\flexelog\views.py:86
+#: .\flexelog\views.py:85
 msgid "Full"
 msgstr "Completo"
 
-#: .\flexelog\views.py:87
+#: .\flexelog\views.py:86
 msgid "Summary"
 msgstr "Resumo"
 
-#: .\flexelog\views.py:88
+#: .\flexelog\views.py:87
 msgid "Threaded"
 msgstr "Threaded"
 
-#: .\flexelog\views.py:130
+#: .\flexelog\views.py:93
+msgid "ID"
+msgstr "ID"
+
+#: .\flexelog\views.py:93 .\flexelog\views.py:111
+msgid "Date"
+msgstr "Data"
+
+#: .\flexelog\views.py:99
+msgid "Text"
+msgstr "Texto"
+
+#: .\flexelog\views.py:143
 #, python-brace-format
 msgid "Page {num:d} of {count:d}"
 msgstr ""
 
-#: .\flexelog\views.py:174
+#: .\flexelog\views.py:189
 #, python-format
 msgid "Error: Command \"<b>%s</b>\" not allowed"
 msgstr "Erro: Comando \"<b>%s</b>\" não é permitido"

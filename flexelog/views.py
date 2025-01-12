@@ -3,11 +3,11 @@ import logging
 from typing import Any
 from django.conf import settings
 from django.shortcuts import redirect, render, get_object_or_404
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout
-# Create your views here.
 from django.db.models.functions import Lower
+
 from django.http import HttpResponse, QueryDict
 from django.core.paginator import Paginator, Page
 from .models import Logbook, Entry
@@ -66,7 +66,6 @@ def logbook(request, lb_name):
         return render(request, "flexelog/show_error.html", context)
 
     selected_id = get_param(request, "id", valtype=int)
-    query_dict = request.GET
 
     # XX Adjust available commands according to config
     # XX then according to user auth
@@ -90,36 +89,36 @@ def logbook(request, lb_name):
     current_mode = _(get_param(request, "mode", default="Summary").capitalize())
 
     attrs = list(cfg.lb_attrs[logbook.name].keys())  # XX can also config Attributes shown
-    col_names = ["ID", "Date"] + attrs 
-    
-    attr_args = (f"attrs__{attr}" for attr in attrs)
+    # XX col order could be changed in config
+    col_names = [_("ID"), _("Date")] + attrs 
+    col_fields = ["id", "date"] + [f"attrs__{attr}" for attr in attrs]
+    # Add Text column if config'd to do so
     summary_lines = cfg.get(lb_name, "Summary lines", valtype=int)
     show_text = cfg.get(lb_name, "Show text", valtype=bool)
     if show_text and summary_lines > 0:
-        col_names.append("Text")
-        text_arg = ["text"]
-    else:
-        text_arg = []
-    
+        col_names.append(_("Text"))
+        col_fields.append("text")
+    columns = dict(zip(col_names, col_fields))    
     # determine sort order of entries
     # default is by date
     # check if query args have sort specified
-    if sort_attr := request.GET.get("rsort"):
-        is_rsort = True
-    elif sort_attr := request.GET.get("sort"):
+    if sort_attr_field := columns.get(get_param(request, "sort")):
         is_rsort = False
+    elif sort_attr_field := columns.get(get_param(request, "rsort")):
+        is_rsort = True
     else:
         is_rsort = cfg.get(lb_name, "Reverse sort")
-        sort_attr = "date"
+        sort_attr_field = columns[_("Date")]
 
-    if sort_attr in attrs:
-        sort_attr = f"attrs__{sort_attr}"
-    order_by = -Lower(sort_attr) if is_rsort else Lower(sort_attr)
-    entries = logbook.entry_set.values("id", "date", *attr_args, *text_arg).order_by(
-        order_by)
-    
-    # Get page requested with "?id=#" in url, used when click "List" from detail page
-    req_page_number = request.GET.get("page") or "1"
+    # try:
+    order_by = Lower(sort_attr_field).desc() if is_rsort else Lower(sort_attr_field)
+    entries = logbook.entry_set.values(*columns.values()).order_by(order_by)
+
+    # except FieldError:
+    #     entries = logbook.entry_set.values(*columns.values()).order_by("-date")
+
+    # Get page requested with "?page=#" or ?page=all else 1
+    req_page_number = get_param(request, "page", default="1")
     if req_page_number.lower() == "all":
         req_page_number = 1
         per_page = entries.count() + 1
@@ -151,7 +150,7 @@ def logbook(request, lb_name):
         "commands": commands,
         "modes": modes,
         "current_mode": current_mode,
-        "col_names": col_names,
+        "columns": columns,
         "page_obj": page_obj,
         "page_range": list(paginator.get_elided_page_range(page_obj.number, on_each_side=1, on_ends=3)),
         "page_n_of_N": page_n_of_N,
@@ -159,6 +158,8 @@ def logbook(request, lb_name):
         "summary_lines": summary_lines,
         "main_tab": cfg.get(lb_name, "main tab", valtype=str,default=""),
         "cfg_css": cfg.get(lb_name, "css", valtype=str, default=""),
+        "sort_attr_field": sort_attr_field,
+        "is_rsort": is_rsort,
     }
     return render(request, "flexelog/entry_list.html", context)
 
