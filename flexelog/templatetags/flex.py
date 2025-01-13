@@ -23,10 +23,17 @@ def highlight(value, search_term, autoescape=True):
         search_term = ""
     return mark_safe(
         esc(value).replace(
-            search_term, f"{HIGHLIGHT_OPEN}{esc(search_term)}{HIGHLIGHT_CLOSE}"
+            esc(search_term), f"{HIGHLIGHT_OPEN}{esc(search_term)}{HIGHLIGHT_CLOSE}"
         )
     )
 
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
+
+
+@register.filter
+def attr_show(val):
+    if isinstance(val, list):
+        return "|".join(val)
+    return val

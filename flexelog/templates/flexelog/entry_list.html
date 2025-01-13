@@ -67,7 +67,7 @@
             {% if not key == "text" %}<a href="{% url 'flexelog:detail' logbook.name entry.id %}">{% endif %}
             {% if key == "id" %}&nbsp;&nbsp;{% endif %}
             {% with filter_attrs|get_item:key as search_text %}
-              {{ val|highlight:search_text }}
+              {{ val|attr_show|highlight:search_text }}
             {% endwith %}
             {% if key == "id" %}&nbsp;&nbsp;{% endif %}
             {% if not key == "text" %}</a>{% endif %}
