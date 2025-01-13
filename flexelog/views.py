@@ -89,9 +89,10 @@ def logbook(request, lb_name):
     current_mode = _(get_param(request, "mode", default="Summary").capitalize())
 
     attrs = list(cfg.lb_attrs[logbook.name].keys())  # XX can also config Attributes shown
+    attrs_lower = [attr.lower() for attr in attrs]
     # XX col order could be changed in config
     col_names = [_("ID"), _("Date")] + attrs 
-    col_fields = ["id", "date"] + [f"attrs__{attr}" for attr in attrs]
+    col_fields = ["id", "date"] + [f"attrs__{attr.lower()}" for attr in attrs]
     # Add Text column if config'd to do so
     summary_lines = cfg.get(lb_name, "Summary lines", valtype=int)
     show_text = cfg.get(lb_name, "Show text", valtype=bool)
@@ -99,6 +100,21 @@ def logbook(request, lb_name):
         col_names.append(_("Text"))
         col_fields.append("text")
     columns = dict(zip(col_names, col_fields))    
+
+    col_names_lower = [x.lower() for x in col_names]
+    filters = {
+        k: v
+        for k, v in request.GET.items()
+        if k.lower() in col_names_lower  # XX could also be in columns not shown in display
+    }
+
+    filter_fields = {
+        f"{'attrs__' if k.lower() in attrs_lower else ''}{k.lower()}__icontains": v
+        for k, v in filters.items()
+    }
+    # XX need to handle 'subtext' used in original psi elog
+    # XX Need to exclude date, id from 'contains'-style search, translate back
+    
     # determine sort order of entries
     # default is by date
     # check if query args have sort specified
@@ -112,7 +128,7 @@ def logbook(request, lb_name):
 
     # try:
     order_by = Lower(sort_attr_field).desc() if is_rsort else Lower(sort_attr_field)
-    entries = logbook.entry_set.values(*columns.values()).order_by(order_by)
+    entries = logbook.entry_set.values(*columns.values()).filter(**filter_fields).order_by(order_by)
 
     # except FieldError:
     #     entries = logbook.entry_set.values(*columns.values()).order_by("-date")
@@ -160,6 +176,7 @@ def logbook(request, lb_name):
         "cfg_css": cfg.get(lb_name, "css", valtype=str, default=""),
         "sort_attr_field": sort_attr_field,
         "is_rsort": is_rsort,
+        "filters": filters,
     }
     return render(request, "flexelog/entry_list.html", context)
 

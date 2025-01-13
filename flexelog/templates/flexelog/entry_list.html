@@ -9,6 +9,19 @@
   <table class="frame" cellpadding="0" cellspacing="0">
   {% include "flexelog/include/lb_tabs.html" %}
   {% include "flexelog/include/commands.html" %}
+
+  {% if filters %}
+    <tr><td class="listframe">
+    <table width="100%" border="0" cellpadding="0" cellspacing="0">
+    {% for name, val in filters.items %}
+      <tr>
+        <td nowrap width="10%" class="attribname">{{ name }}:</td>
+        <td class="attribvalue"><span style="color:black;background-color:#ffff66">{{ val }}</span></td>
+      </tr>
+    {% endfor %}
+    </table></td></tr>
+  {% endif %}
+
   {% include "flexelog/include/list_modes.html" %}
   {% if page_obj.has_other_pages %}
     <tr>
