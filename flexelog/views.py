@@ -3,6 +3,7 @@ import logging
 from typing import Any
 from django.conf import settings
 from django.shortcuts import redirect, render, get_object_or_404
+from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout
@@ -78,8 +79,9 @@ def logbook(request, lb_name):
         _("Last day"),
         _("Help"),
     ]
-    commands = [(cmd, f"?cmd={cmd}") for cmd in command_names]
-    commands[4] = (_("Last day"), "past1?mode=Summary")
+    lb_url = reverse("flexelog:logbook", args=[lb_name])
+    commands = [(cmd, f"{lb_url}?cmd={cmd}") for cmd in command_names]
+    commands[4] = (_("Last day"), f"{lb_url}past1?mode=Summary")
 
     modes = (  # First text is translated, url param is not
         (_("Full"), "?mode=full"),
@@ -102,10 +104,11 @@ def logbook(request, lb_name):
     columns = dict(zip(col_names, col_fields))    
 
     col_names_lower = [x.lower() for x in col_names]
+    # XX could also be in columns not shown in display
     filters = {
         k: v
         for k, v in request.GET.items()
-        if k.lower() in col_names_lower  # XX could also be in columns not shown in display
+        if k.lower() in col_names_lower and k.lower() != "id"
     }
 
     filter_attrs = {
@@ -189,21 +192,20 @@ def logbook(request, lb_name):
 def detail(request, lb_name, entry_id):
     # Commands
     # XXX need to take from config file, not just default
-    # New |  Find |  Select |  Import |  Config |  Last day |  Help
-    # Make assuming standard url, fix after for those that differ
-    # XX _("Select") (multi-select editing) not offered currently
     command_names = [
-        _("New"),
-        _("Find"),
-        _("Import"),
-        _("Config"),
-        _("Last day"),
-        _("Help"),
+        _("List"),
+        # _("New"),
+        _("Edit"),
+        # _("Delete"),
+        # _("Reply"),
+        #_("Duplicate"),
+        # _("Find"),
+        # _("Config"),
+        # _("Help"),
     ]
-    commands = [(cmd, f"?cmd={cmd}") for cmd in command_names]
-
-    # commands[2] = (_("Select"), query_id + "?select=1")
-    commands[4] = (_("Last day"), "past1?mode=Summary")
+    url_detail = reverse("flexelog:detail", args=[lb_name, entry_id])
+    commands = [(cmd, f"{url_detail}?cmd={cmd}") for cmd in command_names]
+    commands[0] = (_("List"), reverse("flexelog:logbook", args=[lb_name]) + f"?id={entry_id}")
 
     command = get_param(request, "cmd")
     if command:
@@ -226,5 +228,8 @@ def detail(request, lb_name, entry_id):
         "entry": entry,
         "logbook": logbook,
         "logbooks": Logbook.objects.all(),
+        "commands": commands,
     }
+    if command == _("Edit"):
+        return render(request, "flexelog/edit.html", context)
     return render(request, "flexelog/detail.html", context)

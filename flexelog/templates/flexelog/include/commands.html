@@ -3,7 +3,7 @@
     <td class="menuframe">
         <span class="menu1">
             {% for cmd in commands %}
-            &nbsp;<a href="{% url 'flexelog:logbook' logbook.name %}{{ cmd.1 }}">{{ cmd.0 }}</a>&nbsp;
+            &nbsp;<a href="{{ cmd.1 }}">{{ cmd.0 }}</a>&nbsp;
             {% if not forloop.last %}|{% endif %}
             {% endfor %}
         </span>
