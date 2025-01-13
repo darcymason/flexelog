@@ -108,9 +108,13 @@ def logbook(request, lb_name):
         if k.lower() in col_names_lower  # XX could also be in columns not shown in display
     }
 
-    filter_fields = {
-        f"{'attrs__' if k.lower() in attrs_lower else ''}{k.lower()}__icontains": v
+    filter_attrs = {
+        f"{'attrs__' if k.lower() in attrs_lower else ''}{k.lower()}": v
         for k, v in filters.items()
+    }
+    filter_fields = {
+        f"{k}__icontains": v
+        for k, v in filter_attrs.items()
     }
     # XX need to handle 'subtext' used in original psi elog
     # XX Need to exclude date, id from 'contains'-style search, translate back
@@ -177,6 +181,7 @@ def logbook(request, lb_name):
         "sort_attr_field": sort_attr_field,
         "is_rsort": is_rsort,
         "filters": filters,
+        "filter_attrs": filter_attrs,
     }
     return render(request, "flexelog/entry_list.html", context)
 

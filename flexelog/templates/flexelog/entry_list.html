@@ -1,6 +1,7 @@
 {% extends "flexelog/base.html" %}
 {% load i18n %}
 {% load static %}
+{% load flex %}
 
 {% block body %}
 
@@ -16,7 +17,7 @@
     {% for name, val in filters.items %}
       <tr>
         <td nowrap width="10%" class="attribname">{{ name }}:</td>
-        <td class="attribvalue"><span style="color:black;background-color:#ffff66">{{ val }}</span></td>
+        <td class="attribvalue">{{ val|highlight:val }}</span></td>
       </tr>
     {% endfor %}
     </table></td></tr>
@@ -61,14 +62,15 @@
         <div style="display: none;">{% cycle 'list2' 'list1' as listX %}</div>{# XXX kludge #}
         <tr>
           {% for key, val in entry.items %}
-          <td class="{% if key == 'text' %}summary{% else %}{{ listX }}{% if entry.id == selected_id %}h{% endif %}{% endif %}" {% if key == "date" %} nowrap{% endif %}>
-            {% if not key == "text" %}
-            <a href="{% url 'flexelog:detail' logbook.name entry.id %}">
-              {% if key == "id" %}&nbsp;&nbsp;{% endif %}{{ val }}{% if key == "id" %}&nbsp;&nbsp;{% endif %}
-            </a>
-            {% else %}
-            {{ val }}
-            {% endif %}
+          <td class="{% if key == 'text' %}summary{% else %}{{ listX }}{% if entry.id == selected_id %}h{% endif %}{% endif %}"
+               {% if key == "date" %} nowrap{% endif %}>
+            {% if not key == "text" %}<a href="{% url 'flexelog:detail' logbook.name entry.id %}">{% endif %}
+            {% if key == "id" %}&nbsp;&nbsp;{% endif %}
+            {% with filter_attrs|get_item:key as search_text %}
+              {{ val|highlight:search_text }}
+            {% endwith %}
+            {% if key == "id" %}&nbsp;&nbsp;{% endif %}
+            {% if not key == "text" %}</a>{% endif %}
           </td>
           {% endfor %}
         </tr>
