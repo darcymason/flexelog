@@ -1,5 +1,4 @@
 **/__pycache__/*
 flexelog/migrations/*
-flexdj.code-workspace
 flexelog/tests/test_data/psi_elog/*
-
+flexelog.code-workspace

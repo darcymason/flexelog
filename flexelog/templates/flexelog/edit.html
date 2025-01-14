@@ -1,14 +1,48 @@
 {% extends "flexelog/base.html" %}
+{% load i18n %}
 
 {% block title %}Fl'og {{ entry.attrs.subject }}{% endblock title %}
 {% block more_head_links %}
 {% include "flexelog/include/editor_tui.html" %}
+<script language="javascript" type="text/javascript">
+    function chkform() {
+        // if (last_key == 13) {
+        //     var ret = confirm('Really submit this entry?');
+        //     if (!ret) {
+        //         last_key = 0;
+        //         return false;
+        //     }
+        // }
+    try {
+    if (document.form1.Subject.value == "") {
+        alert("Please enter attribute 'Subject'");
+        document.form1.Subject.focus();
+        return false;
+    }
+    }
+    catch(err) {
+    }
+    
+       
+    
+    // if (autoSaveTimer != null)
+    // clearTimeout(autoSaveTimer);
+    // submitted = true;
+    
+    document.getElementById("editor_markdown").value = editor.getMarkdown();
+    document.getElementById("editor_html").value = editor.getHTML();
+    
+    
+    return true;
+    }
+    </script>
 {% endblock more_head_links %}
 
 {% block body %}
-<form name="form1" method="POST" action="{% url 'flexelog:detail' logbook.name entry.id %}" enctype="multipart/form-data">
+<form name="form1" method="POST" action="{% url 'flexelog:logbook' logbook.name %}" enctype="multipart/form-data">
   {% csrf_token %}
   <input type="hidden" name="page_type" value="{{ page_type }}" />
+  <# <input type="hidden" name="attr_names" value="Type,Category,Subject"> #>
   <table class="frame" cellpadding="0" cellspacing="0">
   {% include "flexelog/include/lb_tabs.html" %}
   <table class="listframe" width="100%" cellspacing="0" cellpadding="0">
@@ -18,6 +52,18 @@
         &nbsp;&nbsp;&nbsp;&nbsp;Entry time:&nbsp;<b>{{ entry.date }}</b>
     </td>
     </tr>
+
+    <tr><td class="menuframe"><span class="menu1">
+        <input type="submit" name="cmd" value="{% translate 'Submit' %}" onclick="return chkform();">
+        {# <input type="submit" name="cmd" value="Delete" onclick="return check_delete();"> #}
+        &nbsp;&nbsp;
+        </span></td></tr>
+        <tr><td><table class="listframe" width="100%" cellspacing="0" cellpadding="0">
+        {# XX make required field thing show only when any are required #}
+        <tr><td colspan="2" class="attribvalue">
+            {% translate "Fields marked with" %}<font color="red"> * </font>
+            {% translate "are required" %}
+        </td></tr>
     <tr>
     <td>
     <table width="100%" cellpadding="0" cellspacing="0">
@@ -34,6 +80,8 @@
     {# EDITOR/VIEWER #}
     <tr>
     <td class="messageframe">
+        <input type="hidden" id="edit_id" name="edit_id" value="{{ entry.id }}">
+        <input type="hidden" id="reply_to" name="reply_to" value="{{ entry.reply_to }}">
         <textarea hidden name="editor_markdown" id="editor_markdown">{{ entry.text }}</textarea>
         <div id="editor"></div>
     </td>

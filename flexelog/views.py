@@ -52,11 +52,8 @@ def index(request):
 
 
 def logbook(request, lb_name):
-    # XX Config to port over from PSI elog settings:
-    # Main Tab = <string> -- extra tab to go back to logbook selection page
-    #  ... and Main Tab URL = <string> to go to a different page instead
-    if not request.user.is_authenticated:
-        return redirect(f"{settings.LOGIN_URL}?next={request.path}")
+    # if not request.user.is_authenticated:
+    #     return redirect(f"{settings.LOGIN_URL}?next={request.path}")
     cfg = get_config()
     try:
         logbook = Logbook.objects.get(name=lb_name)
@@ -66,6 +63,17 @@ def logbook(request, lb_name):
         }
         return render(request, "flexelog/show_error.html", context)
 
+    # New, Edit, Reply, Delete all POST to the logbook page
+    # (makes some sense as New doesn't have an id yet)
+    if request.POST.get("cmd") == "Submit":
+        page_type = request.POST["page_type"]
+        if page_type == "Edit":
+            entry = Entry.objects.get(lb=logbook, id=request.POST["edit_id"])
+            # XXXX update attrs too
+            entry.text = request.POST["editor_markdown"]
+            entry.save()
+            redirect_url = reverse("flexelog:detail", args=[lb_name, entry.id])
+            return redirect(redirect_url)
     selected_id = get_param(request, "id", valtype=int)
 
     # XX Adjust available commands according to config
@@ -231,5 +239,6 @@ def detail(request, lb_name, entry_id):
         "commands": commands,
     }
     if command == _("Edit"):
+        context["page_type"] = "Edit"
         return render(request, "flexelog/edit.html", context)
     return render(request, "flexelog/detail.html", context)
