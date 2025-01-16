@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-12 18:43-0500\n"
+"POT-Creation-Date: 2025-01-16 17:47-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -90,6 +90,14 @@ msgstr ""
 msgid "Chinese"
 msgstr ""
 
+#: .\flexelog\forms.py:14
+msgid "Entry time"
+msgstr "Време на записа"
+
+#: .\flexelog\forms.py:15 .\flexelog\views.py:127
+msgid "Text"
+msgstr "Текст"
+
 #: .\flexelog\models.py:23
 msgid "Syntax error in config file"
 msgstr "Синтактична грешка във файл с настройки"
@@ -100,10 +108,8 @@ msgid "'%(value)s' is reserved, it cannot be used for a logbook name"
 msgstr ""
 
 #: .\flexelog\models.py:92
-#, fuzzy
-#| msgid "Entries"
 msgid "Entry"
-msgstr "Записи"
+msgstr ""
 
 #: .\flexelog\models.py:93
 #: .\flexelog\templates\flexelog\include\list_modes.html:23
@@ -127,6 +133,19 @@ msgstr "Не сте влязъл"
 #: .\flexelog\templates\flexelog\do_logout.html:18
 msgid "Login"
 msgstr "Влизане"
+
+#: .\flexelog\templates\flexelog\edit.html:57
+#: .\flexelog\templates\registration\login.html:41
+msgid "Submit"
+msgstr "Запазване"
+
+#: .\flexelog\templates\flexelog\edit.html:64
+msgid "Fields marked with"
+msgstr "Полетата отбелязани с"
+
+#: .\flexelog\templates\flexelog\edit.html:65
+msgid "are required"
+msgstr "са задължителни"
 
 #: .\flexelog\templates\flexelog\include\lb_tabs.html:37
 msgid "Logged in as"
@@ -188,77 +207,77 @@ msgstr ""
 msgid "Please login"
 msgstr "Моля, влезте"
 
-#: .\flexelog\templates\registration\login.html:41
-msgid "Submit"
-msgstr "Запазване"
-
-#: .\flexelog\views.py:64
+#: .\flexelog\views.py:66
 #, python-format
 msgid "Logbook \"%s\" does not exist on remote server"
 msgstr "Дневникът \"%s\" не съществува на отдалечения сървър"
 
-#: .\flexelog\views.py:74 .\flexelog\views.py:174
+#: .\flexelog\views.py:100 .\flexelog\views.py:262
 msgid "New"
 msgstr "Създаване"
 
-#: .\flexelog\views.py:75 .\flexelog\views.py:175
+#: .\flexelog\views.py:101
 msgid "Find"
 msgstr "Търсене"
 
-#: .\flexelog\views.py:76 .\flexelog\views.py:176
+#: .\flexelog\views.py:102
 msgid "Import"
 msgstr "Импортиране"
 
-#: .\flexelog\views.py:77 .\flexelog\views.py:177
+#: .\flexelog\views.py:103
 msgid "Config"
 msgstr "Настройване"
 
-#: .\flexelog\views.py:78 .\flexelog\views.py:82 .\flexelog\views.py:178
-#: .\flexelog\views.py:184
+#: .\flexelog\views.py:104 .\flexelog\views.py:109
 msgid "Last day"
 msgstr "Последен ден"
 
-#: .\flexelog\views.py:79 .\flexelog\views.py:179
+#: .\flexelog\views.py:105
 msgid "Help"
 msgstr "Помощ"
 
-#: .\flexelog\views.py:85
+#: .\flexelog\views.py:112
 msgid "Full"
 msgstr "Пълен"
 
-#: .\flexelog\views.py:86
+#: .\flexelog\views.py:113
 msgid "Summary"
 msgstr "Обобщен"
 
-#: .\flexelog\views.py:87
+#: .\flexelog\views.py:114
 msgid "Threaded"
 msgstr "Нишковиден"
 
-#: .\flexelog\views.py:93
+#: .\flexelog\views.py:121
 msgid "ID"
 msgstr "ID"
 
-#: .\flexelog\views.py:93 .\flexelog\views.py:111
+#: .\flexelog\views.py:121 .\flexelog\views.py:159
 msgid "Date"
 msgstr "Дата"
 
-#: .\flexelog\views.py:99
-msgid "Text"
-msgstr "Текст"
-
-#: .\flexelog\views.py:143
+#: .\flexelog\views.py:191
 #, python-brace-format
 msgid "Page {num:d} of {count:d}"
 msgstr ""
 
-#: .\flexelog\views.py:189
+#: .\flexelog\views.py:222 .\flexelog\views.py:234
+msgid "List"
+msgstr "Списък"
+
+#: .\flexelog\views.py:224 .\flexelog\views.py:259
+msgid "Edit"
+msgstr "Редактиране"
+
+#: .\flexelog\views.py:226 .\flexelog\views.py:265
+msgid "Reply"
+msgstr "Отговаряне"
+
+#: .\flexelog\views.py:239
 #, python-format
 msgid "Error: Command \"<b>%s</b>\" not allowed"
 msgstr "Грешка: Командата \"<b>%s</b>\" не е позволена"
 
-#, python-format
-#~ msgid "Page %d of %d"
-#~ msgstr "Страница %d от %d"
-
-#~ msgid "Select"
-#~ msgstr "Избиране"
+#: .\flexelog\views.py:273
+msgid "Quote"
+msgstr ""

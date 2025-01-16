@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-12 18:43-0500\n"
+"POT-Creation-Date: 2025-01-16 17:49-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -89,6 +89,14 @@ msgstr ""
 msgid "Chinese"
 msgstr ""
 
+#: .\flexelog\forms.py:14
+msgid "Entry time"
+msgstr "记录时间"
+
+#: .\flexelog\forms.py:15 .\flexelog\views.py:127
+msgid "Text"
+msgstr "文本"
+
 #: .\flexelog\models.py:23
 msgid "Syntax error in config file"
 msgstr "配置文件中语法错误"
@@ -99,8 +107,6 @@ msgid "'%(value)s' is reserved, it cannot be used for a logbook name"
 msgstr ""
 
 #: .\flexelog\models.py:92
-#, fuzzy
-#| msgid "Entries"
 msgid "Entry"
 msgstr "记录"
 
@@ -126,6 +132,19 @@ msgstr "没有登陆"
 #: .\flexelog\templates\flexelog\do_logout.html:18
 msgid "Login"
 msgstr "登陆"
+
+#: .\flexelog\templates\flexelog\edit.html:57
+#: .\flexelog\templates\registration\login.html:41
+msgid "Submit"
+msgstr "提交"
+
+#: .\flexelog\templates\flexelog\edit.html:64
+msgid "Fields marked with"
+msgstr "内容标识为"
+
+#: .\flexelog\templates\flexelog\edit.html:65
+msgid "are required"
+msgstr "是必须的"
 
 #: .\flexelog\templates\flexelog\include\lb_tabs.html:37
 msgid "Logged in as"
@@ -187,77 +206,77 @@ msgstr ""
 msgid "Please login"
 msgstr "请登陆"
 
-#: .\flexelog\templates\registration\login.html:41
-msgid "Submit"
-msgstr "提交"
-
-#: .\flexelog\views.py:64
+#: .\flexelog\views.py:66
 #, python-format
 msgid "Logbook \"%s\" does not exist on remote server"
 msgstr "记录本 \"%s\" 并不存在于远程服务器上"
 
-#: .\flexelog\views.py:74 .\flexelog\views.py:174
+#: .\flexelog\views.py:100 .\flexelog\views.py:262
 msgid "New"
 msgstr "新建"
 
-#: .\flexelog\views.py:75 .\flexelog\views.py:175
+#: .\flexelog\views.py:101
 msgid "Find"
 msgstr "查找"
 
-#: .\flexelog\views.py:76 .\flexelog\views.py:176
+#: .\flexelog\views.py:102
 msgid "Import"
 msgstr "导入"
 
-#: .\flexelog\views.py:77 .\flexelog\views.py:177
+#: .\flexelog\views.py:103
 msgid "Config"
 msgstr "配置"
 
-#: .\flexelog\views.py:78 .\flexelog\views.py:82 .\flexelog\views.py:178
-#: .\flexelog\views.py:184
+#: .\flexelog\views.py:104 .\flexelog\views.py:109
 msgid "Last day"
 msgstr "昨天"
 
-#: .\flexelog\views.py:79 .\flexelog\views.py:179
+#: .\flexelog\views.py:105
 msgid "Help"
 msgstr "帮助"
 
-#: .\flexelog\views.py:85
+#: .\flexelog\views.py:112
 msgid "Full"
 msgstr "全文"
 
-#: .\flexelog\views.py:86
+#: .\flexelog\views.py:113
 msgid "Summary"
 msgstr "摘要"
 
-#: .\flexelog\views.py:87
+#: .\flexelog\views.py:114
 msgid "Threaded"
 msgstr "主题"
 
-#: .\flexelog\views.py:93
+#: .\flexelog\views.py:121
 msgid "ID"
 msgstr "ID"
 
-#: .\flexelog\views.py:93 .\flexelog\views.py:111
+#: .\flexelog\views.py:121 .\flexelog\views.py:159
 msgid "Date"
 msgstr "日期"
 
-#: .\flexelog\views.py:99
-msgid "Text"
-msgstr "文本"
-
-#: .\flexelog\views.py:143
+#: .\flexelog\views.py:191
 #, python-brace-format
 msgid "Page {num:d} of {count:d}"
-msgstr "第 {num:d} 页/共 {count:d} 页"
+msgstr ""
 
-#: .\flexelog\views.py:189
+#: .\flexelog\views.py:222 .\flexelog\views.py:234
+msgid "List"
+msgstr "列表"
+
+#: .\flexelog\views.py:224 .\flexelog\views.py:259
+msgid "Edit"
+msgstr "编辑"
+
+#: .\flexelog\views.py:226 .\flexelog\views.py:265
+msgid "Reply"
+msgstr "回复"
+
+#: .\flexelog\views.py:239
 #, python-format
 msgid "Error: Command \"<b>%s</b>\" not allowed"
 msgstr "错误：命令 \"<b>%s</b>\" 被禁止"
 
-#, python-format
-#~ msgid "Page %d of %d"
-#~ msgstr "第 %d 页/共 %d 页"
-
-#~ msgid "Select"
-#~ msgstr "选择"
+#: .\flexelog\views.py:273
+msgid "Quote"
+msgstr "引用"
