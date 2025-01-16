@@ -1,16 +1,20 @@
 from copy import copy
+from datetime import datetime
 import logging
+import textwrap
 from typing import Any
 from django.conf import settings
-from django.shortcuts import redirect, render, get_object_or_404
-from django.urls import reverse
-from django.utils.translation import gettext as _
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout
-from django.db.models.functions import Lower
-
-from django.http import HttpResponse, QueryDict
 from django.core.paginator import Paginator, Page
+from django.db.models.functions import Lower
+from django.http import HttpResponse, QueryDict
+from django.shortcuts import redirect, render, get_object_or_404
+from django.urls import reverse
+from django.utils import timezone
+from django.utils.translation import gettext as _
+
+from .forms import EntryForm
 from .models import Logbook, Entry
 from .elog_cfg import get_config
 
@@ -67,13 +71,26 @@ def logbook(request, lb_name):
     # (makes some sense as New doesn't have an id yet)
     if request.POST.get("cmd") == "Submit":
         page_type = request.POST["page_type"]
+        attr_names = request.POST["attr_names"].split(",")
+        attrs = {attr_name: request.POST[attr_name] for attr_name in attr_names}
         if page_type == "Edit":
             entry = Entry.objects.get(lb=logbook, id=request.POST["edit_id"])
-            # XXXX update attrs too
-            entry.text = request.POST["editor_markdown"]
-            entry.save()
-            redirect_url = reverse("flexelog:detail", args=[lb_name, entry.id])
-            return redirect(redirect_url)
+            force_insert = False
+        else:  # New/Reply
+            entry = Entry()
+            force_insert = True
+        # Fill in edit object
+        entry.attrs = attrs
+        entry.text = request.POST["editor_markdown"]
+        if page_type in ("New", "Reply"):
+            entry.date = request.POST["date"]
+            # Find max id for this logbook and add 1
+            # XXX is this thread-safe?  Trap exists error and try again 1 higher
+            entry.id = Entry.objects.filter(lb__name=lb_name).order_by("-id").first() + 1
+        entry.save(force_insert=force_insert)
+        redirect_url = reverse("flexelog:detail", args=[lb_name, entry.id])
+        return redirect(redirect_url)
+
     selected_id = get_param(request, "id", valtype=int)
 
     # XX Adjust available commands according to config
@@ -200,12 +217,13 @@ def logbook(request, lb_name):
 def detail(request, lb_name, entry_id):
     # Commands
     # XXX need to take from config file, not just default
+    cfg = get_config()
     command_names = [
         _("List"),
         # _("New"),
         _("Edit"),
         # _("Delete"),
-        # _("Reply"),
+        _("Reply"),
         #_("Duplicate"),
         # _("Find"),
         # _("Config"),
@@ -228,7 +246,7 @@ def detail(request, lb_name, entry_id):
 
     try:
         logbook = Logbook.objects.get(name=lb_name)
-    except Entry.DoesNotExist:
+    except Logbook.DoesNotExist:
         # 'Logbook "%s" does not exist on remote server'
         raise  # XXX
     entry = get_object_or_404(Entry, lb=logbook, id=entry_id)
@@ -241,4 +259,40 @@ def detail(request, lb_name, entry_id):
     if command == _("Edit"):
         context["page_type"] = "Edit"
         return render(request, "flexelog/edit.html", context)
+    if command == _("New"):
+        entry = Entry()
+        entry.attrs = cfg.lb_attrs[lb_name]
+    if command == _("Reply"):
+        context["page_type"] = "Reply"
+        new_entry = copy(entry)
+        # XXX copy attrs, or blank them?
+        new_entry.id = None
+        new_entry.date = timezone.now()
+        new_entry.reply_to = entry.id
+        new_entry.text = (
+            f"\n{_('Quote')}:\n"
+            + textwrap.indent(entry.text, "> ", lambda _: True)
+            + "\n"
+        )
+        context["entry"] = new_entry
+        return render(request, "flexelog/edit.html", context)
     return render(request, "flexelog/detail.html", context)
+
+def test(request, lb_name, entry_id):
+    cfg = get_config()
+    try:
+        logbook = Logbook.objects.get(name=lb_name)
+    except Logbook.DoesNotExist:
+        # 'Logbook "%s" does not exist on remote server'
+        raise  # XXX
+    entry = get_object_or_404(Entry, lb=logbook, id=entry_id)
+    # Error: translate: "Attribute <b>%s</b> not supplied" for required 
+    context = {
+        # "form": EntryForm(initial={"date": timezone.now()}),  # instance=entry for edit existing
+        "form": EntryForm(instance=entry),
+        "logbook": logbook,
+        "logbooks": Logbook.objects.all(),  # XX will need to restrict to what user auth is, not show deactivated ones
+        "main_tab": cfg.get(lb_name, "main tab", valtype=str,default=""),
+        "cfg_css": cfg.get(lb_name, "css", valtype=str, default=""),
+    }
+    return render(request, "flexelog/xxxtest.html", context)
