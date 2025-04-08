@@ -33,14 +33,7 @@
         </tr>
     {% empty %}
         <tr><td>{% translate "No logbook defined on this server" %}</td></tr>
-        {% if request.user.is_authenticated %}
-            <tr><td class="title2">{% translate "Logged in as" %} "{{ request.user.username }}"&nbsp;
-            &nbsp;&nbsp;<a href="{% url 'flexelog:do_logout' %}">{% translate "Logout" %}</a>
-            {% if request.user.is_staff %}
-                &nbsp;&nbsp;<a href="{% url 'admin:index' %}">{% translate "Admin" %}</a>
-            {% endif %}
-            </td></tr> 
-        {% endif %}
+        <tr><td>&nbsp;&nbsp;<a href="{% url 'admin:index' %}">{% translate "Admin" %}</a></tr></td>
     {% endfor %}
 </table>
 {% endblock body %}

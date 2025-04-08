@@ -19,7 +19,7 @@ from .models import Logbook, Entry
 from .elog_cfg import get_config
 
 from htmlobj import HTML
-from urllib.parse import urlencode
+from urllib.parse import unquote_plus, urlencode
 
 
 def get_param(request, key: str, *, valtype: type = str, default: Any = None) -> Any:
@@ -84,6 +84,7 @@ def logbook_or_new_edit_delete_post(request, lb_name):
     # if not request.user.is_authenticated:
     #     return redirect(f"{settings.LOGIN_URL}?next={request.path}")
     cfg = get_config()
+    lb_name = unquote_plus(lb_name)
     try:
         logbook = Logbook.objects.get(name=lb_name)
     except Logbook.DoesNotExist:
