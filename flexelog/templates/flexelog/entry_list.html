@@ -64,7 +64,7 @@
           {% for key, val in entry.items %}
           <td class="{% if key == 'text' %}summary{% else %}{{ listX }}{% if entry.id == selected_id %}h{% endif %}{% endif %}"
                {% if key == "date" %} nowrap{% endif %}>
-            {% if not key == "text" %}<a href="{% url 'flexelog:detail' logbook.name entry.id %}">{% endif %}
+            {% if not key == "text" %}<a href="{% url 'flexelog:entry_detail' logbook.name entry.id %}">{% endif %}
             {% if key == "id" %}&nbsp;&nbsp;{% endif %}
             {% with filter_attrs|get_item:key as search_text %}
               {{ val|attr_show|highlight:search_text }}

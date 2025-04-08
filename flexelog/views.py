@@ -14,7 +14,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from .forms import EntryForm
+from .forms import entry_form_factory  #EntryForm
 from .models import Logbook, Entry
 from .elog_cfg import get_config
 
@@ -55,7 +55,32 @@ def index(request):
     return render(request, "flexelog/index.html", context)
 
 
-def logbook(request, lb_name):
+
+def _new_reply_edit_delete(request, lb_name, logbook):
+    if request.POST.get("cmd") == "Submit":
+        page_type = request.POST["page_type"]
+        attr_names = request.POST["attr_names"].split(",")
+        attrs = {attr_name: request.POST[attr_name] for attr_name in attr_names}
+        if page_type == "Edit":
+            entry = Entry.objects.get(lb=logbook, id=request.POST["edit_id"])
+            is_new_entry = False
+        else:  # New/Reply
+            entry = Entry()
+            is_new_entry = True
+        # Fill in edit object
+        entry.attrs = attrs
+        entry.text = request.POST["editor_markdown"]
+        if page_type in ("New", "Reply"):
+            entry.date = request.POST["date"]
+            # Find max id for this logbook and add 1
+            # XXX is this thread-safe?  Trap exists error and try again 1 higher
+            entry.id = Entry.objects.filter(lb__name=lb_name).order_by("-id").first() + 1
+        entry.save(force_insert=is_new_entry)
+        redirect_url = reverse("flexelog:entry_detail", args=[lb_name, entry.id])
+        return redirect(redirect_url)
+    # XXX need to cover other cases?
+
+def logbook_or_new_edit_delete_post(request, lb_name):
     # if not request.user.is_authenticated:
     #     return redirect(f"{settings.LOGIN_URL}?next={request.path}")
     cfg = get_config()
@@ -67,30 +92,12 @@ def logbook(request, lb_name):
         }
         return render(request, "flexelog/show_error.html", context)
 
-    # New, Edit, Reply, Delete all POST to the logbook page
+    # New (incl Reply), Edit, Delete all POST to the logbook page
     # (makes some sense as New doesn't have an id yet)
-    if request.POST.get("cmd") == "Submit":
-        page_type = request.POST["page_type"]
-        attr_names = request.POST["attr_names"].split(",")
-        attrs = {attr_name: request.POST[attr_name] for attr_name in attr_names}
-        if page_type == "Edit":
-            entry = Entry.objects.get(lb=logbook, id=request.POST["edit_id"])
-            force_insert = False
-        else:  # New/Reply
-            entry = Entry()
-            force_insert = True
-        # Fill in edit object
-        entry.attrs = attrs
-        entry.text = request.POST["editor_markdown"]
-        if page_type in ("New", "Reply"):
-            entry.date = request.POST["date"]
-            # Find max id for this logbook and add 1
-            # XXX is this thread-safe?  Trap exists error and try again 1 higher
-            entry.id = Entry.objects.filter(lb__name=lb_name).order_by("-id").first() + 1
-        entry.save(force_insert=force_insert)
-        redirect_url = reverse("flexelog:detail", args=[lb_name, entry.id])
-        return redirect(redirect_url)
+    if request.method == "POST":
+        return _new_reply_edit_delete(request, lb_name, logbook)
 
+    # New dealing with GET, listing logbook entries
     selected_id = get_param(request, "id", valtype=int)
 
     # XX Adjust available commands according to config
@@ -214,7 +221,7 @@ def logbook(request, lb_name):
     return render(request, "flexelog/entry_list.html", context)
 
 
-def detail(request, lb_name, entry_id):
+def entry_detail(request, lb_name, entry_id):
     # Commands
     # XXX need to take from config file, not just default
     cfg = get_config()
@@ -229,7 +236,7 @@ def detail(request, lb_name, entry_id):
         # _("Config"),
         # _("Help"),
     ]
-    url_detail = reverse("flexelog:detail", args=[lb_name, entry_id])
+    url_detail = reverse("flexelog:entry_detail", args=[lb_name, entry_id])
     commands = [(cmd, f"{url_detail}?cmd={cmd}") for cmd in command_names]
     commands[0] = (_("List"), reverse("flexelog:logbook", args=[lb_name]) + f"?id={entry_id}")
 
@@ -276,7 +283,7 @@ def detail(request, lb_name, entry_id):
         )
         context["entry"] = new_entry
         return render(request, "flexelog/edit.html", context)
-    return render(request, "flexelog/detail.html", context)
+    return render(request, "flexelog/entry_detail.html", context)
 
 def test(request, lb_name, entry_id):
     cfg = get_config()
@@ -286,10 +293,11 @@ def test(request, lb_name, entry_id):
         # 'Logbook "%s" does not exist on remote server'
         raise  # XXX
     entry = get_object_or_404(Entry, lb=logbook, id=entry_id)
+    attr_names = entry.attrs.keys()
     # Error: translate: "Attribute <b>%s</b> not supplied" for required 
     context = {
         # "form": EntryForm(initial={"date": timezone.now()}),  # instance=entry for edit existing
-        "form": EntryForm(instance=entry),
+        "form": entry_form_factory(attr_names)(instance=entry),
         "logbook": logbook,
         "logbooks": Logbook.objects.all(),  # XX will need to restrict to what user auth is, not show deactivated ones
         "main_tab": cfg.get(lb_name, "main tab", valtype=str,default=""),

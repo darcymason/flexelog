@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-16 17:47-0500\n"
+"POT-Creation-Date: 2025-04-07 17:10-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -90,11 +90,11 @@ msgstr ""
 msgid "Chinese"
 msgstr ""
 
-#: .\flexelog\forms.py:14
+#: .\flexelog\forms.py:10
 msgid "Entry time"
 msgstr "Време на записа"
 
-#: .\flexelog\forms.py:15 .\flexelog\views.py:127
+#: .\flexelog\forms.py:10 .\flexelog\views.py:134
 msgid "Text"
 msgstr "Текст"
 
@@ -113,7 +113,7 @@ msgstr ""
 
 #: .\flexelog\models.py:93
 #: .\flexelog\templates\flexelog\include\list_modes.html:23
-#: .\flexelog\templates\flexelog\index.html:26
+#: .\flexelog\templates\flexelog\index.html:22
 msgid "Entries"
 msgstr "Записи"
 
@@ -171,21 +171,27 @@ msgstr "Следваща"
 msgid "All"
 msgstr "Всички"
 
-#: .\flexelog\templates\flexelog\index.html:20
+#: .\flexelog\templates\flexelog\index.html:16
 msgid "Several logbooks are defined on this host"
 msgstr "На този хост са дефинирани няколко дневника"
 
-#: .\flexelog\templates\flexelog\index.html:21
+#: .\flexelog\templates\flexelog\index.html:17
 msgid "Please select the one to connect to"
 msgstr "Моля, изберете към кой да бъдете свързан"
 
-#: .\flexelog\templates\flexelog\index.html:25
+#: .\flexelog\templates\flexelog\index.html:21
 msgid "Logbook"
 msgstr "Дневник"
 
-#: .\flexelog\templates\flexelog\index.html:27
+#: .\flexelog\templates\flexelog\index.html:23
 msgid "Last submission"
 msgstr "Последна промяна"
+
+#: .\flexelog\templates\flexelog\index.html:35
+#, fuzzy
+#| msgid "Several logbooks are defined on this host"
+msgid "No logbook defined on this server"
+msgstr "Не са определени дневници в този сървър"
 
 #: .\flexelog\templates\flexelog\show_error.html:4
 msgid "ELOG error"
@@ -207,77 +213,77 @@ msgstr ""
 msgid "Please login"
 msgstr "Моля, влезте"
 
-#: .\flexelog\views.py:66
+#: .\flexelog\views.py:91
 #, python-format
 msgid "Logbook \"%s\" does not exist on remote server"
 msgstr "Дневникът \"%s\" не съществува на отдалечения сървър"
 
-#: .\flexelog\views.py:100 .\flexelog\views.py:262
+#: .\flexelog\views.py:107 .\flexelog\views.py:269
 msgid "New"
 msgstr "Създаване"
 
-#: .\flexelog\views.py:101
+#: .\flexelog\views.py:108
 msgid "Find"
 msgstr "Търсене"
 
-#: .\flexelog\views.py:102
+#: .\flexelog\views.py:109
 msgid "Import"
 msgstr "Импортиране"
 
-#: .\flexelog\views.py:103
+#: .\flexelog\views.py:110
 msgid "Config"
 msgstr "Настройване"
 
-#: .\flexelog\views.py:104 .\flexelog\views.py:109
+#: .\flexelog\views.py:111 .\flexelog\views.py:116
 msgid "Last day"
 msgstr "Последен ден"
 
-#: .\flexelog\views.py:105
+#: .\flexelog\views.py:112
 msgid "Help"
 msgstr "Помощ"
 
-#: .\flexelog\views.py:112
+#: .\flexelog\views.py:119
 msgid "Full"
 msgstr "Пълен"
 
-#: .\flexelog\views.py:113
+#: .\flexelog\views.py:120
 msgid "Summary"
 msgstr "Обобщен"
 
-#: .\flexelog\views.py:114
+#: .\flexelog\views.py:121
 msgid "Threaded"
 msgstr "Нишковиден"
 
-#: .\flexelog\views.py:121
+#: .\flexelog\views.py:128
 msgid "ID"
 msgstr "ID"
 
-#: .\flexelog\views.py:121 .\flexelog\views.py:159
+#: .\flexelog\views.py:128 .\flexelog\views.py:166
 msgid "Date"
 msgstr "Дата"
 
-#: .\flexelog\views.py:191
+#: .\flexelog\views.py:198
 #, python-brace-format
 msgid "Page {num:d} of {count:d}"
 msgstr ""
 
-#: .\flexelog\views.py:222 .\flexelog\views.py:234
+#: .\flexelog\views.py:229 .\flexelog\views.py:241
 msgid "List"
 msgstr "Списък"
 
-#: .\flexelog\views.py:224 .\flexelog\views.py:259
+#: .\flexelog\views.py:231 .\flexelog\views.py:266
 msgid "Edit"
 msgstr "Редактиране"
 
-#: .\flexelog\views.py:226 .\flexelog\views.py:265
+#: .\flexelog\views.py:233 .\flexelog\views.py:272
 msgid "Reply"
 msgstr "Отговаряне"
 
-#: .\flexelog\views.py:239
+#: .\flexelog\views.py:246
 #, python-format
 msgid "Error: Command \"<b>%s</b>\" not allowed"
 msgstr "Грешка: Командата \"<b>%s</b>\" не е позволена"
 
-#: .\flexelog\views.py:273
+#: .\flexelog\views.py:280
 msgid "Quote"
 msgstr ""
