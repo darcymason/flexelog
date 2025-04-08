@@ -124,12 +124,24 @@ class TestResponsesNoAuth(TestCase):
         url = reverse("flexelog:logbook", kwargs={"lb_name": "Log+1"})
         response = self.client.get(url)
         rstr = response.content.decode()
-        print(rstr)
 
-        # Note Reverse Sort is true
+        # Note Reverse Sort is config'd
         pattern = (
             r"<tr.*ID.*Date.*Status.*Category.*Subject.*Text.*</tr>"
             r".*<tr.*2.*Done.*Cat 2.*Second entry.*Log 1 entry 2.*</tr>"
             r".*<tr.*1.*Started.*Cat 1\|Cat 2.*First entry.*</tr>"
+        )
+        self.assertTrue(re.search(pattern, rstr, re.DOTALL))
+
+    def test_entry_detail(self):
+        url = reverse("flexelog:entry_detail", kwargs={"lb_name": "Log+1", "entry_id": "2"})
+        response = self.client.get(url)
+        rstr = response.content.decode()
+        print(rstr)
+        pattern = (
+            r"<tr.*subject:.*Second entry.*</tr>"
+            r".*<tr.*category:.*Cat 2.*</tr>"
+            r".*<tr.*status:.*Done.*</tr>"
+            r".*<tr.*>.*<textarea.*>.*Log 1 entry 2.*</textarea>.*</tr>"
         )
         self.assertTrue(re.search(pattern, rstr, re.DOTALL))

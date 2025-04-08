@@ -226,6 +226,7 @@ def entry_detail(request, lb_name, entry_id):
     # Commands
     # XXX need to take from config file, not just default
     cfg = get_config()
+    lb_name = unquote_plus(lb_name)
     command_names = [
         _("List"),
         # _("New"),
