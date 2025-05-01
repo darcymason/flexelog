@@ -14,7 +14,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from .forms import entry_form_factory  #EntryForm
+from .forms import EntryForm, entry_form_factory
 from .models import Logbook, Entry
 from .elog_cfg import get_config
 
@@ -295,11 +295,12 @@ def test(request, lb_name, entry_id):
         # 'Logbook "%s" does not exist on remote server'
         raise  # XXX
     entry = get_object_or_404(Entry, lb=logbook, id=entry_id)
+    lb_attributes = cfg.lb_attrs[lb_name]
     attr_names = entry.attrs.keys()
     # Error: translate: "Attribute <b>%s</b> not supplied" for required 
     context = {
-        # "form": EntryForm(initial={"date": timezone.now()}),  # instance=entry for edit existing
-        "form": entry_form_factory(attr_names)(instance=entry),
+        "form": EntryForm(instance=entry, initial={"date": timezone.now()}),  # instance=entry for edit existing
+        # "form": entry_form_factory(lb_attributes, attr_names)(instance=entry),
         "logbook": logbook,
         "logbooks": Logbook.objects.all(),  # XX will need to restrict to what user auth is, not show deactivated ones
         "main_tab": cfg.get(lb_name, "main tab", valtype=str,default=""),
