@@ -302,12 +302,13 @@ def test(request, lb_name, entry_id):
     # form = EntryForm(instance=entry, initial={"date": timezone.now()})  # instance=entry for edit existing
     initial = {"date": timezone.now()}
     form = EntryForm(lb_attrs=lb_attributes, initial=initial)
-    context = {
-        "form": form,
-        # "form": entry_form_factory(lb_attributes, attr_names)(instance=entry),
-        "logbook": logbook,
-        "logbooks": Logbook.objects.all(),  # XX will need to restrict to what user auth is, not show deactivated ones
-        "main_tab": cfg.get(lb_name, "main tab", valtype=str,default=""),
-        "cfg_css": cfg.get(lb_name, "css", valtype=str, default=""),
-    }
-    return render(request, "flexelog/xxxtest.html", context)
+    context = form.get_context()
+    context.update(
+        {
+            "logbook": logbook,
+            "logbooks": Logbook.objects.all(),  # XX will need to restrict to what user auth is, not show deactivated ones
+            "main_tab": cfg.get(lb_name, "main tab", valtype=str,default=""),
+            "cfg_css": cfg.get(lb_name, "css", valtype=str, default=""),
+        }
+    )
+    return render(request, "flexelog/edit.html", context)
