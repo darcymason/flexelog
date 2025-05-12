@@ -14,7 +14,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from .forms import EntryForm, entry_form_factory
+from .forms import EntryForm
 from .models import Logbook, Entry
 from .elog_cfg import get_config
 
@@ -298,8 +298,12 @@ def test(request, lb_name, entry_id):
     lb_attributes = cfg.lb_attrs[lb_name]
     attr_names = entry.attrs.keys()
     # Error: translate: "Attribute <b>%s</b> not supplied" for required 
+
+    # form = EntryForm(instance=entry, initial={"date": timezone.now()})  # instance=entry for edit existing
+    initial = {"date": timezone.now()}
+    form = EntryForm(lb_attrs=lb_attributes, initial=initial)
     context = {
-        "form": EntryForm(instance=entry, initial={"date": timezone.now()}),  # instance=entry for edit existing
+        "form": form,
         # "form": entry_form_factory(lb_attributes, attr_names)(instance=entry),
         "logbook": logbook,
         "logbooks": Logbook.objects.all(),  # XX will need to restrict to what user auth is, not show deactivated ones
