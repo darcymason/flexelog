@@ -14,7 +14,9 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from .forms import EntryForm
+from flexelog.forms import EntryForm
+
+
 from .models import Logbook, Entry
 from .elog_cfg import get_config
 
@@ -57,9 +59,31 @@ def index(request):
 
 
 def _new_reply_edit_delete(request, lb_name, logbook):
-    if request.POST.get("cmd") == "Submit":
+    cfg = get_config()
+    try:
+        logbook = Logbook.objects.get(name=lb_name)
+    except Logbook.DoesNotExist:
+        # 'Logbook "%s" does not exist on remote server'
+        raise  # XXX
+
+    if request.POST.get("cmd") in (_("Submit"), _("Save")):
         page_type = request.POST["page_type"]
         attr_names = request.POST["attr_names"].split(",")
+        lb_attrs = cfg.lb_attrs[lb_name]
+        form = EntryForm(lb_attrs, data=request.POST)
+        if not form.is_valid():
+            context = form.get_context()
+            context.update(
+                {
+                    "logbook": logbook,
+                    "logbooks": Logbook.objects.all(),  # XX will need to restrict to what user auth is, not show deactivated ones
+                    "main_tab": cfg.get(lb_name, "main tab", valtype=str, default=""),
+                    "cfg_css": cfg.get(lb_name, "css", valtype=str, default=""),
+                }
+            )
+            return render(request, "flexelog/edit.html", context)
+        
+        # Form is valid, now save the inputs to a database Entry
         attrs = {attr_name: request.POST[attr_name] for attr_name in attr_names}
         if page_type == "Edit":
             entry = Entry.objects.get(lb=logbook, id=request.POST["edit_id"])
@@ -74,12 +98,14 @@ def _new_reply_edit_delete(request, lb_name, logbook):
             entry.date = request.POST["date"]
             # Find max id for this logbook and add 1
             # XXX is this thread-safe?  Trap exists error and try again 1 higher
-            entry.id = Entry.objects.filter(lb__name=lb_name).order_by("-id").first() + 1
+            entry.id = Entry.objects.filter(lb__name=lb_name).order_by("-id").first().id + 1
         entry.save(force_insert=is_new_entry)
         redirect_url = reverse("flexelog:entry_detail", args=[lb_name, entry.id])
         return redirect(redirect_url)
     # XXX need to cover other cases?
 
+
+# view for route "<str:lb_name>/"
 def logbook_or_new_edit_delete_post(request, lb_name):
     # if not request.user.is_authenticated:
     #     return redirect(f"{settings.LOGIN_URL}?next={request.path}")
@@ -221,7 +247,8 @@ def logbook_or_new_edit_delete_post(request, lb_name):
     }
     return render(request, "flexelog/entry_list.html", context)
 
-
+# ---------------------
+# view for route "<str:lb_name>/<int:entry_id>/"
 def entry_detail(request, lb_name, entry_id):
     # Commands
     # XXX need to take from config file, not just default
@@ -259,32 +286,32 @@ def entry_detail(request, lb_name, entry_id):
         # 'Logbook "%s" does not exist on remote server'
         raise  # XXX
     entry = get_object_or_404(Entry, lb=logbook, id=entry_id)
+
     context = {
         "entry": entry,
         "logbook": logbook,
         "logbooks": Logbook.objects.all(),
         "commands": commands,
     }
-    if command == _("Edit"):
-        context["page_type"] = "Edit"
+
+    if command in (_("Edit"), _("Reply")):
+        page_type = "Edit" if command == _("Edit") else "Reply"
+        # XXX Need to confirm are not timed-out from allowed edit window
+        if command == _("Reply"):
+            entry.reply_to = entry.id
+            entry.id = None
+            entry.date = timezone.now()
+            entry.text = (
+                f"\n{_('Quote')}:\n"
+                + textwrap.indent(entry.text, "> ", lambda _: True)
+                + "\n"
+            )
+        form = EntryForm.from_entry(entry, page_type)
+        context.update(form.get_context())
+
         return render(request, "flexelog/edit.html", context)
-    if command == _("New"):
-        entry = Entry()
-        entry.attrs = cfg.lb_attrs[lb_name]
-    if command == _("Reply"):
-        context["page_type"] = "Reply"
-        new_entry = copy(entry)
-        # XXX copy attrs, or blank them?
-        new_entry.id = None
-        new_entry.date = timezone.now()
-        new_entry.reply_to = entry.id
-        new_entry.text = (
-            f"\n{_('Quote')}:\n"
-            + textwrap.indent(entry.text, "> ", lambda _: True)
-            + "\n"
-        )
-        context["entry"] = new_entry
-        return render(request, "flexelog/edit.html", context)
+    
+
     return render(request, "flexelog/entry_detail.html", context)
 
 def test(request, lb_name, entry_id):

@@ -1,10 +1,10 @@
 import json
 from django.db import models
-from django.forms import CheckboxSelectMultiple, Form, DateTimeField, CharField, MultiValueField, MultiWidget, MultipleChoiceField, RadioSelect, SelectMultiple, TextInput, Textarea, modelform_factory
+from django.forms import CheckboxSelectMultiple, Form, DateTimeField, CharField, HiddenInput, IntegerField, MultiValueField, MultiWidget, MultipleChoiceField, RadioSelect, SelectMultiple, TextInput, Textarea, modelform_factory
 from django.forms import CharField
 from django.utils.translation import gettext_lazy as _
 
-from flexelog.elog_cfg import Attribute
+from flexelog.elog_cfg import Attribute, get_config
 
 from .models import Entry
 
@@ -139,13 +139,39 @@ def lb_attrs_to_form_fields(lb_attrs: dict[str, Attribute]) -> dict:
 
 
 class EntryForm(Form):
-    date = DateTimeField(label=_("Entry time"),required=True, localize=True, disabled=True)
-    text = CharField(widget=Textarea)
+    date = DateTimeField(label=_("Entry time"), required=True, localize=True, widget=TextInput(attrs={"readonly": "readonly"}))
+    text = CharField(widget=Textarea(), required=False)  # XX should be required ultimately
+    # Will insert entry attributes on __init__
+
+    # Hidden fields to persist info needed:
+    page_type = CharField(widget=HiddenInput(), initial="New")
+    attr_names = CharField(widget=HiddenInput(), required=False)
+    edit_id = IntegerField(widget=HiddenInput(), required=False)
+    reply_to = IntegerField(widget=HiddenInput(), required=False)
+    editor_markdown = CharField(widget=HiddenInput(), required=False)  # XX specific to TUI Editor?
+    editor_html = CharField(widget=HiddenInput(), required=False)  # XX specific to TUI Editor?
 
     def __init__(self, lb_attrs, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.entry_attrs = lb_attrs  # save for conditionals later
         # XXX need to check entry for attrs that are no longer configd for the logbook
         self.fields.update(lb_attrs_to_form_fields(lb_attrs))
-        self.order_fields(["date", *lb_attrs.keys(), "text"])
-        
+        attr_names = list(lb_attrs.keys())
+        self.order_fields(["date", *attr_names, "text"])
+        self.fields["attr_names"].initial = ",".join(attr_names)
+
+    @classmethod
+    def from_entry(cls, entry: Entry, page_type) -> "EntryForm":
+        cfg = get_config()
+        lb_attrs = cfg.lb_attrs[entry.lb.name]
+        # XX add any extra attrs existing in the entry
+        data = {
+            "date": entry.date,
+            "reply_to": entry.reply_to,
+            "edit_id": entry.id,
+            "editor_markdown": entry.text,
+            "page_type": page_type,
+        }
+        data.update(entry.attrs)
+        form = cls(lb_attrs, data=data)
+        return form
