@@ -164,7 +164,7 @@ class EntryForm(Form):
         super().__init__(data, *args, **kwargs)
 
         # XXX need to check entry for attrs that are no longer configd for the logbook
-        self.fields.update(lb_attrs_to_form_fields(lb_attrs))
+        self.fields.update(lb_attrs_to_form_fields(lb_attrs, data=data))
         attr_names = [x.lower() for x in lb_attrs.keys()]
         self.order_fields(["date", *attr_names, "text"])
         attr_str = ",".join(attr_names)
