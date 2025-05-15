@@ -95,7 +95,7 @@ def _new_reply_edit_delete(request, lb_name, logbook):
             is_new_entry = True
         # Fill in edit object
         entry.attrs = attrs
-        entry.text = form.cleaned_data["editor_markdown"]
+        entry.text = form.cleaned_data["text"]
         if page_type in ("New", "Reply"):
             entry.date = form.cleaned_data["date"]
             # Find max id for this logbook and add 1

@@ -9,7 +9,8 @@ name = "flexelog"
 readme = "README.md"
 license = { file = "LICENSE.md" }
 requires-python = ">=3.10"
-dynamic = ["version", "description"]
+dynamic = ["description"]
+version = "0.1.dev0"
 
 authors = [
     {name = "Darcy Mason", email = "darcymason@gmail.com"},
@@ -31,6 +32,7 @@ classifiers = [
 dependencies = [
     "django >=5.1,<6.0",
     "htmlobj",
+    "django-tuieditor @ git+file:///c/git/django-tui.editor"   # XXXX https://github.com/darcymason/django-tui.editor.git",
 ]
 
 [project.urls]

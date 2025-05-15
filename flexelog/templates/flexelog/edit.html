@@ -3,21 +3,8 @@
 
 {% block title %}Fl'og {{ entry.attrs.subject }}{% endblock title %}
 {% block more_head_links %}
-{% include "flexelog/include/editor_tui.html" %}
-<script language="javascript" type="text/javascript">
-    function chkform() {
-    
-    // if (autoSaveTimer != null)
-    // clearTimeout(autoSaveTimer);
-    // submitted = true;
-    
-    document.getElementById("editor_markdown").value = editor.getMarkdown();
-    document.getElementById("editor_html").value = editor.getHTML();
-    
-    
-    return true;
-    }
-    </script>
+ {{ form.media }}
+
 {% endblock more_head_links %}
 
 {% block body %}
@@ -90,8 +77,10 @@
     {# EDITOR/VIEWER #}
     <tr>
     <td class="messageframe">
-        <textarea hidden name="editor_markdown" id="editor_markdown">{{ entry.text }}</textarea>
-        <div id="editor"></div>
+        {# XX kludge, not sure correct syntax to get text field directly #}
+        {% for field, errors in fields %}
+            {% if field.label == "Text" %}{{ field }}{% endif %}
+        {% endfor %}
     </td>
     </tr>
 
@@ -115,7 +104,7 @@ function latexPlugin() {
     return { toHTMLRenderers };
 }
     
-const { Editor } = toastui;
+{% comment %} const { Editor } = toastui;
 const { chart, codeSyntaxHighlight, colorSyntax, tableMergedCell } = Editor.plugin;
 
 const editor = new Editor({
@@ -134,6 +123,6 @@ function body_onload() {
     var text = document.getElementById("editor_markdown").value;
     editor.setMarkdown(text);
     return true;
-}
+} {% endcomment %}
 </script>
 {% endblock body %}
