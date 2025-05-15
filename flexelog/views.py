@@ -85,9 +85,9 @@ def _new_reply_edit_delete(request, lb_name, logbook):
             return render(request, "flexelog/edit.html", context)
         
         # Form is valid, now save the inputs to a database Entry
-        attrs = {attr_name: request.POST[attr_name] for attr_name in attr_names}
+        attrs = {attr_name: form.cleaned_data[attr_name] for attr_name in attr_names}
         if page_type == "Edit":
-            entry = Entry.objects.get(lb=logbook, id=request.POST["edit_id"])
+            entry = Entry.objects.get(lb=logbook, id=form.cleaned_data["edit_id"])
             is_new_entry = False
         else:  # New/Reply
             entry = Entry()
@@ -95,9 +95,9 @@ def _new_reply_edit_delete(request, lb_name, logbook):
             is_new_entry = True
         # Fill in edit object
         entry.attrs = attrs
-        entry.text = request.POST["editor_markdown"]
+        entry.text = form.cleaned_data["editor_markdown"]
         if page_type in ("New", "Reply"):
-            entry.date = request.POST["date"]
+            entry.date = form.cleaned_data["date"]
             # Find max id for this logbook and add 1
             # XXX is this thread-safe?  Trap exists error and try again 1 higher
             entry.id = Entry.objects.filter(lb__name=lb_name).order_by("-id").first().id + 1
