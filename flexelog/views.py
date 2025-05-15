@@ -59,6 +59,7 @@ def index(request):
 
 
 def _new_reply_edit_delete(request, lb_name, logbook):
+    # XX auth - need to confirm user can New or Reply or Edit or Delete
     cfg = get_config()
     try:
         logbook = Logbook.objects.get(name=lb_name)
@@ -70,7 +71,7 @@ def _new_reply_edit_delete(request, lb_name, logbook):
         page_type = request.POST["page_type"]
         attr_names = request.POST["attr_names"].split(",")
         lb_attrs = cfg.lb_attrs[lb_name]
-        form = EntryForm(lb_attrs, data=request.POST)
+        form = EntryForm( data=request.POST, lb_attrs=lb_attrs)
         if not form.is_valid():
             context = form.get_context()
             context.update(
@@ -90,6 +91,7 @@ def _new_reply_edit_delete(request, lb_name, logbook):
             is_new_entry = False
         else:  # New/Reply
             entry = Entry()
+            entry.lb = logbook  # XX security - should check logbook = original entry if a reply
             is_new_entry = True
         # Fill in edit object
         entry.attrs = attrs

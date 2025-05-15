@@ -3,6 +3,7 @@ from django.db import models
 from django.forms import CheckboxSelectMultiple, Form, DateTimeField, CharField, HiddenInput, IntegerField, MultiValueField, MultiWidget, MultipleChoiceField, RadioSelect, SelectMultiple, TextInput, Textarea, modelform_factory
 from django.forms import CharField
 from django.utils.translation import gettext_lazy as _
+from django.utils.datastructures import MultiValueDict
 
 from flexelog.elog_cfg import Attribute, get_config
 
@@ -120,17 +121,24 @@ class AttributesWidget(MultiWidget):
 
 
 
-def lb_attrs_to_form_fields(lb_attrs: dict[str, Attribute]) -> dict:
+def lb_attrs_to_form_fields(lb_attrs: dict[str, Attribute], data: MultiValueDict=None) -> dict:
     fields = {}
     for name, lb_attr in lb_attrs.items():   
         if lb_attr.options_type in ("ROptions", "MOptions"):
-            fields[name] = MultipleChoiceField(
+            # Show choices(options) in current logbook config, and if entry has another, add them to choices
+            choices = lb_attr.options
+            if data and name.lower() in data:
+                for set_choice in data.getlist(name.lower()):  # XX verify it is a list, could have been configd different in past
+                    if set_choice not in choices:
+                        choices.append(set_choice)
+
+            fields[name.lower()] = MultipleChoiceField(
                 widget=RadioSelect if lb_attr.options_type == "ROptions" else CheckboxSelectMultiple, 
                 required=lb_attr.required, 
-                choices=list(enumerate(lb_attr.options)),
+                choices=[(choice, choice) for choice in choices]
             )
         else:
-            fields[name] = CharField(
+            fields[name.lower()] = CharField(
                 required=lb_attr.required,
                 max_length=1500,
                 widget = TextInput(attrs={"size": 80}),
@@ -151,27 +159,35 @@ class EntryForm(Form):
     editor_markdown = CharField(widget=HiddenInput(), required=False)  # XX specific to TUI Editor?
     editor_html = CharField(widget=HiddenInput(), required=False)  # XX specific to TUI Editor?
 
-    def __init__(self, lb_attrs, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.entry_attrs = lb_attrs  # save for conditionals later
+    def __init__(self, data=None, *args, **kwargs):
+        self.entry_attrs = lb_attrs = kwargs.pop("lb_attrs")  # save for conditionals later
+        super().__init__(data, *args, **kwargs)
+
         # XXX need to check entry for attrs that are no longer configd for the logbook
         self.fields.update(lb_attrs_to_form_fields(lb_attrs))
-        attr_names = list(lb_attrs.keys())
+        attr_names = [x.lower() for x in lb_attrs.keys()]
         self.order_fields(["date", *attr_names, "text"])
-        self.fields["attr_names"].initial = ",".join(attr_names)
+        attr_str = ",".join(attr_names)
+        self.fields["attr_names"].initial = attr_str
+
 
     @classmethod
     def from_entry(cls, entry: Entry, page_type) -> "EntryForm":
         cfg = get_config()
-        lb_attrs = cfg.lb_attrs[entry.lb.name]
-        # XX add any extra attrs existing in the entry
-        data = {
-            "date": entry.date,
-            "reply_to": entry.reply_to,
-            "edit_id": entry.id,
-            "editor_markdown": entry.text,
-            "page_type": page_type,
-        }
-        data.update(entry.attrs)
-        form = cls(lb_attrs, data=data)
+        # XXX add any extra attrs now in lb config that aren't in this entry
+        data = MultiValueDict()
+        data["date"] = entry.date
+        data["reply_to"] = entry.reply_to
+        data["edit_id"] = entry.id
+        data["editor_markdown"] = entry.text
+        data["page_type"] = page_type
+        data["attr_names"] = ",".join(x.lower() for x in entry.attrs.keys())
+        for attr_name, val in entry.attrs.items():
+            if isinstance(val, list):
+                data.setlist(attr_name.lower(), val)
+            else:
+                data[attr_name.lower()] = val
+        lb_attrs = cfg.lb_attrs[entry.lb.name]        
+        form = cls(data=data, lb_attrs=lb_attrs)
+            
         return form
