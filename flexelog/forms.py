@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.datastructures import MultiValueDict
 
 from flexelog.elog_cfg import Attribute, get_config
-from django_tuieditor.fields import MarkdownFormField
+from django_tuieditor.fields import MarkdownFormField, MarkdownViewerFormField
 from .models import Entry
 
 
@@ -22,13 +22,15 @@ def lb_attrs_to_form_fields(lb_attrs: dict[str, Attribute], data: MultiValueDict
             fields[name.lower()] = MultipleChoiceField(
                 widget=RadioSelect if lb_attr.options_type == "ROptions" else CheckboxSelectMultiple, 
                 required=lb_attr.required, 
-                choices=[(choice, choice) for choice in choices]
+                choices=[(choice, choice) for choice in choices],
+                error_messages={"required": _("Please enter attribute '%s'") % name},
             )
         else:
             fields[name.lower()] = CharField(
                 required=lb_attr.required,
                 max_length=1500,
                 widget = TextInput(attrs={"size": 80}),
+                error_messages={"required": _("Please enter attribute '%s'") % name},
             )  # xX for file psi-elog used size="60" maxlength="200"
     return fields
 
@@ -74,3 +76,10 @@ class EntryForm(Form):
         form = cls(data=data, lb_attrs=lb_attrs)
             
         return form
+    
+
+
+# In future may try to combine edit and view into one form.
+# Here just have a kludge to get Viewer widget rendered
+class EntryViewerForm(Form):
+    text = MarkdownViewerFormField(required=False) # note some logbooks can have no text field

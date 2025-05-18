@@ -35,11 +35,8 @@
     {# EDITOR/VIEWER #}
     <tr>
     <td class="messageframe">
-        <textarea hidden name="editor_markdown" id="editor_markdown">
-{{ entry.text }}
-<p>&nbsp;</p>
-        </textarea>
-        <div id="viewer"></div>
+
+        {{ form.text }}
     </td>
     </tr>
 
@@ -47,37 +44,4 @@
 </table>
 </form>
 
-<script language="javascript" type="text/javascript">
-function latexPlugin() {
-    const toHTMLRenderers = {
-        latex(node) {
-            const html = katex.renderToString(node.literal);
-
-            return [
-                { type: 'openTag', tagName: 'div', outerNewLine: true },
-                { type: 'html', content: html },
-                { type: 'closeTag', tagName: 'div', outerNewLine: true }
-            ];
-        }
-    }
-    return { toHTMLRenderers };
-}
-    
-const { Editor } = toastui;
-const { chart, codeSyntaxHighlight, colorSyntax, tableMergedCell } = Editor.plugin;
-const editor = toastui.Editor.factory({
-    el: document.querySelector('#viewer'),
-    viewer: true,
-    initialValue: '',
-    usageStatistics: false,
-    mathSupport: true,
-    plugins: [[chart, {maxWidth:750, maxHeight:500}], [codeSyntaxHighlight, {highlighter: Prism}], colorSyntax, tableMergedCell, latexPlugin],
-});
-
-function body_onload() {            
-    var text = document.getElementById("editor_markdown").value;
-    editor.setMarkdown(text);
-    return true;
-}
-</script>
 {% endblock body %}

@@ -14,7 +14,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from flexelog.forms import EntryForm
+from flexelog.forms import EntryForm, EntryViewerForm
 
 
 from .models import Logbook, Entry
@@ -23,6 +23,7 @@ from .elog_cfg import get_config
 from htmlobj import HTML
 from urllib.parse import unquote_plus, urlencode
 
+from django_tuieditor.widgets import MarkdownViewerWidget
 
 def get_param(request, key: str, *, valtype: type = str, default: Any = None) -> Any:
     """Return the GET query value for key, but default if not found or not of right type"""
@@ -305,7 +306,7 @@ def entry_detail(request, lb_name, entry_id):
             entry.date = timezone.now()
             entry.text = (
                 f"\n{_('Quote')}:\n"
-                + textwrap.indent(entry.text, "> ", lambda _: True)
+                + textwrap.indent(entry.text or "", "> ", lambda _: True)
                 + "\n"
             )
         form = EntryForm.from_entry(entry, page_type)
@@ -313,7 +314,9 @@ def entry_detail(request, lb_name, entry_id):
 
         return render(request, "flexelog/edit.html", context)
     
-
+    # If get here, then are just doing the detail view, no editing
+    form = EntryViewerForm(data={"text": entry.text or ""})
+    context['form'] = form
     return render(request, "flexelog/entry_detail.html", context)
 
 def test(request, lb_name, entry_id):
