@@ -35,5 +35,5 @@ def get_item(dictionary, key):
 @register.filter
 def attr_show(val):
     if isinstance(val, list):
-        return "|".join(val)
+        return " | ".join(val)
     return val

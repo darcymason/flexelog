@@ -1,4 +1,5 @@
 {% extends "flexelog/base.html" %}
+{% load flex %}
 
 {% block title %}Fl'og {{ entry.attrs.subject }}{% endblock title %}
 {% block more_head_links %}
@@ -25,7 +26,7 @@
         {% for attr, val in entry.attrs.items %}
         <tr>
             <td class="attribname" nowrap>{{ attr }}:</td>
-            <td class="attribvalue">{{ val }}</td>
+            <td class="attribvalue">{{ val|attr_show }}</td>
         </tr>
         {% endfor %}
     </table>
