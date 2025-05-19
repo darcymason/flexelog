@@ -9,8 +9,10 @@
 {% endblock %}
 
 {% block body %}
-  <form name="form1" method="POST" action="./" enctype="multipart/form-data">
+  <form name="form1" method="GET" action=".">
     {% csrf_token %}
+    {{ form.page_type }}
+    {{ form.attr_names }}
     <table class="frame" cellpadding="0" cellspacing="0">
       {% include 'flexelog/include/lb_tabs.html' %}
       <tr>
@@ -35,13 +37,24 @@
         </td>
       </tr>
     <tr><td class="form2"><b>{% translate "Filters" %}:</b>&nbsp;&nbsp;
-        <span class="selcomment">({{ regex_message|safe }} {% translate "regular expressions" %})</a></span><br>
+        <span class="selcomment">({{ regex_message|safe }})</span><br>
         <table width="100%" cellspacing=0>
     <tr><td class="attribname" nowrap width="10%">{% translate "Entry date" %}:</td><td class="attribvalue">
         <table width="100%" cellspacing=0 border=0>
-            <tr><td width="1%">{{ form.start_date.label }}:</td><td>{{ form.start_date }}&nbsp;&nbsp;/&nbsp;&nbsp;{{ form.show_last.label }}: {{ form.show_last }}</td></tr>
+            <tr><td width="1%">{{ form.start_date.label }}:</td><td>{{ form.start_date }}&nbsp;&nbsp;/&nbsp;&nbsp;{{ form.last.label }}: {{ form.last }}</td></tr>
             <tr><td width="1%">{{ form.end_date.label }}:</td><td>{{ form.end_date }}</td></tr>
-        </table>    
-    </table>
+        </table>  
+    {# --------- Entry Attributes ---------------------- #}
+
+    {# --------- #}
+    <tr>
+        <td class="attribname">{{ form.subtext.label }}:</td>
+        <td class="attribvalue">{{ form.subtext }} {{ form.sall }} {{ form.sall.label }}</td>
+    </tr>
+    <tr>
+        <td class="attribvalue"></td>
+        <td class="attribvalue">{{ form.casesensitive }} {{ form.casesensitive.label }}
+    </tr>  
+</table>
   </form>
 {% endblock %}

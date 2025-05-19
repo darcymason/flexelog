@@ -57,7 +57,6 @@ def index(request):
     return render(request, "flexelog/index.html", context)
 
 
-
 def _new_reply_edit_delete(request, lb_name, logbook):
     # XX auth - need to confirm user can New or Reply or Edit or Delete
     cfg = get_config()
@@ -136,7 +135,7 @@ def logbook_or_new_edit_delete_post(request, lb_name):
             "logbooks": Logbook.objects.all(),  # XX will need to restrict to what user auth is, not show deactivated ones
             "main_tab": cfg.get(lb_name, "main tab", valtype=str, default=""),
             "cfg_css": cfg.get(lb_name, "css", valtype=str, default=""),
-            "regex_message": _("Text fields are treated as %s") % '<a href="https://docs.python.org/3/howto/regex.html">',
+            "regex_message": _("Text fields are treated as %s") % f'<a href="https://docs.python.org/3/howto/regex.html">{_("regular expressions")}</a>',
         }
 
         return render(request, "flexelog/search_form.html", context)

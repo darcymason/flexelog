@@ -1,4 +1,4 @@
-from django.forms import CharField, CheckboxSelectMultiple, Form, DateTimeField, Select
+from django.forms import BooleanField, CharField, CheckboxSelectMultiple, DateTimeInput, Form, DateTimeField, Select, SplitDateTimeField, SplitDateTimeWidget
 from django.forms import HiddenInput, IntegerField, MultipleChoiceField, RadioSelect, TextInput, Textarea
 from django.utils.translation import gettext_lazy as _
 from django.utils.datastructures import MultiValueDict
@@ -89,6 +89,7 @@ class SearchForm(Form):
     page_type = CharField(widget=HiddenInput(), initial="Search")
     attr_names = CharField(widget=HiddenInput(), required=False)
     mode = MultipleChoiceField(
+        required=False,
         widget=RadioSelect(),
         choices = [
             ("Display full", _("Display full entries")), 
@@ -98,6 +99,7 @@ class SearchForm(Form):
         label=_("Mode"),
     )
     export_to = MultipleChoiceField(
+        required=False,
         widget=RadioSelect(),
         choices = [
             ("CSV1", _('CSV ("," separated)')), 
@@ -109,6 +111,7 @@ class SearchForm(Form):
         label=_("Export to"),
     )
     options = MultipleChoiceField(
+        required=False,
         widget = CheckboxSelectMultiple(),
         choices = [
             ("attach", _("Show attachments")), 
@@ -120,9 +123,11 @@ class SearchForm(Form):
     )
     npp = IntegerField(widget=TextInput(attrs={"size": 3}), min_value=1, label=_("entries per page"), initial=20)
     # ----- bottom half
-    start_date = DateTimeField(label=_("Start"))
-    end_date = DateTimeField(label=_("End"))
-    show_last = MultipleChoiceField(
+    # XX does datetime-local need to be converted to server time?
+    start_date = DateTimeField(required=False, widget=DateTimeInput(attrs={'type': 'datetime-local'}), label=_("Start"))
+    end_date = SplitDateTimeField(required=False, widget=DateTimeInput(attrs={'type': 'datetime-local'}), label=_("End"))
+    last = MultipleChoiceField(
+        required=False,
         widget=Select(),
         choices=[
             ("", ""),
@@ -134,4 +139,9 @@ class SearchForm(Form):
             ("182", _("6 Months")),
             ("364", _("Year")),
         ],
+        label=_("Show last")
     )
+    # Then attrs added in __init__
+    subtext = CharField(required=False, widget=TextInput(attrs={"size": 30, "maxlength": 80}), label=_("Text"))
+    sall = BooleanField(required=False, label=_("Search text also in attributes"))
+    casesensitive = BooleanField(required=False, label=_("Case sensitive"))

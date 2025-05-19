@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-07 17:10-0400\n"
+"POT-Creation-Date: 2025-05-19 15:26-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,85 +18,204 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
 
-#: .\flexsite\settings.py:126
+#: .\flexsite\settings.py:127
 msgid "English"
 msgstr ""
 
-#: .\flexsite\settings.py:127
+#: .\flexsite\settings.py:128
 msgid "Bulgarian"
 msgstr ""
 
-#: .\flexsite\settings.py:128
+#: .\flexsite\settings.py:129
 msgid "Brazilian"
 msgstr ""
 
-#: .\flexsite\settings.py:129
+#: .\flexsite\settings.py:130
 msgid "Czech"
 msgstr ""
 
-#: .\flexsite\settings.py:130
+#: .\flexsite\settings.py:131
 msgid "German"
 msgstr ""
 
-#: .\flexsite\settings.py:131
+#: .\flexsite\settings.py:132
 msgid "Danish"
 msgstr ""
 
-#: .\flexsite\settings.py:132
+#: .\flexsite\settings.py:133
 msgid "Spanish"
 msgstr ""
 
-#: .\flexsite\settings.py:133
+#: .\flexsite\settings.py:134
 msgid "French"
 msgstr ""
 
-#: .\flexsite\settings.py:134
+#: .\flexsite\settings.py:135
 msgid "Indonesia"
 msgstr ""
 
-#: .\flexsite\settings.py:135
+#: .\flexsite\settings.py:136
 msgid "Italian"
 msgstr ""
 
-#: .\flexsite\settings.py:136
+#: .\flexsite\settings.py:137
 msgid "Japanese"
 msgstr ""
 
-#: .\flexsite\settings.py:137
+#: .\flexsite\settings.py:138
 msgid "Dutch"
 msgstr ""
 
-#: .\flexsite\settings.py:138
+#: .\flexsite\settings.py:139
 msgid "Polish"
 msgstr ""
 
-#: .\flexsite\settings.py:139
+#: .\flexsite\settings.py:140
 msgid "Russian"
 msgstr ""
 
-#: .\flexsite\settings.py:140
+#: .\flexsite\settings.py:141
 msgid "Swedish"
 msgstr ""
 
-#: .\flexsite\settings.py:141
+#: .\flexsite\settings.py:142
 msgid "Slowak"
 msgstr ""
 
-#: .\flexsite\settings.py:142
+#: .\flexsite\settings.py:143
 msgid "Turkish"
 msgstr ""
 
-#: .\flexsite\settings.py:143
+#: .\flexsite\settings.py:144
 msgid "Chinese"
 msgstr ""
 
-#: .\flexelog\forms.py:10
+#: .\flexelog\forms.py:26 .\flexelog\forms.py:33
+#, python-format
+msgid "Please enter attribute '%s'"
+msgstr "Пожалуйста введите атрибут \"%s\""
+
+#: .\flexelog\forms.py:39
 msgid "Entry time"
 msgstr "Время записи"
 
-#: .\flexelog\forms.py:10 .\flexelog\views.py:134
+#: .\flexelog\forms.py:95
+msgid "Display full entries"
+msgstr "Отобразить записи полностью"
+
+#: .\flexelog\forms.py:96
+#, fuzzy
+#| msgid "Summary"
+msgid "Summary only"
+msgstr "Суммарный"
+
+#: .\flexelog\forms.py:97
+msgid "Display threads"
+msgstr "По темам"
+
+#: .\flexelog\forms.py:99
+msgid "Mode"
+msgstr "Режим"
+
+#: .\flexelog\forms.py:105
+msgid "CSV (\",\" separated)"
+msgstr "CSV (разделитель \",\")"
+
+#: .\flexelog\forms.py:106
+msgid "CSV (\";\" separated)"
+msgstr "CSV (разделитель \";\")"
+
+#: .\flexelog\forms.py:107
+msgid "CSV (\";\" separated) + Text"
+msgstr ""
+
+#: .\flexelog\forms.py:108
+msgid "XML"
+msgstr ""
+
+#: .\flexelog\forms.py:109
+msgid "Raw"
+msgstr ""
+
+#: .\flexelog\forms.py:111
+msgid "Export to"
+msgstr ""
+
+#: .\flexelog\forms.py:117
+msgid "Show attachments"
+msgstr "Показывать прикрепленные файлы"
+
+#: .\flexelog\forms.py:118
+msgid "Printable output"
+msgstr "Версия для печати"
+
+#: .\flexelog\forms.py:119
+msgid "Sort in reverse order"
+msgstr "Сортировать в обратном порядке"
+
+#: .\flexelog\forms.py:120
+msgid "Search all logbooks"
+msgstr "Искать во всех журналах"
+
+#: .\flexelog\forms.py:122
+msgid "Options"
+msgstr "Опции"
+
+#: .\flexelog\forms.py:124
+msgid "entries per page"
+msgstr "записей на странице"
+
+#: .\flexelog\forms.py:126
+msgid "Start"
+msgstr "Начало"
+
+#: .\flexelog\forms.py:127
+msgid "End"
+msgstr "Конец"
+
+#: .\flexelog\forms.py:133
+msgid "Day"
+msgstr "День"
+
+#: .\flexelog\forms.py:134
+msgid "3 Days"
+msgstr ""
+
+#: .\flexelog\forms.py:135
+msgid "Week"
+msgstr "Неделя"
+
+#: .\flexelog\forms.py:136
+msgid "Month"
+msgstr "Месяц"
+
+#: .\flexelog\forms.py:137
+msgid "3 Months"
+msgstr "3 Месяца"
+
+#: .\flexelog\forms.py:138
+msgid "6 Months"
+msgstr "6 Месяцев"
+
+#: .\flexelog\forms.py:139
+msgid "Year"
+msgstr "Год"
+
+#: .\flexelog\forms.py:141
+msgid "Show last"
+msgstr "Показать последние"
+
+#: .\flexelog\forms.py:144 .\flexelog\views.py:176
 msgid "Text"
 msgstr "Текст"
+
+#: .\flexelog\forms.py:145
+msgid "Search text also in attributes"
+msgstr "Также искать текст в атрибутах"
+
+#: .\flexelog\forms.py:146
+msgid "Case sensitive"
+msgstr "Чуствительно к регистру"
 
 #: .\flexelog\models.py:23
 msgid "Syntax error in config file"
@@ -107,11 +226,21 @@ msgstr "Синтаксическая ошибка в конфигурацион�
 msgid "'%(value)s' is reserved, it cannot be used for a logbook name"
 msgstr ""
 
-#: .\flexelog\models.py:92
+#: .\flexelog\models.py:68 .\flexelog\templates\flexelog\index.html:21
+msgid "Logbook"
+msgstr "Журнал"
+
+#: .\flexelog\models.py:69
+#, fuzzy
+#| msgid "Logbook"
+msgid "Logbooks"
+msgstr "Журнал"
+
+#: .\flexelog\models.py:94
 msgid "Entry"
 msgstr "Запись"
 
-#: .\flexelog\models.py:93
+#: .\flexelog\models.py:95
 #: .\flexelog\templates\flexelog\include\list_modes.html:23
 #: .\flexelog\templates\flexelog\index.html:22
 msgid "Entries"
@@ -134,16 +263,16 @@ msgstr "Не вошел"
 msgid "Login"
 msgstr "Войти"
 
-#: .\flexelog\templates\flexelog\edit.html:57
-#: .\flexelog\templates\registration\login.html:41
+#: .\flexelog\templates\flexelog\edit.html:24
+#: .\flexelog\templates\registration\login.html:41 .\flexelog\views.py:69
 msgid "Submit"
 msgstr "Отправить"
 
-#: .\flexelog\templates\flexelog\edit.html:64
+#: .\flexelog\templates\flexelog\edit.html:32
 msgid "Fields marked with"
 msgstr "Поля помеченые"
 
-#: .\flexelog\templates\flexelog\edit.html:65
+#: .\flexelog\templates\flexelog\edit.html:33
 msgid "are required"
 msgstr "требуется"
 
@@ -152,6 +281,7 @@ msgid "Logged in as"
 msgstr "Вошел как"
 
 #: .\flexelog\templates\flexelog\include\lb_tabs.html:40
+#: .\flexelog\templates\flexelog\index.html:36
 msgid "Admin"
 msgstr "Администрирование"
 
@@ -179,10 +309,6 @@ msgstr "Несколько журналов определены на этом �
 msgid "Please select the one to connect to"
 msgstr "Выберите один"
 
-#: .\flexelog\templates\flexelog\index.html:21
-msgid "Logbook"
-msgstr "Журнал"
-
 #: .\flexelog\templates\flexelog\index.html:23
 msgid "Last submission"
 msgstr "Last submission"
@@ -193,13 +319,40 @@ msgstr "Last submission"
 msgid "No logbook defined on this server"
 msgstr "На этом сервере не существует журналов"
 
+#: .\flexelog\templates\flexelog\search_form.html:19 .\flexelog\views.py:132
+msgid "Search"
+msgstr "Искать"
+
+#: .\flexelog\templates\flexelog\search_form.html:20 .\flexelog\views.py:132
+msgid "Reset Form"
+msgstr "Сбросить"
+
+#: .\flexelog\templates\flexelog\search_form.html:21
+#: .\flexelog\templates\flexelog\show_error.html:15 .\flexelog\views.py:132
+msgid "Back"
+msgstr "Назад"
+
+#: .\flexelog\templates\flexelog\search_form.html:32
+msgid "Display"
+msgstr "Отображать"
+
+#: .\flexelog\templates\flexelog\search_form.html:37
+msgid "Filters"
+msgstr "Фильтры"
+
+#: .\flexelog\templates\flexelog\search_form.html:38
+msgid "regular expressions"
+msgstr "регулярные выражения"
+
+#: .\flexelog\templates\flexelog\search_form.html:40
+#, fuzzy
+#| msgid "Entry time"
+msgid "Entry date"
+msgstr "Время записи"
+
 #: .\flexelog\templates\flexelog\show_error.html:4
 msgid "ELOG error"
 msgstr ""
-
-#: .\flexelog\templates\flexelog\show_error.html:15
-msgid "Back"
-msgstr "Назад"
 
 #: .\flexelog\templates\flexelog\show_error.html:17
 msgid "Please use your browser's back button to go back"
@@ -213,77 +366,86 @@ msgstr ""
 msgid "Please login"
 msgstr "ВХОД"
 
-#: .\flexelog\views.py:91
+#: .\flexelog\views.py:69
+msgid "Save"
+msgstr "Сохранить"
+
+#: .\flexelog\views.py:119
 #, python-format
 msgid "Logbook \"%s\" does not exist on remote server"
 msgstr "Журнал \"%s\" не существует на удаленном сервере"
 
-#: .\flexelog\views.py:107 .\flexelog\views.py:269
-msgid "New"
-msgstr "Создать"
-
-#: .\flexelog\views.py:108
+#: .\flexelog\views.py:129 .\flexelog\views.py:150
 msgid "Find"
 msgstr "Поиск"
 
-#: .\flexelog\views.py:109
+#: .\flexelog\views.py:138
+#, python-format
+msgid "Text fields are treated as %s"
+msgstr "Текстовые поля интерпретируются как %s"
+
+#: .\flexelog\views.py:149
+msgid "New"
+msgstr "Создать"
+
+#: .\flexelog\views.py:151
 msgid "Import"
 msgstr "Импортировать"
 
-#: .\flexelog\views.py:110
+#: .\flexelog\views.py:152
 msgid "Config"
 msgstr "Конфигурация"
 
-#: .\flexelog\views.py:111 .\flexelog\views.py:116
+#: .\flexelog\views.py:153 .\flexelog\views.py:158
 msgid "Last day"
 msgstr "Последний день"
 
-#: .\flexelog\views.py:112
+#: .\flexelog\views.py:154
 msgid "Help"
 msgstr "Помощь"
 
-#: .\flexelog\views.py:119
+#: .\flexelog\views.py:161
 msgid "Full"
 msgstr "Полный"
 
-#: .\flexelog\views.py:120
+#: .\flexelog\views.py:162
 msgid "Summary"
 msgstr "Суммарный"
 
-#: .\flexelog\views.py:121
+#: .\flexelog\views.py:163
 msgid "Threaded"
 msgstr "По темам"
 
-#: .\flexelog\views.py:128
+#: .\flexelog\views.py:170
 msgid "ID"
 msgstr "ID"
 
-#: .\flexelog\views.py:128 .\flexelog\views.py:166
+#: .\flexelog\views.py:170 .\flexelog\views.py:208
 msgid "Date"
 msgstr "Дата"
 
-#: .\flexelog\views.py:198
+#: .\flexelog\views.py:240
 #, python-brace-format
 msgid "Page {num:d} of {count:d}"
 msgstr ""
 
-#: .\flexelog\views.py:229 .\flexelog\views.py:241
+#: .\flexelog\views.py:273 .\flexelog\views.py:285
 msgid "List"
 msgstr "Список"
 
-#: .\flexelog\views.py:231 .\flexelog\views.py:266
+#: .\flexelog\views.py:275 .\flexelog\views.py:312 .\flexelog\views.py:313
 msgid "Edit"
 msgstr "Редактировать"
 
-#: .\flexelog\views.py:233 .\flexelog\views.py:272
+#: .\flexelog\views.py:277 .\flexelog\views.py:312 .\flexelog\views.py:315
 msgid "Reply"
 msgstr "Комментировать"
 
-#: .\flexelog\views.py:246
+#: .\flexelog\views.py:290
 #, python-format
 msgid "Error: Command \"<b>%s</b>\" not allowed"
 msgstr "Ошибка: Команда \"<b>%s</b>\" не разрешена"
 
-#: .\flexelog\views.py:280
+#: .\flexelog\views.py:320
 msgid "Quote"
 msgstr "Цитировать"
