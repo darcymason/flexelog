@@ -20,7 +20,7 @@ def highlight(value, search_term, autoescape=True):
     else:
         esc = lambda x: x
     if search_term is None:
-        search_term = ""
+        return mark_safe(esc(value))
     return mark_safe(
         esc(value).replace(
             esc(search_term), f"{HIGHLIGHT_OPEN}{esc(search_term)}{HIGHLIGHT_CLOSE}"
@@ -35,5 +35,5 @@ def get_item(dictionary, key):
 @register.filter
 def attr_show(val):
     if isinstance(val, list):
-        return "|".join(val)
+        return " | ".join(val)
     return val

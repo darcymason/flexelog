@@ -3,46 +3,13 @@
 
 {% block title %}Fl'og {{ entry.attrs.subject }}{% endblock title %}
 {% block more_head_links %}
-{% include "flexelog/include/editor_tui.html" %}
-<script language="javascript" type="text/javascript">
-    function chkform() {
-        // if (last_key == 13) {
-        //     var ret = confirm('Really submit this entry?');
-        //     if (!ret) {
-        //         last_key = 0;
-        //         return false;
-        //     }
-        // }
-    try {
-    if (document.form1.Subject.value == "") {
-        alert("Please enter attribute 'Subject'");
-        document.form1.Subject.focus();
-        return false;
-    }
-    }
-    catch(err) {
-    }
-    
-       
-    
-    // if (autoSaveTimer != null)
-    // clearTimeout(autoSaveTimer);
-    // submitted = true;
-    
-    document.getElementById("editor_markdown").value = editor.getMarkdown();
-    document.getElementById("editor_html").value = editor.getHTML();
-    
-    
-    return true;
-    }
-    </script>
+ {{ form.media }}
+
 {% endblock more_head_links %}
 
 {% block body %}
 <form name="form1" method="POST" action="{% url 'flexelog:logbook' logbook.name %}" enctype="multipart/form-data">
   {% csrf_token %}
-  <input type="hidden" name="page_type" value="{{ page_type }}" />
-  <input type="hidden" name="attr_names" value="{{ entry.attrs.keys|join:',' }}">
   <table class="frame" cellpadding="0" cellspacing="0">
   {% include "flexelog/include/lb_tabs.html" %}
   <table class="listframe" width="100%" cellspacing="0" cellpadding="0">
@@ -58,7 +25,8 @@
         {# <input type="submit" name="cmd" value="Delete" onclick="return check_delete();"> #}
         &nbsp;&nbsp;
         </span></td></tr>
-        <tr><td><table class="listframe" width="100%" cellspacing="0" cellpadding="0">
+        <tr><td>
+        <table class="listframe" width="100%" cellspacing="0" cellpadding="0">
         {# XX make required field thing show only when any are required #}
         <tr><td colspan="2" class="attribvalue">
             {% translate "Fields marked with" %}<font color="red"> * </font>
@@ -67,12 +35,41 @@
     <tr>
     <td>
     <table width="100%" cellpadding="0" cellspacing="0">
-        {% for attr, val in entry.attrs.items %}
+        {% comment %} {% for attr, val in entry.attrs.items %} {% endcomment %}
+        {% if errors %}
         <tr>
-            <td class="attribname" nowrap>{{ attr }}:</td>
-            <td class="attribvalue">{{ val }}</td>
+          <td colspan="2">
+            {{ errors }}
+            {% if not fields %}
+              {% for field in hidden_fields %}{{ field }}{% endfor %}
+              
+            {% endif %}
+          </td>
         </tr>
-        {% endfor %}
+      {% endif %}
+      {% for field, errors in fields %}
+       
+        <tr{% with classes=field.css_classes %}{% if classes %} class="{{ classes }}"{% endif %}{% endwith %}>
+            {% if field.label != "Text" %}<th class="attribname" nowrap>{% if field.label %}{{ field.label_tag }}{% endif %}</th>
+                <td class="attribvalue">
+                {{ errors }}
+                {{ field }}
+                {% if field.help_text %}
+                <br>
+                <span class="helptext"{% if field.auto_id %} id="{{ field.auto_id }}_helptext"{% endif %}>{{ field.help_text|safe }}</span>
+                {% endif %}
+            {% endif %}
+            {% if forloop.last %}
+              {% for field in hidden_fields %}{{ field }}
+              {% endfor %}
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      {% if not fields and not errors %}
+        {% for field in hidden_fields %}{{ field }}{% endfor %}
+      {% endif %}
+      
     </table>
     </td>
     </tr>
@@ -80,11 +77,10 @@
     {# EDITOR/VIEWER #}
     <tr>
     <td class="messageframe">
-        <input type="hidden" name="date" value="{{ entry.date }}">
-        <input type="hidden" id="edit_id" name="edit_id" value="{{ entry.id }}">
-        <input type="hidden" id="reply_to" name="reply_to" value="{{ entry.reply_to }}">
-        <textarea hidden name="editor_markdown" id="editor_markdown">{{ entry.text }}</textarea>
-        <div id="editor"></div>
+        {# XX kludge, not sure correct syntax to get text field directly #}
+        {% for field, errors in fields %}
+            {% if field.label == "Text" %}{{ field }}{% endif %}
+        {% endfor %}
     </td>
     </tr>
 
@@ -108,7 +104,7 @@ function latexPlugin() {
     return { toHTMLRenderers };
 }
     
-const { Editor } = toastui;
+{% comment %} const { Editor } = toastui;
 const { chart, codeSyntaxHighlight, colorSyntax, tableMergedCell } = Editor.plugin;
 
 const editor = new Editor({
@@ -127,6 +123,6 @@ function body_onload() {
     var text = document.getElementById("editor_markdown").value;
     editor.setMarkdown(text);
     return true;
-}
+} {% endcomment %}
 </script>
 {% endblock body %}

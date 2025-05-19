@@ -356,7 +356,10 @@ def config_updated(sender, **kwargs):
 
 def reload_config():
     global _cfg
-    config_text = ElogConfig.objects.get(name="default").config_text
+    try:
+        config_text = ElogConfig.objects.get(name="default").config_text
+    except ElogConfig.DoesNotExist:
+        config_text = "[global]"
     _cfg = LogbookConfig(config_text)
 
 # Set up signal to reload config if ElogConfig changed

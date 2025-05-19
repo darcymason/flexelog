@@ -6,11 +6,7 @@
 {% block title %}FlexElog Logbook Selection{% endblock %}
 
 {% block more_head_links %}
-  {% if cfg_css %}
-    {% with 'flexelog/'|add:cfg_css as static_link %}
-      <link rel="stylesheet" type="text/css" href="{% static static_link %}">
-    {% endwith %}
-  {% endif %}
+
 {% endblock %}
 
 {% block body %}
@@ -35,6 +31,9 @@
             <td nowrap class="selentries">{{ lb.entry_set.count }}</td>
             <td nowrap class="selentries">{{ lb.latest_date|localize}}</td>
         </tr>
+    {% empty %}
+        <tr><td>{% translate "No logbook defined on this server" %}</td></tr>
+        <tr><td>&nbsp;&nbsp;<a href="{% url 'admin:index' %}">{% translate "Admin" %}</a></tr></td>
     {% endfor %}
 </table>
 {% endblock body %}

@@ -65,6 +65,8 @@ class Logbook(models.Model):
         indexes = [
             models.Index(fields=["name"]),
         ]
+        verbose_name = _("Logbook")
+        verbose_name_plural = _("Logbooks")
 
 
 class Entry(models.Model):
@@ -82,7 +84,7 @@ class Entry(models.Model):
     def __str__(self):
         return (
             f"{self.lb} {self.id}: {self.date} {self.attrs} "
-            f"{shorten(self.text, 50)}"
+            f"{shorten(self.text or "", 50)}"
         )
 
     class Meta:

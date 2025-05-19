@@ -12,6 +12,11 @@
     <link rel="stylesheet" type="text/css" href="{% static 'flexelog/elog.css' %}">
     <link rel="shortcut icon" href="{% static 'flexelog/favicon.ico' %}">
     <link rel="icon" href="{% static 'flexelog/favicon.png' %}" type="image/png">
+    {% if cfg_css %}
+        {% with 'flexelog/'|add:cfg_css as static_link %}
+        <link rel="stylesheet" type="text/css" href="{% static static_link %}">
+        {% endwith %}
+    {% endif %}
     {% block more_head_links %}{% endblock %}
 </head>
 
