@@ -1,5 +1,5 @@
-from django.forms import CheckboxSelectMultiple, Form, DateTimeField, CharField, HiddenInput, IntegerField, MultipleChoiceField, RadioSelect, TextInput, Textarea
-from django.forms import CharField
+from django.forms import CharField, CheckboxSelectMultiple, Form, DateTimeField
+from django.forms import HiddenInput, IntegerField, MultipleChoiceField, RadioSelect, TextInput, Textarea
 from django.utils.translation import gettext_lazy as _
 from django.utils.datastructures import MultiValueDict
 
@@ -83,3 +83,39 @@ class EntryForm(Form):
 # Here just have a kludge to get Viewer widget rendered
 class EntryViewerForm(Form):
     text = MarkdownViewerFormField(required=False) # note some logbooks can have no text field
+
+
+class SearchForm(Form):
+    page_type = CharField(widget=HiddenInput(), initial="Search")
+    attr_names = CharField(widget=HiddenInput(), required=False)
+    mode = MultipleChoiceField(
+        widget=RadioSelect(),
+        choices = [
+            ("Display full", _("Display full entries")), 
+            ("Summary", _("Summary only")), 
+            ("Threads", _("Display threads")),
+        ],
+        label=_("Mode"),
+    )
+    export_to = MultipleChoiceField(
+        widget=RadioSelect(),
+        choices = [
+            ("CSV1", _('CSV ("," separated)')), 
+            ("CSV2", _('CSV (";" separated)')), 
+            ("CSV3", _('CSV (";" separated) + Text')),
+            ("XML", _("XML")),
+            ("Raw", _("Raw")),
+        ],
+        label=_("Export to"),
+    )
+    options = MultipleChoiceField(
+        widget = CheckboxSelectMultiple(),
+        choices = [
+            ("attach", _("Show attachments")), 
+            ("printable", _("Printable output")), 
+            ("reverse", _("Sort in reverse order")),
+            ("all", _("Search all logbooks")),
+        ],
+        label=_("Options"),
+    )
+    npp = IntegerField(widget=TextInput(attrs={"size": 3}), min_value=1, label=_("entries per page"), initial=20)

@@ -1,0 +1,39 @@
+{% extends 'flexelog/base.html' %}
+{% load i18n %}
+
+{% block title %}
+  Fl'og {{ logbook.name }}
+{% endblock %}
+{% block more_head_links %}
+  {{ form.media }}
+{% endblock %}
+
+{% block body %}
+  <form name="form1" method="POST" action="./" enctype="multipart/form-data">
+    {% csrf_token %}
+    <table class="frame" cellpadding="0" cellspacing="0">
+      {% include 'flexelog/include/lb_tabs.html' %}
+      <tr>
+        <td class="menuframe">
+          <span class="menu1">
+            <input type="submit" value="{% translate 'Search' %}" />&nbsp;&nbsp;
+            <input type="reset" value="{% translate 'Reset Form' %}" />&nbsp;&nbsp;
+            <input type="submit" name="cmd" value="{% translate 'Back' %}" />&nbsp;&nbsp;
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <td class="form1">
+          <table>
+            <tr>
+              <td valign="top" class="form1"><b>{{ form.mode.label }}:</b><br>{{ form.mode }}</td>
+              <td valign="top" class="form1"<b>{{ form.export_to.label }}:</b><br>{{ form.export_to }}</td>
+              <td valign="top" class="form2"><b>{{ form.options.label }}:</b><br>{{ form.options }}
+                {% translate 'Display' %}&nbsp;{{ form.npp }} {{ form.npp.label }}</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </form>
+{% endblock %}

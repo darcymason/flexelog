@@ -14,14 +14,13 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from flexelog.forms import EntryForm, EntryViewerForm
+from flexelog.forms import EntryForm, EntryViewerForm, SearchForm
 
 
 from .models import Logbook, Entry
 from .elog_cfg import get_config
 
-from htmlobj import HTML
-from urllib.parse import unquote_plus, urlencode
+from urllib.parse import unquote_plus
 
 from django_tuieditor.widgets import MarkdownViewerWidget
 
@@ -127,6 +126,20 @@ def logbook_or_new_edit_delete_post(request, lb_name):
     if request.method == "POST":
         return _new_reply_edit_delete(request, lb_name, logbook)
 
+    cmd = get_param(request, "cmd")
+    if cmd == _("Find"):
+        form = SearchForm(initial={"options": ["reverse"], "mode": "Display full"})
+        context = {
+            "command_names": [_("Search"), _("Reset Form"), _("Back")],
+            "form": form,
+            "logbook": logbook,
+            "logbooks": Logbook.objects.all(),  # XX will need to restrict to what user auth is, not show deactivated ones
+            "main_tab": cfg.get(lb_name, "main tab", valtype=str, default=""),
+            "cfg_css": cfg.get(lb_name, "css", valtype=str, default=""),
+
+        }
+
+        return render(request, "flexelog/search_form.html", context)
     # New dealing with GET, listing logbook entries
     selected_id = get_param(request, "id", valtype=int)
 
