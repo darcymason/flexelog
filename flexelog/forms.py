@@ -1,4 +1,4 @@
-from django.forms import CharField, CheckboxSelectMultiple, Form, DateTimeField
+from django.forms import CharField, CheckboxSelectMultiple, Form, DateTimeField, Select
 from django.forms import HiddenInput, IntegerField, MultipleChoiceField, RadioSelect, TextInput, Textarea
 from django.utils.translation import gettext_lazy as _
 from django.utils.datastructures import MultiValueDict
@@ -119,3 +119,19 @@ class SearchForm(Form):
         label=_("Options"),
     )
     npp = IntegerField(widget=TextInput(attrs={"size": 3}), min_value=1, label=_("entries per page"), initial=20)
+    # ----- bottom half
+    start_date = DateTimeField(label=_("Start"))
+    end_date = DateTimeField(label=_("End"))
+    show_last = MultipleChoiceField(
+        widget=Select(),
+        choices=[
+            ("", ""),
+            ("1", _("Day")),
+            ("3", _("3 Days")),
+            ("7", _("Week")),
+            ("31", _("Month")),
+            ("92", _("3 Months")),
+            ("182", _("6 Months")),
+            ("364", _("Year")),
+        ],
+    )

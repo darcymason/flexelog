@@ -136,7 +136,7 @@ def logbook_or_new_edit_delete_post(request, lb_name):
             "logbooks": Logbook.objects.all(),  # XX will need to restrict to what user auth is, not show deactivated ones
             "main_tab": cfg.get(lb_name, "main tab", valtype=str, default=""),
             "cfg_css": cfg.get(lb_name, "css", valtype=str, default=""),
-
+            "regex_message": _("Text fields are treated as %s") % '<a href="https://docs.python.org/3/howto/regex.html">',
         }
 
         return render(request, "flexelog/search_form.html", context)
