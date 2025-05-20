@@ -45,7 +45,10 @@
             <tr><td width="1%">{{ form.end_date.label }}:</td><td>{{ form.end_date }}</td></tr>
         </table>  
     {# --------- Entry Attributes ---------------------- #}
-
+        {% for attr_field in form.attr_bound_fields.values %}
+        <tr><td class="attribname">{{ attr_field.label }}</td>
+            <td class="attribvalue">{{ attr_field }}</td>
+        {% endfor %}
     {# --------- #}
     <tr>
         <td class="attribname">{{ form.subtext.label }}:</td>

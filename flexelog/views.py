@@ -127,7 +127,10 @@ def logbook_or_new_edit_delete_post(request, lb_name):
 
     cmd = get_param(request, "cmd")
     if cmd == _("Find"):
-        form = SearchForm(initial={"options": ["reverse"], "mode": "Display full"})
+        lb_attrs = cfg.lb_attrs[lb_name]
+        # for lb_attr in lb_attrs.values():
+        #     lb_attr.required = False
+        form = SearchForm(initial={"options": ["reverse"], "mode": "Display full"}, lb_attrs=lb_attrs)
         context = {
             "command_names": [_("Search"), _("Reset Form"), _("Back")],
             "form": form,
@@ -139,7 +142,7 @@ def logbook_or_new_edit_delete_post(request, lb_name):
         }
 
         return render(request, "flexelog/search_form.html", context)
-    # New dealing with GET, listing logbook entries
+    # Now dealing with GET, listing logbook entries
     selected_id = get_param(request, "id", valtype=int)
 
     # XX Adjust available commands according to config
@@ -173,17 +176,20 @@ def logbook_or_new_edit_delete_post(request, lb_name):
     summary_lines = cfg.get(lb_name, "Summary lines", valtype=int)
     show_text = cfg.get(lb_name, "Show text", valtype=bool)
     if show_text and summary_lines > 0:
-        col_names.append(_("Text"))
+        col_names.append(_("Text"))  # XX even if text not shown, should still be in filters below
         col_fields.append("text")
     columns = dict(zip(col_names, col_fields))    
 
-    col_names_lower = [x.lower() for x in col_names]
+    col_names_lower = [x.lower() for x in col_names] + ["subtext"]
     # XX could also be in columns not shown in display
     filters = {
         k: v
         for k, v in request.GET.items()
         if k.lower() in col_names_lower and k.lower() != "id"
     }
+    # need to handle 'subtext' used in original psi elog query string
+    if 'subtext' in filters:
+        filters['text'] = filters.pop('subtext')
 
     filter_attrs = {
         f"{'attrs__' if k.lower() in attrs_lower else ''}{k.lower()}": v
@@ -193,12 +199,12 @@ def logbook_or_new_edit_delete_post(request, lb_name):
         f"{k}__icontains": v
         for k, v in filter_attrs.items()
     }
-    # XX need to handle 'subtext' used in original psi elog
+
     # XX Need to exclude date, id from 'contains'-style search, translate back
     
-    # determine sort order of entries
-    # default is by date
-    # check if query args have sort specified
+    # Determine sort order of entries
+    # Default is by date
+    # Check if query args have sort specified
     if sort_attr_field := columns.get(get_param(request, "sort")):
         is_rsort = False
     elif sort_attr_field := columns.get(get_param(request, "rsort")):

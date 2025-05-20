@@ -23,13 +23,14 @@ def lb_attrs_to_form_fields(lb_attrs: dict[str, Attribute], data: MultiValueDict
                 widget=RadioSelect if lb_attr.options_type == "ROptions" else CheckboxSelectMultiple, 
                 required=lb_attr.required, 
                 choices=[(choice, choice) for choice in choices],
-                error_messages={"required": _("Please enter attribute '%s'") % name},
+                label=name,
             )
         else:
             fields[name.lower()] = CharField(
                 required=lb_attr.required,
                 max_length=1500,
                 widget = TextInput(attrs={"size": 80}),
+                label=name,
                 error_messages={"required": _("Please enter attribute '%s'") % name},
             )  # xX for file psi-elog used size="60" maxlength="200"
     return fields
@@ -145,3 +146,20 @@ class SearchForm(Form):
     subtext = CharField(required=False, widget=TextInput(attrs={"size": 30, "maxlength": 80}), label=_("Text"))
     sall = BooleanField(required=False, label=_("Search text also in attributes"))
     casesensitive = BooleanField(required=False, label=_("Case sensitive"))
+
+
+    def __init__(self, data=None, *args, **kwargs):
+        self.entry_attrs = lb_attrs = kwargs.pop("lb_attrs")  # save for conditionals later
+        super().__init__(data, *args, **kwargs)
+
+        # XXX need to check entry for attrs that are no longer configd for the logbook
+        attr_fields = lb_attrs_to_form_fields(lb_attrs, data=data)
+        for field in attr_fields.values():
+            field.required = False
+        self.fields.update(attr_fields)
+        
+        # Get bound fields used in html template
+        self.attr_bound_fields = {name: field.get_bound_field(self, name) for name, field in attr_fields.items()}
+        
+        attr_names = [x.lower() for x in lb_attrs.keys()]
+        self.fields["attr_names"].initial = ",".join(attr_names)
