@@ -10,9 +10,6 @@
 
 {% block body %}
   <form name="form1" method="GET" action=".">
-    {% csrf_token %}
-    {{ form.page_type }}
-    {{ form.attr_names }}
     <table class="frame" cellpadding="0" cellspacing="0">
       {% include 'flexelog/include/lb_tabs.html' %}
       <tr>

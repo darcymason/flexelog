@@ -1,7 +1,7 @@
 from django.urls import include, path
-
-
 from flexelog import views
+
+
 
 app_name = "flexelog"
 urlpatterns = [

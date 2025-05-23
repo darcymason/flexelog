@@ -11,16 +11,9 @@ from flexelog.models import Logbook, ElogConfig, Entry
 from flexelog.elog_cfg import LogbookConfig, get_config
 
 
-
 lb_config = dedent(
     """\
-    Comment = Comment for Log 1
-    Attributes = Status, Category, Subject
-    ROptions Status = Not started, Started, Done
-    MOptions Category =  Cat 1, Cat 2, Cat 3
-    Required Attributes = Category, Subject
-    Page Title = Log 1 - $Subject
-    Quick filter = Category, Status
+
     """
 )
 
@@ -32,12 +25,27 @@ global_config = dedent(
     Default Encoding = 0
     Reverse sort = 1
     Main Tab = Index
+
+    [Log 1]
+    Comment = Comment for Log 1
+    Attributes = Status, Category, Subject
+    ROptions Status = Not started, Started, Done
+    MOptions Category =  Cat 1, Cat 2, Cat 3
+    Required Attributes = Category, Subject
+    Page Title = Log 1 - $Subject
+    Quick filter = Category, Status
+
+    [Log2]
+    Comment = Comment for Log 2
+    Attributes = Status, Category, Subject
+    ROptions Status = Not started, Started, Done
+    MOptions Category =  Cat 1, Cat 2, Cat 3
+    Required Attributes = Category, Subject
+    Page Title = Log 2 - $Subject
+    Quick filter = Category, Status
+
     """
 )
-
-global_config += f"[Log 1]\n{lb_config}"
-global_config += f'[Log2]\n{lb_config.replace("Log 1", "Log2")}'
-
 
 
 class TestResponsesEmptyDb(TestCase):
@@ -78,11 +86,9 @@ class TestResponsesNoAuth(TestCase):
 
         cls.lb1 = Logbook.objects.create(
             name="Log 1",  # NOTE: has space for url quoting testing
-            # config=lb_config,
         )
         cls.lb2 = Logbook.objects.create(
             name="Log2",
-            # config=lb_config.replace("Log 1", "Log2"),
         )
 
         # Add some entries
@@ -145,3 +151,27 @@ class TestResponsesNoAuth(TestCase):
             r".*<tr.*>.*<textarea.*>.*Log 1 entry 2.*</textarea>.*</tr>"
         )
         self.assertTrue(re.search(pattern, rstr, re.DOTALL))
+
+    def test_new_entry(self):
+        data = {
+            'cmd': 'Submit',
+            'date': '2025-05-23 22:05:40',
+            'status': 'Started',
+            'category': ['Cat 2'],
+            'subject': 'Test edit',
+            'page_type': 'New',
+            'attr_names': 'status,category,subject',
+            'edit_id': '',
+            'reply_to': '',
+            'text': 'Test New entry',
+        }
+        url = reverse("flexelog:logbook", kwargs={"lb_name": "Log+1"})
+        response = self.client.post(url, data=data)
+
+        # check entry in db created
+        lb = Logbook.objects.get(name="Log 1")
+        entry = lb.entry_set.last()
+
+        self.assertEqual(entry.attrs, {'status': 'Started', 'category': ['Cat 2'], 'subject': 'Test edit'})
+        self.assertEqual(entry.text, data['text'])
+        self.assertEqual(entry.id, 3)

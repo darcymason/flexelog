@@ -24,15 +24,33 @@ from urllib.parse import unquote_plus
 
 from django_tuieditor.widgets import MarkdownViewerWidget
 
-def get_param(request, key: str, *, valtype: type = str, default: Any = None) -> Any:
-    """Return the GET query value for key, but default if not found or not of right type"""
-    val = request.GET.get(key, default)
-    if val is not default:
+def get_param(request, key: str, *, valtype: type = str, default: Any = None, force_single=True) -> Any:
+    """Return the GET query value for key, but default if not found or not of right type
+    
+    get_single only affects what happens if a value in the query string is repeated.
+    If True, it is standard Django 'get' behaviour - the last value is returned.
+
+    If any value of the parameter can't be converted to `valtype`, then `default` is returned.
+    """
+    if force_single:
+        val = request.GET.get(key, default)
+        if val == default:
+            return val
         try:
-            val = valtype(val)
+            return valtype(val)
         except ValueError:
-            val = default
-    return val
+            return default
+
+    val = request.GET.getlist(key, default)
+    if len(val) == 0 or val == default:
+        return default
+    try:
+        val = [valtype(x) for x in val]
+    except ValueError:
+        val = default
+
+    return val[0] if len(val) == 1 else val
+
 
 def do_logout(request):
     return render(request, "flexelog/do_logout.html")
@@ -57,7 +75,7 @@ def index(request):
     return render(request, "flexelog/index.html", context)
 
 
-def _new_reply_edit_delete(request, lb_name, logbook):
+def post_new_reply_edit_delete(request, lb_name, logbook):
     # XX auth - need to confirm user can New or Reply or Edit or Delete
     cfg = get_config()
     try:
@@ -123,7 +141,7 @@ def logbook_or_new_edit_delete_post(request, lb_name):
     # New (incl Reply), Edit, Delete all POST to the logbook page
     # (makes some sense as New doesn't have an id yet)
     if request.method == "POST":
-        return _new_reply_edit_delete(request, lb_name, logbook)
+        return post_new_reply_edit_delete(request, lb_name, logbook)
 
     cmd = get_param(request, "cmd")
     if cmd == _("Find"):
@@ -185,16 +203,19 @@ def logbook_or_new_edit_delete_post(request, lb_name):
     filters = {
         k: v
         for k, v in request.GET.items()
-        if k.lower() in col_names_lower and k.lower() != "id"
+        if k.lower() in col_names_lower and k.lower() != "id" and v != ""
     }
     # need to handle 'subtext' used in original psi elog query string
     if 'subtext' in filters:
         filters['text'] = filters.pop('subtext')
 
-    filter_attrs = {
+    filter_attrs = {  # actually text and attrs
         f"{'attrs__' if k.lower() in attrs_lower else ''}{k.lower()}": v
         for k, v in filters.items()
     }
+    
+    # Some db backends (e.g. sqlite, oracle?) do not do case sensitive on unicode,
+    # and/or on JSONFields.  So do case insensitive and filter entires in code below
     filter_fields = {
         f"{k}__icontains": v
         for k, v in filter_attrs.items()
@@ -215,20 +236,24 @@ def logbook_or_new_edit_delete_post(request, lb_name):
 
     # try:
     order_by = Lower(sort_attr_field).desc() if is_rsort else Lower(sort_attr_field)
-    entries = logbook.entry_set.values(*columns.values()).filter(**filter_fields).order_by(order_by)
+    qs = logbook.entry_set.values(*columns.values()).filter(**filter_fields).order_by(order_by)
+
+    # 'Manually' filter attrs if case sensitive search
+    if get_param(request, "casesensitive", valtype=bool):
+        filter_qs_case_sensitive(qs, filter_fields)
 
     # except FieldError:
-    #     entries = logbook.entry_set.values(*columns.values()).order_by("-date")
+    #     qs = logbook.entry_set.values(*columns.values()).order_by("-date")
 
     # Get page requested with "?page=#" or ?page=all else 1
     req_page_number = get_param(request, "page", default="1")
     if req_page_number.lower() == "all":
         req_page_number = 1
-        per_page = entries.count() + 1
+        per_page = qs.count() + 1
     else:
         per_page = get_param(request, "npp", valtype=int) or cfg.get(lb_name, "entries per page")
 
-    paginator = Paginator(entries, per_page=per_page)
+    paginator = Paginator(qs, per_page=per_page)
     # If query string has "id=#", then need to position to page with that id
     # ... assuming it exists.  Check that first. If not, then ignore the setting
     page_obj = paginator.get_page(req_page_number)
@@ -268,6 +293,53 @@ def logbook_or_new_edit_delete_post(request, lb_name):
     }
     return render(request, "flexelog/entry_list.html", context)
 
+
+def get_new_edit(request, logbook, command, entry_id):
+    # XXXX check request.user permissions for each of these, for the logbook
+    
+    if command == _("New"):
+        entry = Entry(lb=logbook)
+    else: # _("Reply"), _("Duplicate")
+        original_entry = get_object_or_404(Entry, lb=logbook, id=entry_id)
+        entry = copy(original_entry)
+        entry.pk = None
+        entry.id = None
+        entry.reply_to = None
+        # XXXX entry.author = <current user>
+        if command == _("Reply"):
+            entry.reply_to = entry.id
+            entry.text = (
+                f"\n{_('Quote')}:\n"
+                + textwrap.indent(entry.text or "", "> ", lambda _: True)
+                + "\n"
+            )
+    
+    if command == _("Edit"): 
+        entry = original_entry
+        # XXX last_mod_author  = <current user>, original author stays
+        page_type = "Edit"
+    else:
+        entry.date = timezone.now()
+        page_type = "New"
+
+    if command == _("New"):
+        cfg = get_config()
+        form = EntryForm(
+            lb_attrs=cfg.lb_attrs[logbook.name],
+            initial={"date": timezone.now()},
+        )
+    else:
+        form = EntryForm.from_entry(entry, page_type)
+
+    context = {
+        "entry": entry,
+        "logbook": logbook,
+        "logbooks": Logbook.objects.all(),
+        "commands": [],
+    }
+    context.update(form.get_context())
+    return render(request, "flexelog/edit.html", context)
+    
 # ---------------------
 # view for route "<str:lb_name>/<int:entry_id>/"
 def entry_detail(request, lb_name, entry_id):
@@ -277,11 +349,11 @@ def entry_detail(request, lb_name, entry_id):
     lb_name = unquote_plus(lb_name)
     command_names = [
         _("List"),
-        # _("New"),
+        _("New"),
         _("Edit"),
-        # _("Delete"),
+        _("Delete"),
         _("Reply"),
-        #_("Duplicate"),
+        _("Duplicate"),
         # _("Find"),
         # _("Config"),
         # _("Help"),
@@ -293,7 +365,7 @@ def entry_detail(request, lb_name, entry_id):
     command = get_param(request, "cmd")
     if command:
         if command not in command_names:
-            context = {"message": _('Error: Command "<b>%s</b>" not allowed')}
+            context = {"message": _('Error: Command "<b>%s</b>" not allowed') % command}
             return render(request, "flexelog/show_error.html", context)
             # if command not in command_dispatch:
             #     return show_error(
@@ -306,32 +378,19 @@ def entry_detail(request, lb_name, entry_id):
     except Logbook.DoesNotExist:
         # 'Logbook "%s" does not exist on remote server'
         raise  # XXX
-    entry = get_object_or_404(Entry, lb=logbook, id=entry_id)
 
+    if command == _("Delete"):
+        pass
+    elif command in (_("New"), _("Edit"), _("Reply"), _("Duplicate")):
+        return get_new_edit(request, logbook, command, entry_id=entry_id)
+
+    entry = get_object_or_404(Entry, lb=logbook, id=entry_id)
     context = {
         "entry": entry,
         "logbook": logbook,
         "logbooks": Logbook.objects.all(),
         "commands": commands,
-    }
-
-    if command in (_("Edit"), _("Reply")):
-        page_type = "Edit" if command == _("Edit") else "Reply"
-        # XXX Need to confirm are not timed-out from allowed edit window
-        if command == _("Reply"):
-            entry.reply_to = entry.id
-            entry.id = None
-            entry.date = timezone.now()
-            entry.text = (
-                f"\n{_('Quote')}:\n"
-                + textwrap.indent(entry.text or "", "> ", lambda _: True)
-                + "\n"
-            )
-        form = EntryForm.from_entry(entry, page_type)
-        context.update(form.get_context())
-
-        return render(request, "flexelog/edit.html", context)
-    
+    }  
     # If get here, then are just doing the detail view, no editing
     form = EntryViewerForm(data={"text": entry.text or ""})
     context['form'] = form

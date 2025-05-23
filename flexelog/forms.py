@@ -1,4 +1,4 @@
-from django.forms import BooleanField, CharField, CheckboxSelectMultiple, DateTimeInput, Form, DateTimeField, Select, SplitDateTimeField, SplitDateTimeWidget
+from django.forms import BooleanField, CharField, CheckboxSelectMultiple, ChoiceField, DateTimeInput, Form, DateTimeField, Select, SplitDateTimeField, SplitDateTimeWidget
 from django.forms import HiddenInput, IntegerField, MultipleChoiceField, RadioSelect, TextInput, Textarea
 from django.utils.translation import gettext_lazy as _
 from django.utils.datastructures import MultiValueDict
@@ -19,12 +19,19 @@ def lb_attrs_to_form_fields(lb_attrs: dict[str, Attribute], data: MultiValueDict
                     if entry_choice not in choices:
                         choices.append(entry_choice)
 
-            fields[name.lower()] = MultipleChoiceField(
-                widget=RadioSelect if lb_attr.options_type == "ROptions" else CheckboxSelectMultiple, 
+            if lb_attr.options_type == "ROptions":
+                field_cls = ChoiceField
+                widget = RadioSelect
+            else:  # MOptions
+                field_cls = MultipleChoiceField
+                widget = CheckboxSelectMultiple
+
+            fields[name.lower()] = field_cls(
+                widget=widget,
                 required=lb_attr.required, 
                 choices=[(choice, choice) for choice in choices],
                 label=name,
-            )
+                )
         else:
             fields[name.lower()] = CharField(
                 required=lb_attr.required,
@@ -67,7 +74,7 @@ class EntryForm(Form):
         data["edit_id"] = entry.id
         data["text"] = entry.text
         data["page_type"] = page_type
-        data["attr_names"] = ",".join(x.lower() for x in entry.attrs.keys())
+        data["attr_names"] = ",".join(x.lower() for x in entry.attrs.keys()) if entry.attrs else "{}"
         for attr_name, val in entry.attrs.items():
             if isinstance(val, list):
                 data.setlist(attr_name.lower(), val)
@@ -87,8 +94,6 @@ class EntryViewerForm(Form):
 
 
 class SearchForm(Form):
-    page_type = CharField(widget=HiddenInput(), initial="Search")
-    attr_names = CharField(widget=HiddenInput(), required=False)
     mode = MultipleChoiceField(
         required=False,
         widget=RadioSelect(),
@@ -161,5 +166,3 @@ class SearchForm(Form):
         # Get bound fields used in html template
         self.attr_bound_fields = {name: field.get_bound_field(self, name) for name, field in attr_fields.items()}
         
-        attr_names = [x.lower() for x in lb_attrs.keys()]
-        self.fields["attr_names"].initial = ",".join(attr_names)
