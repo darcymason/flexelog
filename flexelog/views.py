@@ -80,19 +80,15 @@ def index(request):
     return render(request, "flexelog/index.html", context)
 
 
-def post_new_reply_edit_delete(request, lb_name, logbook):
+def logbook_post(request, logbook):
+    """Handle POST to logbook page - can be New, Reply, Edit form results"""
     # XX auth - need to confirm user can New or Reply or Edit or Delete
-    cfg = get_config()
-    try:
-        logbook = Logbook.objects.get(name=lb_name)
-    except Logbook.DoesNotExist:
-        # 'Logbook "%s" does not exist on remote server'
-        raise  # XXX
 
+    cfg = get_config()
     if request.POST.get("cmd") in (_("Submit"), _("Save")):
         page_type = request.POST["page_type"]
         attr_names = request.POST["attr_names"].split(",")
-        lb_attrs = cfg.lb_attrs[lb_name]
+        lb_attrs = cfg.lb_attrs[logbook.name]
         form = EntryForm(data=request.POST, lb_attrs=lb_attrs)
         if not form.is_valid():
             context = form.get_context()
@@ -100,8 +96,8 @@ def post_new_reply_edit_delete(request, lb_name, logbook):
                 {
                     "logbook": logbook,
                     "logbooks": Logbook.objects.all(),  # XX will need to restrict to what user auth is, not show deactivated ones
-                    "main_tab": cfg.get(lb_name, "main tab", valtype=str, default=""),
-                    "cfg_css": cfg.get(lb_name, "css", valtype=str, default=""),
+                    "main_tab": cfg.get(logbook.name, "main tab", valtype=str, default=""),
+                    "cfg_css": cfg.get(logbook.name, "css", valtype=str, default=""),
                 }
             )
             return render(request, "flexelog/edit.html", context)
@@ -121,21 +117,19 @@ def post_new_reply_edit_delete(request, lb_name, logbook):
         if page_type in ("New", "Reply"):
             entry.date = form.cleaned_data["date"]
             # Find max id for this logbook and add 1
-            # XXX is this thread-safe?  Trap exists error and try again 1 higher
-            entry.id = (
-                Entry.objects.filter(lb__name=lb_name).order_by("-id").first().id + 1
-            )
-        entry.save(force_insert=is_new_entry)
-        redirect_url = reverse("flexelog:entry_detail", args=[lb_name, entry.id])
+            # XXX is this thread-safe?  
+            max_entry = logbook.entry_set.order_by("-id").first()
+            entry.id = max_entry.id + 1 if max_entry else 1
+        entry.save(force_insert=is_new_entry)  # XXX Could trap exists error and try again id +=1
+        redirect_url = reverse("flexelog:entry_detail", args=[logbook.name, entry.id])
         return redirect(redirect_url)
     # XXX need to cover other cases?
 
 
 # view for route "<str:lb_name>/"
-def logbook_or_new_edit_delete_post(request, lb_name):
+def logbook_view(request, lb_name):
     # if not request.user.is_authenticated:
     #     return redirect(f"{settings.LOGIN_URL}?next={request.path}")
-    cfg = get_config()
     lb_name = unquote_plus(lb_name)
     try:
         logbook = Logbook.objects.get(name=lb_name)
@@ -148,23 +142,28 @@ def logbook_or_new_edit_delete_post(request, lb_name):
     # New (incl Reply), Edit, Delete all POST to the logbook page
     # (makes some sense as New doesn't have an id yet)
     if request.method == "POST":
-        return post_new_reply_edit_delete(request, lb_name, logbook)
-
+        return logbook_post(request, logbook)
+    return logbook_get(request, logbook)
+    
+def logbook_get(request, logbook):    
     cmd = get_param(request, "cmd")
-    if cmd == _("Find"):
-        lb_attrs = cfg.lb_attrs[lb_name]
+    if cmd == _("New"):
+        return entry_detail_get(request, logbook, None)
+    elif cmd == _("Find"):
+        lb_attrs = cfg.lb_attrs[logbook.name]
         # for lb_attr in lb_attrs.values():
         #     lb_attr.required = False
         form = SearchForm(
             initial={"options": ["reverse"], "mode": "Display full"}, lb_attrs=lb_attrs
         )
+        cfg = get_config()
         context = {
             "command_names": [_("Search"), _("Reset Form"), _("Back")],
             "form": form,
             "logbook": logbook,
             "logbooks": Logbook.objects.all(),  # XX will need to restrict to what user auth is, not show deactivated ones
-            "main_tab": cfg.get(lb_name, "main tab", valtype=str, default=""),
-            "cfg_css": cfg.get(lb_name, "css", valtype=str, default=""),
+            "main_tab": cfg.get(logbook.name, "main tab", valtype=str, default=""),
+            "cfg_css": cfg.get(logbook.name, "css", valtype=str, default=""),
             "regex_message": _("Text fields are treated as %s")
             % f'<a href="https://docs.python.org/3/howto/regex.html">{_("regular expressions")}</a>',
         }
@@ -177,6 +176,7 @@ def logbook_or_new_edit_delete_post(request, lb_name):
     # XX Adjust available commands according to config
     # XX then according to user auth
     # XX Select command not implemented
+    cfg = get_config()
     command_names = [
         _("New"),
         _("Find"),
@@ -185,7 +185,7 @@ def logbook_or_new_edit_delete_post(request, lb_name):
         _("Last day"),
         _("Help"),
     ]
-    lb_url = reverse("flexelog:logbook", args=[lb_name])
+    lb_url = reverse("flexelog:logbook", args=[logbook.name])
     commands = [(cmd, f"{lb_url}?cmd={cmd}") for cmd in command_names]
     commands[4] = (_("Last day"), f"{lb_url}past1?mode=Summary")
 
@@ -204,8 +204,8 @@ def logbook_or_new_edit_delete_post(request, lb_name):
     col_names = [_("ID"), _("Date")] + attrs
     col_fields = ["id", "date"] + [f"attrs__{attr.lower()}" for attr in attrs]
     # Add Text column if config'd to do so
-    summary_lines = cfg.get(lb_name, "Summary lines", valtype=int)
-    show_text = cfg.get(lb_name, "Show text", valtype=bool)
+    summary_lines = cfg.get(logbook.name, "Summary lines", valtype=int)
+    show_text = cfg.get(logbook.name, "Show text", valtype=bool)
     if show_text and summary_lines > 0:
         col_names.append(
             _("Text")
@@ -243,7 +243,7 @@ def logbook_or_new_edit_delete_post(request, lb_name):
     elif sort_attr_field := columns.get(get_param(request, "rsort")):
         is_rsort = True
     else:
-        is_rsort = cfg.get(lb_name, "Reverse sort")
+        is_rsort = cfg.get(logbook.name, "Reverse sort")
         sort_attr_field = columns[_("Date")]
 
     # try:
@@ -268,7 +268,7 @@ def logbook_or_new_edit_delete_post(request, lb_name):
         per_page = qs.count() + 1
     else:
         per_page = get_param(request, "npp", valtype=int) or cfg.get(
-            lb_name, "entries per page"
+            logbook.name, "entries per page"
         )
 
     paginator = Paginator(qs, per_page=per_page)
@@ -306,8 +306,8 @@ def logbook_or_new_edit_delete_post(request, lb_name):
         "page_n_of_N": page_n_of_N,
         "selected_id": selected_id,
         "summary_lines": summary_lines,
-        "main_tab": cfg.get(lb_name, "main tab", valtype=str, default=""),
-        "cfg_css": cfg.get(lb_name, "css", valtype=str, default=""),
+        "main_tab": cfg.get(logbook.name, "main tab", valtype=str, default=""),
+        "cfg_css": cfg.get(logbook.name, "css", valtype=str, default=""),
         "sort_attr_field": sort_attr_field,
         "is_rsort": is_rsort,
         "filters": filters,
@@ -476,7 +476,7 @@ def test(request, lb_name, entry_id):
         # 'Logbook "%s" does not exist on remote server'
         raise  # XXX
     entry = get_object_or_404(Entry, lb=logbook, id=entry_id)
-    lb_attributes = cfg.lb_attrs[lb_name]
+    lb_attributes = cfg.lb_attrs[logbook.name]
     attr_names = entry.attrs.keys()
     # Error: translate: "Attribute <b>%s</b> not supplied" for required
 
@@ -488,8 +488,8 @@ def test(request, lb_name, entry_id):
         {
             "logbook": logbook,
             "logbooks": Logbook.objects.all(),  # XX will need to restrict to what user auth is, not show deactivated ones
-            "main_tab": cfg.get(lb_name, "main tab", valtype=str, default=""),
-            "cfg_css": cfg.get(lb_name, "css", valtype=str, default=""),
+            "main_tab": cfg.get(logbook.name, "main tab", valtype=str, default=""),
+            "cfg_css": cfg.get(logbook.name, "css", valtype=str, default=""),
         }
     )
     return render(request, "flexelog/edit.html", context)
