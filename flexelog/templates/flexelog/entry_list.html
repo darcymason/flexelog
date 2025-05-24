@@ -73,8 +73,10 @@
           </td>
           {% endfor %}
         </tr>
+        {% empty %}
+            </table><tr><td class="errormsg">{% translate 'No entries found' %}</td></tr>
         {% endfor %}
-      </table>
+    {% if page_obj %}</table>{% endif %}
   {% if page_obj.has_other_pages %}
     <tr>
       <td class="menuframe"><span class="menu3">

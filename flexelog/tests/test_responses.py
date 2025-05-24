@@ -44,6 +44,10 @@ global_config = dedent(
     Page Title = Log 2 - $Subject
     Quick filter = Category, Status
 
+    [EmptyLog]
+    Comment = No entries to start
+    Attributes = Subject
+    
     """
 )
 
@@ -71,6 +75,46 @@ class TestResponsesEmptyDb(TestCase):
         # Different language
         response = self.client.get(url, headers={"accept-language": "de"})
         self.assertContains(response, "existiert nicht auf entferntem Server")
+
+
+class TestEmptyLogbook(TestCase):
+    """Test basic CRUD operations via django test Client tests starting with empty Logbook"""
+
+    @classmethod
+    def setUpTestData(cls):
+        # Set up data for the whole TestCase
+        cls.global_config = ElogConfig.objects.create(
+            name="default",
+            config_text=global_config,
+        )
+        cls.lb = Logbook.objects.create(name="EmptyLog")
+        cls.lb.save()
+
+    def test_empty_list_entries(self):
+        url = reverse("flexelog:logbook", kwargs={"lb_name": "EmptyLog"})
+        response = self.client.get(url)
+        self.assertContains(response, "No entries found")
+    
+    def test_empty_logbook_new_entry(self):
+        data = {
+            'cmd': 'Submit',
+            'date': '2025-05-23 22:05:40',
+            'subject': 'Test edit',
+            'page_type': 'New',
+            'attr_names': 'subject',
+            'edit_id': '',
+            'reply_to': '',
+            'text': 'Test New entry empty logbook',
+        }
+        url = reverse("flexelog:logbook", kwargs={"lb_name": "EmptyLog"})
+        response = self.client.post(url, data=data)
+
+        # check entry in db created
+        entry = self.lb.entry_set.last()
+        self.assertEqual(entry.id, 1)
+    
+    def test_delete_last_entry_redirect(self):
+        pass
 
 
 class TestResponsesNoAuth(TestCase):
