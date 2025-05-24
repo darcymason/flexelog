@@ -1,0 +1,60 @@
+{% extends 'flexelog/base.html' %}
+{% load i18n %}
+
+{% block title %}
+  Fl'og {{ logbook.name }}
+{% endblock %}
+{% block more_head_links %}
+  {{ form.media }}
+{% endblock %}
+
+{% block body %}
+  <form name="form1" method="GET" action=".">
+    <table class="frame" cellpadding="0" cellspacing="0">
+      {% include 'flexelog/include/lb_tabs.html' %}
+      <tr>
+        <td class="menuframe">
+          <span class="menu1">
+            <input type="submit" value="{% translate 'Search' %}" />&nbsp;&nbsp;
+            <input type="reset" value="{% translate 'Reset Form' %}" />&nbsp;&nbsp;
+            <input type="submit" name="cmd" value="{% translate 'Back' %}" />&nbsp;&nbsp;
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <td class="form1">
+          <table>
+            <tr>
+              <td valign="top" class="form1"><b>{{ form.mode.label }}:</b><br>{{ form.mode }}</td>
+              <td valign="top" class="form1"><b>{{ form.export_to.label }}:</b><br>{{ form.export_to }}</td>
+              <td valign="top" class="form2"><b>{{ form.options.label }}:</b><br>{{ form.options }}
+                {% translate 'Display' %}&nbsp;{{ form.npp }} {{ form.npp.label }}</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    <tr><td class="form2"><b>{% translate "Filters" %}:</b>&nbsp;&nbsp;
+        <span class="selcomment">({{ regex_message|safe }})</span><br>
+        <table width="100%" cellspacing=0>
+    <tr><td class="attribname" nowrap width="10%">{% translate "Entry date" %}:</td><td class="attribvalue">
+        <table width="100%" cellspacing=0 border=0>
+            <tr><td width="1%">{{ form.start_date.label }}:</td><td>{{ form.start_date }}&nbsp;&nbsp;/&nbsp;&nbsp;{{ form.last.label }}: {{ form.last }}</td></tr>
+            <tr><td width="1%">{{ form.end_date.label }}:</td><td>{{ form.end_date }}</td></tr>
+        </table>  
+    {# --------- Entry Attributes ---------------------- #}
+        {% for attr_field in form.attr_bound_fields.values %}
+        <tr><td class="attribname">{{ attr_field.label }}</td>
+            <td class="attribvalue">{{ attr_field }}</td>
+        {% endfor %}
+    {# --------- #}
+    <tr>
+        <td class="attribname">{{ form.subtext.label }}:</td>
+        <td class="attribvalue">{{ form.subtext }} {{ form.sall }} {{ form.sall.label }}</td>
+    </tr>
+    <tr>
+        <td class="attribvalue"></td>
+        <td class="attribvalue">{{ form.casesensitive }} {{ form.casesensitive.label }}
+    </tr>  
+</table>
+  </form>
+{% endblock %}

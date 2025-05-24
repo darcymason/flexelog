@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.models import User
 
 from textwrap import shorten
 from configparser import ConfigParser, UNNAMED_SECTION
@@ -71,6 +72,7 @@ class Logbook(models.Model):
 
 class Entry(models.Model):
     rowid = models.AutoField(primary_key=True, blank=True)
+    # XXXX author = models.ForeignKey(User, on_delete=models.CASCADE)
     lb = models.ForeignKey(Logbook, on_delete=models.PROTECT)
     id = models.IntegerField(blank=False, null=False)
     date = models.DateTimeField()

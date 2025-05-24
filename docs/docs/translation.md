@@ -8,7 +8,7 @@ reformmated to a `gettext`-style setup as per usual Django (and Python in genera
 To prepare the 'POT' files which contain the translations:
 
 ```console
-python manage.py makemessages -l de
+python manage.py makemessages --all
 ```
 
 Then run
