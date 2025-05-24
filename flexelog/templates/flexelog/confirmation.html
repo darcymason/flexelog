@@ -1,0 +1,29 @@
+{% extends "flexelog/base.html" %}
+{% load i18n %}
+
+{% block title %}Fl'og {{ title }}{% endblock title %}
+{% block more_head_links %}
+ {{ form.media }}
+
+{% endblock more_head_links %}
+
+{% block body %}
+<form name="form1" method="{{ method }}" action="{{ action }}">
+    {% if method == "POST" %}{% csrf_token %}{% endif %}
+    <input type=hidden name=cmd value="{{ cmd }}">
+    <table class="dlgframe" cellspacing="0" align="center">
+        <tr>
+            <td class="dlgtitle">{{ prompt }}</td>
+        </tr>
+        <tr>
+            <td align=center class="dlgform">{{ message }}</td>
+        </tr>
+        <tr>
+            <td align=center class="dlgform">
+                <input type="submit" name="confirm" value="{{ true_label }}">
+                <input type=submit name="confirm" value="{{ false_label }}">
+            </td>
+        </tr>
+    </table>
+</form>
+{% endblock %}

@@ -24,9 +24,12 @@ from urllib.parse import unquote_plus
 
 from django_tuieditor.widgets import MarkdownViewerWidget
 
-def get_param(request, key: str, *, valtype: type = str, default: Any = None, force_single=True) -> Any:
+
+def get_param(
+    request, key: str, *, valtype: type = str, default: Any = None, force_single=True
+) -> Any:
     """Return the GET query value for key, but default if not found or not of right type
-    
+
     get_single only affects what happens if a value in the query string is repeated.
     If True, it is standard Django 'get' behaviour - the last value is returned.
 
@@ -59,10 +62,10 @@ def do_logout(request):
 def index(request):
     # XXX need to check Protect Selection page whether the list is shown only to registered users,
     #   (or do equivalent permissions "view logbook index" or similar)
-    # OR Selection page = <file> / Guest Selection page = <file> equiv (latter if 'global' password file used in PSI elog) 
+    # OR Selection page = <file> / Guest Selection page = <file> equiv (latter if 'global' password file used in PSI elog)
     # Welcome Title = <html code> equivalent needed
     # Page title from [global] section
-    # 
+    #
     cfg = get_config()
     logbooks = [lb for lb in Logbook.objects.all() if lb.name in cfg.logbook_names()]
 
@@ -70,7 +73,9 @@ def index(request):
         "cfg": cfg,
         "logbooks": logbooks,
         "heading": "FlexElog Logbook Selection",
-        "cfg_css": cfg.get("global", "css", valtype=str, default=""), # XXX admin forces global since lb can't exist
+        "cfg_css": cfg.get(
+            "global", "css", valtype=str, default=""
+        ),  # XXX admin forces global since lb can't exist
     }
     return render(request, "flexelog/index.html", context)
 
@@ -88,7 +93,7 @@ def post_new_reply_edit_delete(request, lb_name, logbook):
         page_type = request.POST["page_type"]
         attr_names = request.POST["attr_names"].split(",")
         lb_attrs = cfg.lb_attrs[lb_name]
-        form = EntryForm( data=request.POST, lb_attrs=lb_attrs)
+        form = EntryForm(data=request.POST, lb_attrs=lb_attrs)
         if not form.is_valid():
             context = form.get_context()
             context.update(
@@ -100,7 +105,7 @@ def post_new_reply_edit_delete(request, lb_name, logbook):
                 }
             )
             return render(request, "flexelog/edit.html", context)
-        
+
         # Form is valid, now save the inputs to a database Entry
         attrs = {attr_name: form.cleaned_data[attr_name] for attr_name in attr_names}
         if page_type == "Edit":
@@ -117,7 +122,9 @@ def post_new_reply_edit_delete(request, lb_name, logbook):
             entry.date = form.cleaned_data["date"]
             # Find max id for this logbook and add 1
             # XXX is this thread-safe?  Trap exists error and try again 1 higher
-            entry.id = Entry.objects.filter(lb__name=lb_name).order_by("-id").first().id + 1
+            entry.id = (
+                Entry.objects.filter(lb__name=lb_name).order_by("-id").first().id + 1
+            )
         entry.save(force_insert=is_new_entry)
         redirect_url = reverse("flexelog:entry_detail", args=[lb_name, entry.id])
         return redirect(redirect_url)
@@ -148,7 +155,9 @@ def logbook_or_new_edit_delete_post(request, lb_name):
         lb_attrs = cfg.lb_attrs[lb_name]
         # for lb_attr in lb_attrs.values():
         #     lb_attr.required = False
-        form = SearchForm(initial={"options": ["reverse"], "mode": "Display full"}, lb_attrs=lb_attrs)
+        form = SearchForm(
+            initial={"options": ["reverse"], "mode": "Display full"}, lb_attrs=lb_attrs
+        )
         context = {
             "command_names": [_("Search"), _("Reset Form"), _("Back")],
             "form": form,
@@ -156,10 +165,12 @@ def logbook_or_new_edit_delete_post(request, lb_name):
             "logbooks": Logbook.objects.all(),  # XX will need to restrict to what user auth is, not show deactivated ones
             "main_tab": cfg.get(lb_name, "main tab", valtype=str, default=""),
             "cfg_css": cfg.get(lb_name, "css", valtype=str, default=""),
-            "regex_message": _("Text fields are treated as %s") % f'<a href="https://docs.python.org/3/howto/regex.html">{_("regular expressions")}</a>',
+            "regex_message": _("Text fields are treated as %s")
+            % f'<a href="https://docs.python.org/3/howto/regex.html">{_("regular expressions")}</a>',
         }
 
         return render(request, "flexelog/search_form.html", context)
+
     # Now dealing with GET, listing logbook entries
     selected_id = get_param(request, "id", valtype=int)
 
@@ -185,18 +196,22 @@ def logbook_or_new_edit_delete_post(request, lb_name):
     )
     current_mode = _(get_param(request, "mode", default="Summary").capitalize())
 
-    attrs = list(cfg.lb_attrs[logbook.name].keys())  # XX can also config Attributes shown
+    attrs = list(
+        cfg.lb_attrs[logbook.name].keys()
+    )  # XX can also config Attributes shown
     attrs_lower = [attr.lower() for attr in attrs]
     # XX col order could be changed in config
-    col_names = [_("ID"), _("Date")] + attrs 
+    col_names = [_("ID"), _("Date")] + attrs
     col_fields = ["id", "date"] + [f"attrs__{attr.lower()}" for attr in attrs]
     # Add Text column if config'd to do so
     summary_lines = cfg.get(lb_name, "Summary lines", valtype=int)
     show_text = cfg.get(lb_name, "Show text", valtype=bool)
     if show_text and summary_lines > 0:
-        col_names.append(_("Text"))  # XX even if text not shown, should still be in filters below
+        col_names.append(
+            _("Text")
+        )  # XX even if text not shown, should still be in filters below
         col_fields.append("text")
-    columns = dict(zip(col_names, col_fields))    
+    columns = dict(zip(col_names, col_fields))
 
     col_names_lower = [x.lower() for x in col_names] + ["subtext"]
     # XX could also be in columns not shown in display
@@ -206,23 +221,20 @@ def logbook_or_new_edit_delete_post(request, lb_name):
         if k.lower() in col_names_lower and k.lower() != "id" and v != ""
     }
     # need to handle 'subtext' used in original psi elog query string
-    if 'subtext' in filters:
-        filters['text'] = filters.pop('subtext')
+    if "subtext" in filters:
+        filters["text"] = filters.pop("subtext")
 
     filter_attrs = {  # actually text and attrs
         f"{'attrs__' if k.lower() in attrs_lower else ''}{k.lower()}": v
         for k, v in filters.items()
     }
-    
+
     # Some db backends (e.g. sqlite, oracle?) do not do case sensitive on unicode,
     # and/or on JSONFields.  So do case insensitive and filter entires in code below
-    filter_fields = {
-        f"{k}__icontains": v
-        for k, v in filter_attrs.items()
-    }
+    filter_fields = {f"{k}__icontains": v for k, v in filter_attrs.items()}
 
     # XX Need to exclude date, id from 'contains'-style search, translate back
-    
+
     # Determine sort order of entries
     # Default is by date
     # Check if query args have sort specified
@@ -236,7 +248,11 @@ def logbook_or_new_edit_delete_post(request, lb_name):
 
     # try:
     order_by = Lower(sort_attr_field).desc() if is_rsort else Lower(sort_attr_field)
-    qs = logbook.entry_set.values(*columns.values()).filter(**filter_fields).order_by(order_by)
+    qs = (
+        logbook.entry_set.values(*columns.values())
+        .filter(**filter_fields)
+        .order_by(order_by)
+    )
 
     # 'Manually' filter attrs if case sensitive search
     if get_param(request, "casesensitive", valtype=bool):
@@ -251,7 +267,9 @@ def logbook_or_new_edit_delete_post(request, lb_name):
         req_page_number = 1
         per_page = qs.count() + 1
     else:
-        per_page = get_param(request, "npp", valtype=int) or cfg.get(lb_name, "entries per page")
+        per_page = get_param(request, "npp", valtype=int) or cfg.get(
+            lb_name, "entries per page"
+        )
 
     paginator = Paginator(qs, per_page=per_page)
     # If query string has "id=#", then need to position to page with that id
@@ -265,13 +283,15 @@ def logbook_or_new_edit_delete_post(request, lb_name):
                 break
         else:  # shouldn't be necessary since checked it exists already...
             page_obj = paginator.get_page(req_page_number)
-    
-    num_pages = paginator.num_pages 
+
+    num_pages = paginator.num_pages
     if num_pages > 1:
-        page_n_of_N = _("Page {num:d} of {count:d}").format(num=page_obj.number, count=num_pages)
+        page_n_of_N = _("Page {num:d} of {count:d}").format(
+            num=page_obj.number, count=num_pages
+        )
     else:
         page_n_of_N = None
-    
+
     context = {
         "logbook": logbook,
         "logbooks": Logbook.objects.all(),  # XX will need to restrict to what user auth is
@@ -280,11 +300,13 @@ def logbook_or_new_edit_delete_post(request, lb_name):
         "current_mode": current_mode,
         "columns": columns,
         "page_obj": page_obj,
-        "page_range": list(paginator.get_elided_page_range(page_obj.number, on_each_side=1, on_ends=3)),
+        "page_range": list(
+            paginator.get_elided_page_range(page_obj.number, on_each_side=1, on_ends=3)
+        ),
         "page_n_of_N": page_n_of_N,
         "selected_id": selected_id,
         "summary_lines": summary_lines,
-        "main_tab": cfg.get(lb_name, "main tab", valtype=str,default=""),
+        "main_tab": cfg.get(lb_name, "main tab", valtype=str, default=""),
         "cfg_css": cfg.get(lb_name, "css", valtype=str, default=""),
         "sort_attr_field": sort_attr_field,
         "is_rsort": is_rsort,
@@ -294,33 +316,34 @@ def logbook_or_new_edit_delete_post(request, lb_name):
     return render(request, "flexelog/entry_list.html", context)
 
 
-def get_new_edit(request, logbook, command, entry_id):
+def new_edit_get(request, logbook, command, entry):
     # XXXX check request.user permissions for each of these, for the logbook
-    
+
     if command == _("New"):
         entry = Entry(lb=logbook)
-    else: # _("Reply"), _("Duplicate")
-        original_entry = get_object_or_404(Entry, lb=logbook, id=entry_id)
-        entry = copy(original_entry)
+        page_type = "New"
+    if command == _("Edit"):
+        # XXX last_mod_author  = <current user>, original author stays
+        page_type = "Edit"
+    else:  # _("Reply"), _("Duplicate")
+        entry = copy(entry)
         entry.pk = None
         entry.id = None
         entry.reply_to = None
         # XXXX entry.author = <current user>
+        page_type = "Duplicate"
         if command == _("Reply"):
+            page_type = "Reply"
             entry.reply_to = entry.id
             entry.text = (
                 f"\n{_('Quote')}:\n"
                 + textwrap.indent(entry.text or "", "> ", lambda _: True)
                 + "\n"
             )
-    
-    if command == _("Edit"): 
-        entry = original_entry
-        # XXX last_mod_author  = <current user>, original author stays
-        page_type = "Edit"
-    else:
+
+    if command != _("Edit"):
         entry.date = timezone.now()
-        page_type = "New"
+        # XXX update last modified date
 
     if command == _("New"):
         cfg = get_config()
@@ -339,14 +362,71 @@ def get_new_edit(request, logbook, command, entry_id):
     }
     context.update(form.get_context())
     return render(request, "flexelog/edit.html", context)
-    
+
+
+def entry_detail_post(request, logbook: Logbook, entry: Entry):
+    """POST method for "<str:lb_name>/<int:entry_id>/"""
+    cmd = request.POST.get("cmd")
+    url_detail = reverse("flexelog:entry_detail", args=[logbook.name, entry.id])
+    if cmd == "Delete":  # hidden field from POSTed Confirmation form
+        if request.POST.get("confirm") != _("Yes"):
+            return redirect(url_detail)
+
+        entry.delete()
+
+        # Find new entry to redirect to ... next higher available number or the last entry
+        next_entry = logbook.entry_set.filter(id__gt=entry.id).order_by("id").first()
+        if not next_entry:
+            next_entry = logbook.entry_set.order_by("-id").first()  # max id entry
+            if not next_entry:  # no entries at all, go to logbook main listing:
+                return redirect(reverse("flexelog:logbook", args=[logbook.name]))
+
+        return redirect(
+            reverse("flexelog:entry_detail", args=[logbook.name, next_entry.id])
+        )
+
+    # XXX else?
+    return redirect(url_detail)
+
+
 # ---------------------
-# view for route "<str:lb_name>/<int:entry_id>/"
+# view for route "<str:lb_name>/<int:entry_id>/" and ?cmd={Delete, Find, Edit, etc.}
 def entry_detail(request, lb_name, entry_id):
-    # Commands
-    # XXX need to take from config file, not just default
-    cfg = get_config()
     lb_name = unquote_plus(lb_name)
+    try:
+        logbook = Logbook.objects.get(name=lb_name)
+    except Logbook.DoesNotExist:
+        # 'Logbook "%s" does not exist on remote server'
+        raise  # XXX
+    entry = get_object_or_404(Entry, lb=logbook, id=entry_id)
+
+    if request.method == "POST":
+        return entry_detail_post(request, logbook, entry)
+
+    return entry_detail_get(request, logbook, entry)
+
+
+def entry_detail_get(request, logbook, entry):
+    command = get_param(request, "cmd")
+    # Delete starts with GET request, confirmation form does POST
+    if command == _("Delete"):
+        context = dict(
+            title=_("Delete"),
+            method="POST",
+            action=f".",
+            cmd="Delete",
+            prompt=_("Are you sure to delete this entry?"),
+            message = f"#{entry.id}",
+            true_label = _("Yes"),
+            false_label = _("No"),
+        )
+        return render(request, "flexelog/confirmation.html", context)
+    
+    elif command in (_("New"), _("Edit"), _("Reply"), _("Duplicate")):
+        return new_edit_get(request, logbook, command, entry)
+    
+    cfg = get_config()
+    # XXX need to take commands from config file, not just default
     command_names = [
         _("List"),
         _("New"),
@@ -358,9 +438,12 @@ def entry_detail(request, lb_name, entry_id):
         # _("Config"),
         # _("Help"),
     ]
-    url_detail = reverse("flexelog:entry_detail", args=[lb_name, entry_id])
+    url_detail = reverse("flexelog:entry_detail", args=[logbook.name, entry.id])
     commands = [(cmd, f"{url_detail}?cmd={cmd}") for cmd in command_names]
-    commands[0] = (_("List"), reverse("flexelog:logbook", args=[lb_name]) + f"?id={entry_id}")
+    commands[0] = (
+        _("List"),
+        reverse("flexelog:logbook", args=[logbook.name]) + f"?id={entry.id}",
+    )
 
     command = get_param(request, "cmd")
     if command:
@@ -373,28 +456,17 @@ def entry_detail(request, lb_name, entry_id):
             #         + " (not currently implemented)"
             #     )
 
-    try:
-        logbook = Logbook.objects.get(name=lb_name)
-    except Logbook.DoesNotExist:
-        # 'Logbook "%s" does not exist on remote server'
-        raise  # XXX
-
-    if command == _("Delete"):
-        pass
-    elif command in (_("New"), _("Edit"), _("Reply"), _("Duplicate")):
-        return get_new_edit(request, logbook, command, entry_id=entry_id)
-
-    entry = get_object_or_404(Entry, lb=logbook, id=entry_id)
     context = {
         "entry": entry,
         "logbook": logbook,
         "logbooks": Logbook.objects.all(),
         "commands": commands,
-    }  
+    }
     # If get here, then are just doing the detail view, no editing
     form = EntryViewerForm(data={"text": entry.text or ""})
-    context['form'] = form
+    context["form"] = form
     return render(request, "flexelog/entry_detail.html", context)
+
 
 def test(request, lb_name, entry_id):
     cfg = get_config()
@@ -406,7 +478,7 @@ def test(request, lb_name, entry_id):
     entry = get_object_or_404(Entry, lb=logbook, id=entry_id)
     lb_attributes = cfg.lb_attrs[lb_name]
     attr_names = entry.attrs.keys()
-    # Error: translate: "Attribute <b>%s</b> not supplied" for required 
+    # Error: translate: "Attribute <b>%s</b> not supplied" for required
 
     # form = EntryForm(instance=entry, initial={"date": timezone.now()})  # instance=entry for edit existing
     initial = {"date": timezone.now()}
@@ -416,7 +488,7 @@ def test(request, lb_name, entry_id):
         {
             "logbook": logbook,
             "logbooks": Logbook.objects.all(),  # XX will need to restrict to what user auth is, not show deactivated ones
-            "main_tab": cfg.get(lb_name, "main tab", valtype=str,default=""),
+            "main_tab": cfg.get(lb_name, "main tab", valtype=str, default=""),
             "cfg_css": cfg.get(lb_name, "css", valtype=str, default=""),
         }
     )

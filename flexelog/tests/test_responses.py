@@ -133,9 +133,9 @@ class TestResponsesNoAuth(TestCase):
 
         # Note Reverse Sort is config'd
         pattern = (
-            r"<tr.*ID.*Date.*Status.*Category.*Subject.*Text.*</tr>"
+            r"<th.*ID.*Date.*Status.*Category.*Subject.*Text.*</th>"
             r".*<tr.*2.*Done.*Cat 2.*Second entry.*Log 1 entry 2.*</tr>"
-            r".*<tr.*1.*Started.*Cat 1\|Cat 2.*First entry.*</tr>"
+            r".*<tr.*1.*Started.*Cat 1 \| Cat 2.*First entry.*</tr>"
         )
         self.assertTrue(re.search(pattern, rstr, re.DOTALL))
 

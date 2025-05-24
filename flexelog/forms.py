@@ -165,4 +165,4 @@ class SearchForm(Form):
         
         # Get bound fields used in html template
         self.attr_bound_fields = {name: field.get_bound_field(self, name) for name, field in attr_fields.items()}
-        
+
