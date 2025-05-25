@@ -57,17 +57,29 @@ class Logbook(models.Model):
     comment = models.CharField(max_length=50, blank=True)
     config = models.TextField(blank=True, null=True)
 
-    def __str__(self):
-        return f"'{self.name}':   {self.comment}"
+    # The following override any permissions set for Groups or Users
+    active = models.BooleanField(default=True, help_text=_("If False, logbook cannot be viewed or edited"))
+    readonly = models.BooleanField(default=False, help_text=_("If True, logbook is frozen, but existing entries can be viewed"))
+    auth_required = models.BooleanField(default=True, help_text=_("If False, anyone can view or edit this logbook without login"))
+    order = models.IntegerField(default=999, help_text=_("Logbooks will be listed in increasing order if specified"))
 
-    def latest_date(self):
-        return self.entry_set.latest("date").date  # XXX need to check if no entries
     class Meta:
-        indexes = [
-            models.Index(fields=["name"]),
-        ]
+        indexes = [ models.Index(fields=["name"])]
         verbose_name = _("Logbook")
         verbose_name_plural = _("Logbooks")
+
+    def __str__(self):
+        return (
+            f"'{self.name}':   {self.comment}   order:{self.order} "
+            f"{'   active' if self.active else ''} {'   readonly' if self.readonly else ''}"
+            f"{'   auth-required' if self.auth_required else ''}"
+        )
+    def latest_date(self):
+        return self.entry_set.latest("date").date  # XXX need to check if no entries
+    
+    @classmethod
+    def active_logbooks(cls):
+        return list(cls.objects.filter(active=True).order_by("order"))
 
 
 class Entry(models.Model):

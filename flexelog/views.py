@@ -55,6 +55,12 @@ def get_param(
     return val[0] if len(val) == 1 else val
 
 
+def available_logbooks(request) -> list[Logbook]:
+    # XX need to list active logbooks as per current user
+    logbooks = Logbook.objects.filter(active=True)
+    # XXX further filter for what user has permissions to at least view
+    return list(logbooks)
+
 def do_logout(request):
     return render(request, "flexelog/do_logout.html")
 
@@ -67,11 +73,10 @@ def index(request):
     # Page title from [global] section
     #
     cfg = get_config()
-    logbooks = [lb for lb in Logbook.objects.all() if lb.name in cfg.logbook_names()]
 
     context = {
         "cfg": cfg,
-        "logbooks": logbooks,
+        "logbooks": available_logbooks(request),
         "heading": "FlexElog Logbook Selection",
         "cfg_css": cfg.get(
             "global", "css", valtype=str, default=""
@@ -95,7 +100,7 @@ def logbook_post(request, logbook):
             context.update(
                 {
                     "logbook": logbook,
-                    "logbooks": Logbook.objects.all(),  # XX will need to restrict to what user auth is, not show deactivated ones
+                    "logbooks": available_logbooks(request),  # XX will need to restrict to what user auth is, not show deactivated ones
                     "main_tab": cfg.get(logbook.name, "main tab", valtype=str, default=""),
                     "cfg_css": cfg.get(logbook.name, "css", valtype=str, default=""),
                 }
@@ -161,7 +166,7 @@ def logbook_get(request, logbook):
             "command_names": [_("Search"), _("Reset Form"), _("Back")],
             "form": form,
             "logbook": logbook,
-            "logbooks": Logbook.objects.all(),  # XX will need to restrict to what user auth is, not show deactivated ones
+            "logbooks": available_logbooks(request),  # XX will need to restrict to what user auth is, not show deactivated ones
             "main_tab": cfg.get(logbook.name, "main tab", valtype=str, default=""),
             "cfg_css": cfg.get(logbook.name, "css", valtype=str, default=""),
             "regex_message": _("Text fields are treated as %s")
@@ -294,7 +299,7 @@ def logbook_get(request, logbook):
 
     context = {
         "logbook": logbook,
-        "logbooks": Logbook.objects.all(),  # XX will need to restrict to what user auth is
+        "logbooks": available_logbooks(request),  # XX will need to restrict to what user auth is
         "commands": commands,
         "modes": modes,
         "current_mode": current_mode,
@@ -357,7 +362,7 @@ def new_edit_get(request, logbook, command, entry):
     context = {
         "entry": entry,
         "logbook": logbook,
-        "logbooks": Logbook.objects.all(),
+        "logbooks": available_logbooks(request),
         "commands": [],
     }
     context.update(form.get_context())
@@ -459,7 +464,7 @@ def entry_detail_get(request, logbook, entry):
     context = {
         "entry": entry,
         "logbook": logbook,
-        "logbooks": Logbook.objects.all(),
+        "logbooks": available_logbooks(request),
         "commands": commands,
     }
     # If get here, then are just doing the detail view, no editing
@@ -487,7 +492,7 @@ def test(request, lb_name, entry_id):
     context.update(
         {
             "logbook": logbook,
-            "logbooks": Logbook.objects.all(),  # XX will need to restrict to what user auth is, not show deactivated ones
+            "logbooks": available_logbooks(request),  # XX will need to restrict to what user auth is, not show deactivated ones
             "main_tab": cfg.get(logbook.name, "main tab", valtype=str, default=""),
             "cfg_css": cfg.get(logbook.name, "css", valtype=str, default=""),
         }

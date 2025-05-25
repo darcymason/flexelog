@@ -7,7 +7,7 @@ import warnings
 import functools
 
 from django.db.models.signals import post_save  # update config when logbook changed
-from flexelog.models import ElogConfig
+from flexelog.models import ElogConfig, Logbook
 
 import logging
 
@@ -357,13 +357,15 @@ def config_updated(sender, **kwargs):
 def reload_config():
     global _cfg
     try:
-        config_text = ElogConfig.objects.get(name="default").config_text
+        global_config_text = "[global]\n" + ElogConfig.objects.get(name="default").config_text + "\n"
     except ElogConfig.DoesNotExist:
-        config_text = "[global]"
-    _cfg = LogbookConfig(config_text)
+        global_config_text = "[global]\n"
+    lb_config_texts = [f"\n\n[{lb.name}]\n" + (lb.config if lb.config else "") for lb in Logbook.active_logbooks()]
+    _cfg = LogbookConfig(global_config_text + "".join(lb_config_texts))
 
 # Set up signal to reload config if ElogConfig changed
 post_save.connect(config_updated, sender=ElogConfig)
+post_save.connect(config_updated, sender=Logbook)
 
 def get_config() -> LogbookConfig:
     global _cfg
