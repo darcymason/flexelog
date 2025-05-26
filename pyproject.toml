@@ -31,7 +31,7 @@ classifiers = [
 
 dependencies = [
     "django >=5.1,<6.0",
-    "htmlobj",
+    "django-guardian >=3.0,<4.0",
     "django-tuieditor @ git+file:///c/git/django-tui.editor"   # XXXX https://github.com/darcymason/django-tui.editor.git",
 ]
 

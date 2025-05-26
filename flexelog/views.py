@@ -56,10 +56,12 @@ def get_param(
 
 
 def available_logbooks(request) -> list[Logbook]:
-    # XX need to list active logbooks as per current user
-    logbooks = Logbook.objects.filter(active=True)
-    # XXX further filter for what user has permissions to at least view
-    return list(logbooks)
+    return [
+        lb
+        for lb in Logbook.objects.filter(active=True)
+        if not lb.auth_required
+        or request.user.has_perm("view_entries", lb)
+    ]
 
 def do_logout(request):
     return render(request, "flexelog/do_logout.html")
@@ -175,7 +177,13 @@ def logbook_get(request, logbook):
 
         return render(request, "flexelog/search_form.html", context)
 
-    # Now dealing with GET, listing logbook entries
+    # Now doing the logbook entry listing summary page
+        # If get here, then are just doing the detail view, no editing
+    if logbook.auth_required and not request.user.has_perm("view_entries", logbook):
+        context = {
+            "message": _('User "%s" has no access to this logbook') % request.user.username
+        }
+        return render(request, "flexelog/show_error.html", context)
     selected_id = get_param(request, "id", valtype=int)
 
     # XX Adjust available commands according to config
@@ -468,6 +476,11 @@ def entry_detail_get(request, logbook, entry):
         "commands": commands,
     }
     # If get here, then are just doing the detail view, no editing
+    if logbook.auth_required and not request.user.has_perm("view_entries", logbook):
+        context = {
+            "message": _('User "%s" has no access to this logbook') % request.user.username
+        }
+        return render(request, "flexelog/show_error.html", context)
     form = EntryViewerForm(data={"text": entry.text or ""})
     context["form"] = form
     return render(request, "flexelog/entry_detail.html", context)

@@ -68,6 +68,18 @@ class Logbook(models.Model):
         verbose_name = _("Logbook")
         verbose_name_plural = _("Logbooks")
 
+        # Permissions below are set for each logbook instance,
+        # using django-guardian
+        # (https://django-guardian.readthedocs.io/en/stable/userguide/assign/#for-group)
+        permissions = (
+            ("view_entries", _("View entries")),
+            ("add_entries", _("Add entries")),
+            ("edit_own_entries", _("Edit own entries")),
+            ("edit_others_entries", _("Edit others' entries")),
+            ("delete_own_entries", _("Delete own entries")),
+            ("delete_others_entries", _("Delete others' entries")),
+        )
+
     def __str__(self):
         return (
             f"'{self.name}':   {self.comment}   order:{self.order} "

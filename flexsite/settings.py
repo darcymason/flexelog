@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_tuieditor.apps.DjangoTUIEditorConfig",
+    "guardian",
 ]
 
 if not TESTING:
@@ -92,6 +93,12 @@ DATABASES = {
         "NAME": BASE_DIR / "db.sqlite3", # "test.db", #
     }
 }
+
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',  # this is default
+    'guardian.backends.ObjectPermissionBackend',
+)
 
 
 # Password validation
