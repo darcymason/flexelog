@@ -63,6 +63,9 @@ def available_logbooks(request) -> list[Logbook]:
         or request.user.has_perm("view_entries", lb)
     ]
 
+# Error: Command "<b>{command}</b>" is not allowed for user "<b>{user}</b>"
+
+
 def do_logout(request):
     return render(request, "flexelog/do_logout.html")
 
