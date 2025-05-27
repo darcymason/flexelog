@@ -7,7 +7,7 @@
 <center>
 <table class="dlgframe" width="50%" cellpadding="1" cellspacing="0"
     <tr>
-        <td class="errormsg">ERROR: {{ message }}</td>
+        <td class="errormsg">{{ message | safe}}</td>
     </tr>
     <tr>
         <td class="errormsg">

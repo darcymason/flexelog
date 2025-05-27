@@ -25,6 +25,7 @@ def validate_config_section(value):
         raise ValidationError(f'{msg}: {str(e)}')
 
 
+
 class ElogConfig(models.Model):
     name = models.CharField(
         max_length=50,
@@ -96,10 +97,12 @@ class Logbook(models.Model):
 
 class Entry(models.Model):
     rowid = models.AutoField(primary_key=True, blank=True)
-    # XXXX author = models.ForeignKey(User, on_delete=models.CASCADE)
     lb = models.ForeignKey(Logbook, on_delete=models.PROTECT)
     id = models.IntegerField(blank=False, null=False)
     date = models.DateTimeField()
+    author = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True) # XX should never delete authors, ## temp
+    last_modified_author = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True, related_name="modified_entry") # XX should never delete authors, ## temp
+    last_modified_date = models.DateTimeField(null=True)
     attrs = models.JSONField(blank=True, null=True)
     reply_to = models.IntegerField(blank=True, null=True)
     encoding = models.TextField(blank=True, null=True)

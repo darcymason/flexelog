@@ -121,6 +121,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 PASSWORD_RESET_TIMEOUT = 60  # seconds  XXX temp for testing
 LOGIN_URL = reverse_lazy('login')
+LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = reverse_lazy('login')
 
 INTERNAL_IPS = [

@@ -263,7 +263,7 @@ class LogbookConfig:
 
     def get(
         self,
-        lb_name: str,
+        lb: str | Logbook,
         param: str,
         default: str | None = None,
         valtype: type | None = None,
@@ -283,6 +283,7 @@ class LogbookConfig:
         if valtype is bool:
             valtype = cfg_bool
 
+        lb_name = lb.name if isinstance(lb, Logbook) else lb
         if lb_name not in self._cfg:
             logging.warning(f"Unknown config section {lb_name}")
             return None
