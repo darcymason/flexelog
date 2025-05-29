@@ -30,7 +30,8 @@ def available_logbooks(request) -> list[Logbook]:
         lb
         for lb in Logbook.objects.filter(active=True)
         if not lb.auth_required
-        or request.user.has_perm("view_entries", lb)
+        or request.user.is_authenticated and request.user.has_perm("view_entries", lb)
+        or not lb.is_unlisted
     ]
 
 
@@ -54,8 +55,8 @@ def command_perm_response(request, command, commands, logbook, entry=None) -> Ht
         return err(msg)
 
     if logbook.auth_required and not request.user.is_authenticated:
-        # XXX redirect to login
-        return err(_("This logbook requires authentication"))
+        return redirect(f"{settings.LOGIN_URL}?next={request.path}")
+        # return err(_("This logbook requires authentication"))
 
     # XX note - could possibly restrict defaults for no-auth logbook
     #   e.g. not allow deleting entries
@@ -65,7 +66,16 @@ def command_perm_response(request, command, commands, logbook, entry=None) -> Ht
     if (not command or command == _("Find")):
         if 'view_entries' in perms:
             return None
-        return err_command()
+        else:
+            # From django admin translations
+            msg = _(
+                "You are authenticated as %(username)s, but are not authorized to access this "
+                "page. Would you like to login to a different account?"
+            ) % dict(username=request.user.username)
+            # XX offer link to logout or login as other person  
+            # logout_url =  reverse("flexelog:do_logout")
+            # link = f'<a href="{logout_url}>{_("Logout")}</a>'
+            return err(msg)  
 
     # if read-only logbook, cannot do anthing other than viewing-type commands
     if logbook.readonly:
@@ -88,7 +98,7 @@ def command_perm_response(request, command, commands, logbook, entry=None) -> Ht
     if entry is None:
         return None  # will have to deal with after POST or something
 
-    if request.user != entry.author:
+    if entry.author and request.user != entry.author:
         if command==("Edit") and 'edit_others_entries' not in perms:
             return err(_("Only user <b>%s</b> can edit this entry") % entry.author.username)
         if command==("Delete") and 'delete_others_entries' not in perms:

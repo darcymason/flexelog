@@ -62,6 +62,7 @@ class Logbook(models.Model):
     active = models.BooleanField(default=True, help_text=_("If False, logbook cannot be viewed or edited"))
     readonly = models.BooleanField(default=False, help_text=_("If True, logbook is frozen, but existing entries can be viewed"))
     auth_required = models.BooleanField(default=True, help_text=_("If False, anyone can view or edit this logbook without login"))
+    is_unlisted = models.BooleanField(default=False, help_text=_("If True, don't show in logbook index"))
     order = models.IntegerField(default=999, help_text=_("Logbooks will be listed in increasing order if specified"))
 
     class Meta:
@@ -86,6 +87,7 @@ class Logbook(models.Model):
             f"'{self.name}':   {self.comment}   order:{self.order} "
             f"{'   active' if self.active else ''} {'   readonly' if self.readonly else ''}"
             f"{'   auth-required' if self.auth_required else ''}"
+            f"{'   unlisted' if self.is_unlisted else ''}"
         )
     def latest_date(self):
         return self.entry_set.latest("date").date  # XXX need to check if no entries
