@@ -30,7 +30,7 @@ class ElogConfig(models.Model):
     name = models.CharField(
         max_length=50,
         choices=[
-            ("default", "Default config")
+            ("global", "Default config for all logbooks if not otherwise specified")
         ],  # XX later could have different configs
         
     )

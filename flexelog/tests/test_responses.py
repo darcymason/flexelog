@@ -84,7 +84,7 @@ class TestEmptyLogbook(TestCase):
     def setUpTestData(cls):
         # Set up data for the whole TestCase
         cls.global_config = ElogConfig.objects.create(
-            name="default",
+            name="global",
             config_text=global_config,
         )
         cls.lb = Logbook.objects.create(name="EmptyLog")
@@ -124,7 +124,7 @@ class TestResponsesNoAuth(TestCase):
     def setUpTestData(cls):
         # Set up data for the whole TestCase
         cls.global_config = ElogConfig.objects.create(
-            name="default",
+            name="global",
             config_text=global_config,
         )
 

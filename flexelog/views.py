@@ -28,7 +28,7 @@ from django_tuieditor.widgets import MarkdownViewerWidget
 def available_logbooks(request) -> list[Logbook]:
     return [
         lb
-        for lb in Logbook.objects.filter(active=True)
+        for lb in Logbook.objects.filter(active=True).order_by("order")
         if not lb.auth_required
         or request.user.is_authenticated and request.user.has_perm("view_entries", lb)
         or not lb.is_unlisted
@@ -54,13 +54,18 @@ def command_perm_response(request, command, commands, logbook, entry=None) -> Ht
         )
         return err(msg)
 
+    # XX note - could possibly restrict defaults for no-auth logbook
+    #   e.g. not allow deleting entries (but can use time restriction for that)
+    perms = get_perms(request.user, logbook) if logbook.auth_required else [p[0] for p in logbook._meta.permissions]
+
+    # If logbook is unlisted, then should look like doesn't exist to those without permissions
+    if logbook.is_unlisted and not perms:
+        return err(_('Logbook "%s" does not exist on remote server') % logbook.name)
+    
     if logbook.auth_required and not request.user.is_authenticated:
         return redirect(f"{settings.LOGIN_URL}?next={request.path}")
         # return err(_("This logbook requires authentication"))
 
-    # XX note - could possibly restrict defaults for no-auth logbook
-    #   e.g. not allow deleting entries
-    perms = get_perms(request.user, logbook) if logbook.auth_required else [p[0] for p in logbook._meta.permissions]
 
     # Just viewing:
     if (not command or command == _("Find")):
@@ -77,9 +82,9 @@ def command_perm_response(request, command, commands, logbook, entry=None) -> Ht
             # link = f'<a href="{logout_url}>{_("Logout")}</a>'
             return err(msg)  
 
-    # if read-only logbook, cannot do anthing other than viewing-type commands
+    # if read-only logbook, cannot do anything other than viewing-type commands
     if logbook.readonly:
-        extra = "nbsp;nbsp;" + _("Logbook %s is read-only") % logbook.name
+        extra = "nbsp;nbsp;" + _('Logbook "%s" is read-only') % logbook.name
         return err_command(extra)
  
     if command not in commands:
@@ -99,6 +104,8 @@ def command_perm_response(request, command, commands, logbook, entry=None) -> Ht
         return None  # will have to deal with after POST or something
 
     if entry.author and request.user != entry.author:
+        # XX below messages not quite true.  Some others might be able to edit the entry, just not current one
+        # proper message would be 'you do not have rights to edit another user's entry' (in this logbook)
         if command==("Edit") and 'edit_others_entries' not in perms:
             return err(_("Only user <b>%s</b> can edit this entry") % entry.author.username)
         if command==("Delete") and 'delete_others_entries' not in perms:
@@ -227,19 +234,28 @@ def logbook_post(request, logbook):
         return redirect(redirect_url)
     # XXX need to cover other cases?
 
-
-# view for route "<str:lb_name>/"
-def logbook_view(request, lb_name):
-    # if not request.user.is_authenticated:
-    #     return redirect(f"{settings.LOGIN_URL}?next={request.path}")
+def logbook_from_name(request, lb_name) -> Logbook | HttpResponse:
     lb_name = unquote_plus(lb_name)
     try:
         logbook = Logbook.objects.get(name=lb_name)
     except Logbook.DoesNotExist:
-        context = {
-            "message": _('Logbook "%s" does not exist on remote server') % lb_name
-        }
-        return render(request, "flexelog/show_error.html", context)
+        msg = _('Logbook "%s" does not exist on remote server') % lb_name
+        return render(request, "flexelog/show_error.html", context={"message": msg})    
+    
+    if logbook.active:
+        return logbook
+
+    # XX ?maybe should have its own message here?
+    msg = _('Logbook "%s" does not exist on remote server') % lb_name
+    return render(request, "flexelog/show_error.html", context={"message": msg})      
+
+
+
+# view for route "<str:lb_name>/"
+def logbook_view(request, lb_name):
+    logbook = logbook_from_name(request, lb_name)
+    if isinstance(logbook, HttpResponse):
+        return logbook
 
     # New (incl Reply), Edit, Delete all POST to the logbook page
     # (makes some sense as New doesn't have an id yet)
@@ -505,16 +521,15 @@ def entry_detail_post(request, logbook: Logbook, entry: Entry):
 # ---------------------
 # view for route "<str:lb_name>/<int:entry_id>/" and ?cmd={Delete, Find, Edit, etc.}
 def entry_detail(request, lb_name, entry_id):
-    lb_name = unquote_plus(lb_name)
+    logbook = logbook_from_name(request, lb_name)
+    if isinstance(logbook, HttpResponse):
+        return logbook
+
     try:
-        logbook = Logbook.objects.get(name=lb_name)
-    except Logbook.DoesNotExist:
-        return render(request, "flexelog/show_error.html", {
-            "message": _('Logbook "%s" does not exist on remote server') % lb_name
-            }
-        )
-        raise  # XXX
-    entry = Entry.objects.get(lb=logbook, id=entry_id)
+        entry = Entry.objects.get(lb=logbook, id=entry_id)
+    except Entry.DoesNotExist:
+        msg = _("This entry has been deleted")  # XX or was never made
+        return render(request, "flexelog/show_error.html", context={"message": msg})
 
     if request.method == "POST":
         return entry_detail_post(request, logbook, entry)
