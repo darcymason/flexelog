@@ -15,7 +15,7 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from flexelog.forms import EntryForm, EntryViewerForm, SearchForm
-
+from guardian.shortcuts import get_perms
 
 from .models import Logbook, Entry
 from .elog_cfg import get_config
@@ -23,6 +23,111 @@ from .elog_cfg import get_config
 from urllib.parse import unquote_plus
 
 from django_tuieditor.widgets import MarkdownViewerWidget
+
+
+def available_logbooks(request) -> list[Logbook]:
+    return [
+        lb
+        for lb in Logbook.objects.filter(active=True).order_by("order")
+        if not lb.auth_required
+        or request.user.is_authenticated and request.user.has_perm("view_entries", lb)
+        or not lb.is_unlisted
+    ]
+
+
+def command_perm_response(request, command, commands, logbook, entry=None) -> HttpResponse | None:
+    """Return an error message if the user is not allowed to <cmd> with this entry, else None"""
+    # Note `entry`` only matters when editing/deleting one's own entries vs another author
+    # If logbook does not require auth - anyone can do anything, 
+    # except perhaps delete/edit after time period 
+    def err(msg):
+        return render(request, "flexelog/show_error.html", {"message": msg})
+
+    def err_command(extra=""):
+        msg = _('Error: Command "<b>%s</b>" not allowed') % command
+        return err(msg + extra)
+
+    def err_command_user():
+        msg = _('Error: Command "<b>{command}</b>" is not allowed for user "<b>{user}</b>"').format(
+                command=command,
+                user = request.user.username
+        )
+        return err(msg)
+
+    # XX note - could possibly restrict defaults for no-auth logbook
+    #   e.g. not allow deleting entries (but can use time restriction for that)
+    perms = get_perms(request.user, logbook) if logbook.auth_required else [p[0] for p in logbook._meta.permissions]
+
+    # If logbook is unlisted, then should look like doesn't exist to those without permissions
+    if logbook.is_unlisted and not perms:
+        return err(_('Logbook "%s" does not exist on remote server') % logbook.name)
+    
+    if logbook.auth_required and not request.user.is_authenticated:
+        return redirect(f"{settings.LOGIN_URL}?next={request.path}")
+        # return err(_("This logbook requires authentication"))
+
+
+    # Just viewing:
+    if (not command or command == _("Find")):
+        if 'view_entries' in perms:
+            return None
+        else:
+            # From django admin translations
+            msg = _(
+                "You are authenticated as %(username)s, but are not authorized to access this "
+                "page. Would you like to login to a different account?"
+            ) % dict(username=request.user.username)
+            # XX offer link to logout or login as other person  
+            # logout_url =  reverse("flexelog:do_logout")
+            # link = f'<a href="{logout_url}>{_("Logout")}</a>'
+            return err(msg)  
+
+    # if read-only logbook, cannot do anything other than viewing-type commands
+    if logbook.readonly:
+        extra = "nbsp;nbsp;" + _('Logbook "%s" is read-only') % logbook.name
+        return err_command(extra)
+ 
+    if command not in commands:
+        return err_command()
+
+    if command in (_("New"), _("Reply"), _("Duplicate")) and "add_entries" in perms:
+        return None
+    
+    # Only 'edit' and 'delete' left, check user permissions first
+    can_edit = 'edit_own_entries' in perms or 'edit_others_entries' in perms
+    can_delete = 'delete_own_entries' in perms or 'delete_others_entries' in perms
+    if (command == _("Edit") and not can_edit) or (command == _("Delete") and not can_delete):
+        return err_command_user()
+    
+    # Now need to check entry vs author
+    if entry is None:
+        return None  # will have to deal with after POST or something
+
+    if entry.author and request.user != entry.author:
+        # XX below messages not quite true.  Some others might be able to edit the entry, just not current one
+        # proper message would be 'you do not have rights to edit another user's entry' (in this logbook)
+        if command==("Edit") and 'edit_others_entries' not in perms:
+            return err(_("Only user <b>%s</b> can edit this entry") % entry.author.username)
+        if command==("Delete") and 'delete_others_entries' not in perms:
+            return err(_("Only user <b>%s</b> can delete this entry") % entry.author.username)
+    elif (
+        (command == _("Edit") and 'edit_own_entries' not in perms) 
+        or (command == _("Delete") and 'delete_own_entries' not in perms)
+    ):
+        return err_command_user()
+    
+    # User has permission, in general, but now see if time-restricted
+    cfg = get_config()
+    restrict_hours = cfg.get(logbook, "Restrict edit time", valtype=float)
+    if not restrict_hours:
+        return None
+
+    timediff = timezone.now() - entry.date   # XXX timezone differences?   
+    if timediff.total_seconds > restrict_hours * 60 * 60:
+        msg = _("Entry can only be edited %1.2lg hours after creation") % restrict_hours
+        return err(msg)
+
+    return None
 
 
 def get_param(
@@ -55,6 +160,7 @@ def get_param(
     return val[0] if len(val) == 1 else val
 
 
+
 def do_logout(request):
     return render(request, "flexelog/do_logout.html")
 
@@ -67,11 +173,10 @@ def index(request):
     # Page title from [global] section
     #
     cfg = get_config()
-    logbooks = [lb for lb in Logbook.objects.all() if lb.name in cfg.logbook_names()]
 
     context = {
         "cfg": cfg,
-        "logbooks": logbooks,
+        "logbooks": available_logbooks(request),
         "heading": "FlexElog Logbook Selection",
         "cfg_css": cfg.get(
             "global", "css", valtype=str, default=""
@@ -95,9 +200,9 @@ def logbook_post(request, logbook):
             context.update(
                 {
                     "logbook": logbook,
-                    "logbooks": Logbook.objects.all(),  # XX will need to restrict to what user auth is, not show deactivated ones
-                    "main_tab": cfg.get(logbook.name, "main tab", valtype=str, default=""),
-                    "cfg_css": cfg.get(logbook.name, "css", valtype=str, default=""),
+                    "logbooks": available_logbooks(request),  # XX will need to restrict to what user auth is, not show deactivated ones
+                    "main_tab": cfg.get(logbook, "main tab", valtype=str, default=""),
+                    "cfg_css": cfg.get(logbook, "css", valtype=str, default=""),
                 }
             )
             return render(request, "flexelog/edit.html", context)
@@ -107,11 +212,15 @@ def logbook_post(request, logbook):
         if page_type == "Edit":
             entry = Entry.objects.get(lb=logbook, id=form.cleaned_data["edit_id"])
             is_new_entry = False
+            entry.last_modified_author = None if request.user.is_anonymous else request.user
+            entry.last_modified_date = timezone.now()
         else:  # New/Reply
             entry = Entry()
+            entry.author = None if request.user.is_anonymous else request.user
             entry.lb = logbook  # XX security - should check logbook = original entry if a reply
             is_new_entry = True
         # Fill in edit object
+        
         entry.attrs = attrs
         entry.text = form.cleaned_data["text"]
         if page_type in ("New", "Reply"):
@@ -125,19 +234,28 @@ def logbook_post(request, logbook):
         return redirect(redirect_url)
     # XXX need to cover other cases?
 
-
-# view for route "<str:lb_name>/"
-def logbook_view(request, lb_name):
-    # if not request.user.is_authenticated:
-    #     return redirect(f"{settings.LOGIN_URL}?next={request.path}")
+def logbook_from_name(request, lb_name) -> Logbook | HttpResponse:
     lb_name = unquote_plus(lb_name)
     try:
         logbook = Logbook.objects.get(name=lb_name)
     except Logbook.DoesNotExist:
-        context = {
-            "message": _('Logbook "%s" does not exist on remote server') % lb_name
-        }
-        return render(request, "flexelog/show_error.html", context)
+        msg = _('Logbook "%s" does not exist on remote server') % lb_name
+        return render(request, "flexelog/show_error.html", context={"message": msg})    
+    
+    if logbook.active:
+        return logbook
+
+    # XX ?maybe should have its own message here?
+    msg = _('Logbook "%s" does not exist on remote server') % lb_name
+    return render(request, "flexelog/show_error.html", context={"message": msg})      
+
+
+
+# view for route "<str:lb_name>/"
+def logbook_view(request, lb_name):
+    logbook = logbook_from_name(request, lb_name)
+    if isinstance(logbook, HttpResponse):
+        return logbook
 
     # New (incl Reply), Edit, Delete all POST to the logbook page
     # (makes some sense as New doesn't have an id yet)
@@ -147,6 +265,9 @@ def logbook_view(request, lb_name):
     
 def logbook_get(request, logbook):    
     cmd = get_param(request, "cmd")
+    commands = [_("New"), _("Find")] # _("Select"), ("Import"), ("Config"), _("Help")
+    if response := command_perm_response(request, cmd, commands, logbook):
+        return response
     if cmd == _("New"):
         return entry_detail_get(request, logbook, None)
     elif cmd == _("Find"):
@@ -161,16 +282,22 @@ def logbook_get(request, logbook):
             "command_names": [_("Search"), _("Reset Form"), _("Back")],
             "form": form,
             "logbook": logbook,
-            "logbooks": Logbook.objects.all(),  # XX will need to restrict to what user auth is, not show deactivated ones
-            "main_tab": cfg.get(logbook.name, "main tab", valtype=str, default=""),
-            "cfg_css": cfg.get(logbook.name, "css", valtype=str, default=""),
+            "logbooks": available_logbooks(request),  # XX will need to restrict to what user auth is, not show deactivated ones
+            "main_tab": cfg.get(logbook, "main tab", valtype=str, default=""),
+            "cfg_css": cfg.get(logbook, "css", valtype=str, default=""),
             "regex_message": _("Text fields are treated as %s")
             % f'<a href="https://docs.python.org/3/howto/regex.html">{_("regular expressions")}</a>',
         }
 
         return render(request, "flexelog/search_form.html", context)
 
-    # Now dealing with GET, listing logbook entries
+    # Now doing the logbook entry listing summary page
+        # If get here, then are just doing the detail view, no editing
+    if logbook.auth_required and not request.user.has_perm("view_entries", logbook):
+        context = {
+            "message": _('User "%s" has no access to this logbook') % request.user.username
+        }
+        return render(request, "flexelog/show_error.html", context)
     selected_id = get_param(request, "id", valtype=int)
 
     # XX Adjust available commands according to config
@@ -204,8 +331,8 @@ def logbook_get(request, logbook):
     col_names = [_("ID"), _("Date")] + attrs
     col_fields = ["id", "date"] + [f"attrs__{attr.lower()}" for attr in attrs]
     # Add Text column if config'd to do so
-    summary_lines = cfg.get(logbook.name, "Summary lines", valtype=int)
-    show_text = cfg.get(logbook.name, "Show text", valtype=bool)
+    summary_lines = cfg.get(logbook, "Summary lines", valtype=int)
+    show_text = cfg.get(logbook, "Show text", valtype=bool)
     if show_text and summary_lines > 0:
         col_names.append(
             _("Text")
@@ -243,7 +370,7 @@ def logbook_get(request, logbook):
     elif sort_attr_field := columns.get(get_param(request, "rsort")):
         is_rsort = True
     else:
-        is_rsort = cfg.get(logbook.name, "Reverse sort")
+        is_rsort = cfg.get(logbook, "Reverse sort")
         sort_attr_field = columns[_("Date")]
 
     # try:
@@ -294,7 +421,7 @@ def logbook_get(request, logbook):
 
     context = {
         "logbook": logbook,
-        "logbooks": Logbook.objects.all(),  # XX will need to restrict to what user auth is
+        "logbooks": available_logbooks(request),  # XX will need to restrict to what user auth is
         "commands": commands,
         "modes": modes,
         "current_mode": current_mode,
@@ -306,8 +433,8 @@ def logbook_get(request, logbook):
         "page_n_of_N": page_n_of_N,
         "selected_id": selected_id,
         "summary_lines": summary_lines,
-        "main_tab": cfg.get(logbook.name, "main tab", valtype=str, default=""),
-        "cfg_css": cfg.get(logbook.name, "css", valtype=str, default=""),
+        "main_tab": cfg.get(logbook, "main tab", valtype=str, default=""),
+        "cfg_css": cfg.get(logbook, "css", valtype=str, default=""),
         "sort_attr_field": sort_attr_field,
         "is_rsort": is_rsort,
         "filters": filters,
@@ -321,12 +448,14 @@ def new_edit_get(request, logbook, command, entry):
 
     if command == _("New"):
         entry = Entry(lb=logbook)
+        entry.author = None if request.user.is_anonymous else request.user
         page_type = "New"
     if command == _("Edit"):
-        # XXX last_mod_author  = <current user>, original author stays
         page_type = "Edit"
+        entry.last_modified_author = None if request.user.is_anonymous else request.user
     else:  # _("Reply"), _("Duplicate")
         entry = copy(entry)
+        entry.author = None if request.user.is_anonymous else request.user
         entry.pk = None
         entry.id = None
         entry.reply_to = None
@@ -357,7 +486,7 @@ def new_edit_get(request, logbook, command, entry):
     context = {
         "entry": entry,
         "logbook": logbook,
-        "logbooks": Logbook.objects.all(),
+        "logbooks": available_logbooks(request),
         "commands": [],
     }
     context.update(form.get_context())
@@ -392,13 +521,15 @@ def entry_detail_post(request, logbook: Logbook, entry: Entry):
 # ---------------------
 # view for route "<str:lb_name>/<int:entry_id>/" and ?cmd={Delete, Find, Edit, etc.}
 def entry_detail(request, lb_name, entry_id):
-    lb_name = unquote_plus(lb_name)
+    logbook = logbook_from_name(request, lb_name)
+    if isinstance(logbook, HttpResponse):
+        return logbook
+
     try:
-        logbook = Logbook.objects.get(name=lb_name)
-    except Logbook.DoesNotExist:
-        # 'Logbook "%s" does not exist on remote server'
-        raise  # XXX
-    entry = get_object_or_404(Entry, lb=logbook, id=entry_id)
+        entry = Entry.objects.get(lb=logbook, id=entry_id)
+    except Entry.DoesNotExist:
+        msg = _("This entry has been deleted")  # XX or was never made
+        return render(request, "flexelog/show_error.html", context={"message": msg})
 
     if request.method == "POST":
         return entry_detail_post(request, logbook, entry)
@@ -408,6 +539,24 @@ def entry_detail(request, lb_name, entry_id):
 
 def entry_detail_get(request, logbook, entry):
     command = get_param(request, "cmd")
+    cfg = get_config()
+    # XXX need to take commands from config file, not just default
+    command_names = [
+        _("List"),
+        _("New"),
+        _("Edit"),
+        _("Delete"),
+        _("Reply"),
+        _("Duplicate"),
+        # _("Find"),
+        # _("Config"),
+        # _("Help"),
+    ]
+
+    # Check auth
+    if response := command_perm_response(request, command, command_names, logbook, entry):
+        return response
+    
     # Delete starts with GET request, confirmation form does POST
     if command == _("Delete"):
         context = dict(
@@ -425,19 +574,6 @@ def entry_detail_get(request, logbook, entry):
     elif command in (_("New"), _("Edit"), _("Reply"), _("Duplicate")):
         return new_edit_get(request, logbook, command, entry)
     
-    cfg = get_config()
-    # XXX need to take commands from config file, not just default
-    command_names = [
-        _("List"),
-        _("New"),
-        _("Edit"),
-        _("Delete"),
-        _("Reply"),
-        _("Duplicate"),
-        # _("Find"),
-        # _("Config"),
-        # _("Help"),
-    ]
     url_detail = reverse("flexelog:entry_detail", args=[logbook.name, entry.id])
     commands = [(cmd, f"{url_detail}?cmd={cmd}") for cmd in command_names]
     commands[0] = (
@@ -459,10 +595,15 @@ def entry_detail_get(request, logbook, entry):
     context = {
         "entry": entry,
         "logbook": logbook,
-        "logbooks": Logbook.objects.all(),
+        "logbooks": available_logbooks(request),
         "commands": commands,
     }
     # If get here, then are just doing the detail view, no editing
+    if logbook.auth_required and not request.user.has_perm("view_entries", logbook):
+        context = {
+            "message": _('User "%s" has no access to this logbook') % request.user.username
+        }
+        return render(request, "flexelog/show_error.html", context)
     form = EntryViewerForm(data={"text": entry.text or ""})
     context["form"] = form
     return render(request, "flexelog/entry_detail.html", context)
@@ -487,9 +628,9 @@ def test(request, lb_name, entry_id):
     context.update(
         {
             "logbook": logbook,
-            "logbooks": Logbook.objects.all(),  # XX will need to restrict to what user auth is, not show deactivated ones
-            "main_tab": cfg.get(logbook.name, "main tab", valtype=str, default=""),
-            "cfg_css": cfg.get(logbook.name, "css", valtype=str, default=""),
+            "logbooks": available_logbooks(request),  # XX will need to restrict to what user auth is, not show deactivated ones
+            "main_tab": cfg.get(logbook, "main tab", valtype=str, default=""),
+            "cfg_css": cfg.get(logbook, "css", valtype=str, default=""),
         }
     )
     return render(request, "flexelog/edit.html", context)

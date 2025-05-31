@@ -6,8 +6,11 @@ from typing import Any
 import warnings
 import functools
 
+from django.conf import settings
 from django.db.models.signals import post_save  # update config when logbook changed
-from flexelog.models import ElogConfig
+from django.contrib.auth.models import Group
+from flexelog.models import ElogConfig, Logbook
+from guardian.shortcuts import assign_perm
 
 import logging
 
@@ -54,7 +57,7 @@ class Attribute:
 
 # Attributes if none are specified in config
 DEFAULT_ATTRIBUTES = {
-    "Author": Attribute("Author", required=True),
+    # "Author": Attribute("Author", required=True),  -- now have distinct author field
     "Type": Attribute(
         "Type", options_type="Options", options=["Routine", "Other"]
     ),
@@ -67,22 +70,28 @@ DEFAULT_ATTRIBUTES = {
 
 # Default settings for database ElogConfig settings if not specified
 ELOGCONFIG_DEFAULTS = {
+    "all display limit": 500,
     "attachment lines": 300,
     "charset": "UTF-8",  # PSI elog default was ISO-8859-1
     "entries per page": 20,
     "hide comments": False,  # lb comment on logbook selection page
     "language": "english",
+    "list display": "ID, Date, Author, *attributes",  # *attributes means all Attributes  
     #  "Page Title": "FlexElog Logbook Selection", if global section
+    "max content length": 10485760,
+    "protect selection page": 0,
+    "search all logbooks": 1,
     "show attachments": True,
     "show text": True, # False = no Text attribute in logbook
     "summary lines": 3,
+    "summary line length": 40,
     # date-time displayed for logbook entries,
     # Default in PSI elog was e.g. "09/30/2023 12:57:03 pm"
-    "time format": "%m/%d/%Y %I:%M:%S %p",
+    "time format": "%m/%d/%Y %I:%M:%S %p",  # likely ignore in favor of locale settings on computer/browser
 }
 
 
-def cfg_bool(s: str | bool) -> bool:
+def cfg_bool(s: str | bool) -> bool | str:
     if isinstance(s, bool):
         return s
     if s.strip().lower() in ("1", "on", "true", "yes"):
@@ -263,7 +272,7 @@ class LogbookConfig:
 
     def get(
         self,
-        lb_name: str,
+        lb: str | Logbook,
         param: str,
         default: str | None = None,
         valtype: type | None = None,
@@ -283,6 +292,7 @@ class LogbookConfig:
         if valtype is bool:
             valtype = cfg_bool
 
+        lb_name = lb.name if isinstance(lb, Logbook) else lb
         if lb_name not in self._cfg:
             logging.warning(f"Unknown config section {lb_name}")
             return None
@@ -350,20 +360,39 @@ def active_config(cls) -> LogbookConfig:
         cls.reload_config()
     return cls._active_config
 
+
 def config_updated(sender, **kwargs):
     global _cfg
     reload_config()
 
+
+def logbook_updated(sender, **kwargs):
+    logbook = kwargs['instance']
+    created = kwargs['created']
+    raw = kwargs['raw']
+    if created and not raw:
+        # Create default groups for the logbook management
+        for group_name, group_perms in settings.DEFAULT_LOGBOOK_GROUP_PERMISSIONS.items():
+            group, was_created = Group.objects.get_or_create(name=group_name.format(logbook=logbook))
+            if was_created:  # don't add permission if group already existed
+                for perm in group_perms:
+                    assign_perm(perm, group, logbook)
+
+    reload_config()
+
+
 def reload_config():
     global _cfg
     try:
-        config_text = ElogConfig.objects.get(name="default").config_text
+        global_config_text = "[global]\n" + ElogConfig.objects.get(name="global").config_text + "\n"
     except ElogConfig.DoesNotExist:
-        config_text = "[global]"
-    _cfg = LogbookConfig(config_text)
+        global_config_text = "[global]\n"
+    lb_config_texts = [f"\n\n[{lb.name}]\n" + (lb.config if lb.config else "\n") for lb in Logbook.active_logbooks()]
+    _cfg = LogbookConfig(global_config_text + "".join(lb_config_texts))
 
 # Set up signal to reload config if ElogConfig changed
 post_save.connect(config_updated, sender=ElogConfig)
+post_save.connect(logbook_updated, sender=Logbook)
 
 def get_config() -> LogbookConfig:
     global _cfg

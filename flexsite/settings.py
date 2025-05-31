@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_tuieditor.apps.DjangoTUIEditorConfig",
+    "guardian",
 ]
 
 if not TESTING:
@@ -89,9 +90,15 @@ WSGI_APPLICATION = "flexsite.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3", # "test.db", #
+        "NAME": BASE_DIR / "flexelog.db", # "test.db", #
     }
 }
+
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',  # this is default
+    'guardian.backends.ObjectPermissionBackend',
+)
 
 
 # Password validation
@@ -114,6 +121,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 PASSWORD_RESET_TIMEOUT = 60  # seconds  XXX temp for testing
 LOGIN_URL = reverse_lazy('login')
+LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = reverse_lazy('login')
 
 INTERNAL_IPS = [
@@ -164,3 +172,18 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Flexelog custom -------
+# Names of Groups auto-created for a new logbook
+# Users are not automatically assigned to those groups
+_view = ("view_entries",)
+_own = ("add_entries", "edit_own_entries", "delete_own_entries",)
+_others = ("edit_others_entries", "delete_others_entries")
+_admin = ("configure_logbook",)
+
+DEFAULT_LOGBOOK_GROUP_PERMISSIONS = {
+    "Logbook {logbook.name} Viewers": _view,
+    "Logbook {logbook.name} Contributors": _view + _own,
+    "Logbook {logbook.name} Editors": _view + _own + _others,
+    "Logbook {logbook.name} Admin": _view + _own + _others + _admin,
+}

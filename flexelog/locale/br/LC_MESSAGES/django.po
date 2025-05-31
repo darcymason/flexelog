@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-19 15:26-0400\n"
+"POT-Creation-Date: 2025-05-26 17:49-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,212 +18,228 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=5; plural=((n%10 == 1) && (n%100 != 11) && (n%100 !=71) && (n%100 !=91) ? 0 :(n%10 == 2) && (n%100 != 12) && (n%100 !=72) && (n%100 !=92) ? 1 :(n%10 ==3 || n%10==4 || n%10==9) && (n%100 < 10 || n% 100 > 19) && (n%100 < 70 || n%100 > 79) && (n%100 < 90 || n%100 > 99) ? 2 :(n != 0 && n % 1000000 == 0) ? 3 : 4);\n"
 
-#: .\flexsite\settings.py:127
+#: .\flexsite\settings.py:134
 msgid "English"
 msgstr ""
 
-#: .\flexsite\settings.py:128
+#: .\flexsite\settings.py:135
 msgid "Bulgarian"
 msgstr ""
 
-#: .\flexsite\settings.py:129
+#: .\flexsite\settings.py:136
 msgid "Brazilian"
 msgstr ""
 
-#: .\flexsite\settings.py:130
+#: .\flexsite\settings.py:137
 msgid "Czech"
 msgstr ""
 
-#: .\flexsite\settings.py:131
+#: .\flexsite\settings.py:138
 msgid "German"
 msgstr ""
 
-#: .\flexsite\settings.py:132
+#: .\flexsite\settings.py:139
 msgid "Danish"
 msgstr ""
 
-#: .\flexsite\settings.py:133
+#: .\flexsite\settings.py:140
 msgid "Spanish"
 msgstr ""
 
-#: .\flexsite\settings.py:134
+#: .\flexsite\settings.py:141
 msgid "French"
 msgstr ""
 
-#: .\flexsite\settings.py:135
+#: .\flexsite\settings.py:142
 msgid "Indonesia"
 msgstr ""
 
-#: .\flexsite\settings.py:136
+#: .\flexsite\settings.py:143
 msgid "Italian"
 msgstr ""
 
-#: .\flexsite\settings.py:137
+#: .\flexsite\settings.py:144
 msgid "Japanese"
 msgstr ""
 
-#: .\flexsite\settings.py:138
+#: .\flexsite\settings.py:145
 msgid "Dutch"
 msgstr ""
 
-#: .\flexsite\settings.py:139
+#: .\flexsite\settings.py:146
 msgid "Polish"
 msgstr ""
 
-#: .\flexsite\settings.py:140
+#: .\flexsite\settings.py:147
 msgid "Russian"
 msgstr ""
 
-#: .\flexsite\settings.py:141
+#: .\flexsite\settings.py:148
 msgid "Swedish"
 msgstr ""
 
-#: .\flexsite\settings.py:142
+#: .\flexsite\settings.py:149
 msgid "Slowak"
 msgstr ""
 
-#: .\flexsite\settings.py:143
+#: .\flexsite\settings.py:150
 msgid "Turkish"
 msgstr ""
 
-#: .\flexsite\settings.py:144
+#: .\flexsite\settings.py:151
 msgid "Chinese"
 msgstr ""
 
-#: .\flexelog\forms.py:26 .\flexelog\forms.py:33
+#: .\flexelog\forms.py:41
 #, python-format
 msgid "Please enter attribute '%s'"
 msgstr "Por favor, entre com o atributo '%s'"
 
-#: .\flexelog\forms.py:39
+#: .\flexelog\forms.py:47 .\flexelog\templates\flexelog\edit.html:19
 msgid "Entry time"
 msgstr "Data da entrada"
 
-#: .\flexelog\forms.py:95
+#: .\flexelog\forms.py:101
 msgid "Display full entries"
 msgstr "Exibir entradas completas"
 
-#: .\flexelog\forms.py:96
+#: .\flexelog\forms.py:102
 #, fuzzy
 #| msgid "Summary"
 msgid "Summary only"
 msgstr "Resumo"
 
-#: .\flexelog\forms.py:97
+#: .\flexelog\forms.py:103
 msgid "Display threads"
 msgstr "Exibir threads"
 
-#: .\flexelog\forms.py:99
+#: .\flexelog\forms.py:105
 msgid "Mode"
 msgstr "Estilo"
 
-#: .\flexelog\forms.py:105
+#: .\flexelog\forms.py:111
 msgid "CSV (\",\" separated)"
 msgstr "CSV (separado por \",\")"
 
-#: .\flexelog\forms.py:106
+#: .\flexelog\forms.py:112
 msgid "CSV (\";\" separated)"
 msgstr "CSV (separado por \";\")"
 
-#: .\flexelog\forms.py:107
+#: .\flexelog\forms.py:113
 msgid "CSV (\";\" separated) + Text"
 msgstr ""
 
-#: .\flexelog\forms.py:108
+#: .\flexelog\forms.py:114
 msgid "XML"
 msgstr ""
 
-#: .\flexelog\forms.py:109
+#: .\flexelog\forms.py:115
 msgid "Raw"
 msgstr ""
 
-#: .\flexelog\forms.py:111
+#: .\flexelog\forms.py:117
 msgid "Export to"
 msgstr ""
 
-#: .\flexelog\forms.py:117
+#: .\flexelog\forms.py:123
 msgid "Show attachments"
 msgstr "Mostrar anexo"
 
-#: .\flexelog\forms.py:118
+#: .\flexelog\forms.py:124
 msgid "Printable output"
 msgstr "Saída para impressão"
 
-#: .\flexelog\forms.py:119
+#: .\flexelog\forms.py:125
 msgid "Sort in reverse order"
 msgstr "Ordenar em ordem reversa"
 
-#: .\flexelog\forms.py:120
+#: .\flexelog\forms.py:126
 msgid "Search all logbooks"
 msgstr "Buscar em todos os logbooks"
 
-#: .\flexelog\forms.py:122
+#: .\flexelog\forms.py:128
 msgid "Options"
 msgstr "Opções"
 
-#: .\flexelog\forms.py:124
+#: .\flexelog\forms.py:130
 msgid "entries per page"
 msgstr "entradas por página"
 
-#: .\flexelog\forms.py:126
+#: .\flexelog\forms.py:133
 msgid "Start"
 msgstr "Início"
 
-#: .\flexelog\forms.py:127
+#: .\flexelog\forms.py:134
 msgid "End"
 msgstr "Fim"
 
-#: .\flexelog\forms.py:133
+#: .\flexelog\forms.py:140
 msgid "Day"
 msgstr "Dia"
 
-#: .\flexelog\forms.py:134
+#: .\flexelog\forms.py:141
 msgid "3 Days"
 msgstr ""
 
-#: .\flexelog\forms.py:135
+#: .\flexelog\forms.py:142
 msgid "Week"
 msgstr "Semana"
 
-#: .\flexelog\forms.py:136
+#: .\flexelog\forms.py:143
 msgid "Month"
 msgstr "Mês"
 
-#: .\flexelog\forms.py:137
+#: .\flexelog\forms.py:144
 msgid "3 Months"
 msgstr "3 Meses"
 
-#: .\flexelog\forms.py:138
+#: .\flexelog\forms.py:145
 msgid "6 Months"
 msgstr "6 Meses"
 
-#: .\flexelog\forms.py:139
+#: .\flexelog\forms.py:146
 msgid "Year"
 msgstr "Ano"
 
-#: .\flexelog\forms.py:141
+#: .\flexelog\forms.py:148
 msgid "Show last"
 msgstr "Exibe últimos"
 
-#: .\flexelog\forms.py:144 .\flexelog\views.py:176
+#: .\flexelog\forms.py:151 .\flexelog\views.py:227
 msgid "Text"
 msgstr "Texto"
 
-#: .\flexelog\forms.py:145
+#: .\flexelog\forms.py:152
 msgid "Search text also in attributes"
 msgstr "Procura o texto também nos atributos"
 
-#: .\flexelog\forms.py:146
+#: .\flexelog\forms.py:153
 msgid "Case sensitive"
 msgstr "Diferenciar maísculas de mínusculas"
 
-#: .\flexelog\models.py:23
+#: .\flexelog\models.py:24
 msgid "Syntax error in config file"
 msgstr "Erro de sintaxe no arquivo de configuração"
 
-#: .\flexelog\models.py:44
+#: .\flexelog\models.py:45
 #, python-format
 msgid "'%(value)s' is reserved, it cannot be used for a logbook name"
+msgstr ""
+
+#: .\flexelog\models.py:61
+msgid "If False, logbook cannot be viewed or edited"
+msgstr ""
+
+#: .\flexelog\models.py:62
+msgid "If True, logbook is frozen, but existing entries can be viewed"
+msgstr ""
+
+#: .\flexelog\models.py:63
+msgid "If False, anyone can view or edit this logbook without login"
+msgstr ""
+
+#: .\flexelog\models.py:64
+msgid "Logbooks will be listed in increasing order if specified"
 msgstr ""
 
 #: .\flexelog\models.py:68 .\flexelog\templates\flexelog\index.html:21
@@ -236,11 +252,41 @@ msgstr "Logbook"
 msgid "Logbooks"
 msgstr "Logbook"
 
-#: .\flexelog\models.py:94
+#: .\flexelog\models.py:75
+#, fuzzy
+#| msgid "Entries"
+msgid "View entries"
+msgstr "Entradas"
+
+#: .\flexelog\models.py:76
+#, fuzzy
+#| msgid "Entries"
+msgid "Add entries"
+msgstr "Entradas"
+
+#: .\flexelog\models.py:77
+#, fuzzy
+#| msgid "Entries"
+msgid "Edit own entries"
+msgstr "Entradas"
+
+#: .\flexelog\models.py:78
+msgid "Edit others' entries"
+msgstr ""
+
+#: .\flexelog\models.py:79
+msgid "Delete own entries"
+msgstr ""
+
+#: .\flexelog\models.py:80
+msgid "Delete others' entries"
+msgstr ""
+
+#: .\flexelog\models.py:120
 msgid "Entry"
 msgstr "Entrada"
 
-#: .\flexelog\models.py:95
+#: .\flexelog\models.py:121
 #: .\flexelog\templates\flexelog\include\list_modes.html:23
 #: .\flexelog\templates\flexelog\index.html:22
 msgid "Entries"
@@ -263,8 +309,12 @@ msgstr "Não está logado"
 msgid "Login"
 msgstr "Login"
 
+#: .\flexelog\templates\flexelog\edit.html:18
+msgid "Message ID"
+msgstr "Message ID"
+
 #: .\flexelog\templates\flexelog\edit.html:24
-#: .\flexelog\templates\registration\login.html:41 .\flexelog\views.py:69
+#: .\flexelog\templates\registration\login.html:41 .\flexelog\views.py:98
 msgid "Submit"
 msgstr "Enviar"
 
@@ -275,6 +325,10 @@ msgstr "Campos marcados com"
 #: .\flexelog\templates\flexelog\edit.html:33
 msgid "are required"
 msgstr "são obrigatórios"
+
+#: .\flexelog\templates\flexelog\entry_list.html:77
+msgid "No entries found"
+msgstr "Não foi encontrada nenhuma mensagem"
 
 #: .\flexelog\templates\flexelog\include\lb_tabs.html:37
 msgid "Logged in as"
@@ -319,32 +373,28 @@ msgstr "Último envio"
 msgid "No logbook defined on this server"
 msgstr "Não há logbook definido neste servidor"
 
-#: .\flexelog\templates\flexelog\search_form.html:19 .\flexelog\views.py:132
+#: .\flexelog\templates\flexelog\search_form.html:18 .\flexelog\views.py:171
 msgid "Search"
 msgstr "Iniciar Procura"
 
-#: .\flexelog\templates\flexelog\search_form.html:20 .\flexelog\views.py:132
+#: .\flexelog\templates\flexelog\search_form.html:19 .\flexelog\views.py:171
 msgid "Reset Form"
 msgstr "Limpar formulário"
 
-#: .\flexelog\templates\flexelog\search_form.html:21
-#: .\flexelog\templates\flexelog\show_error.html:15 .\flexelog\views.py:132
+#: .\flexelog\templates\flexelog\search_form.html:20
+#: .\flexelog\templates\flexelog\show_error.html:15 .\flexelog\views.py:171
 msgid "Back"
 msgstr "Voltar"
 
-#: .\flexelog\templates\flexelog\search_form.html:32
+#: .\flexelog\templates\flexelog\search_form.html:31
 msgid "Display"
 msgstr "Exibir"
 
-#: .\flexelog\templates\flexelog\search_form.html:37
+#: .\flexelog\templates\flexelog\search_form.html:36
 msgid "Filters"
 msgstr "Filtros"
 
-#: .\flexelog\templates\flexelog\search_form.html:38
-msgid "regular expressions"
-msgstr "expressões regulares"
-
-#: .\flexelog\templates\flexelog\search_form.html:40
+#: .\flexelog\templates\flexelog\search_form.html:39
 #, fuzzy
 #| msgid "Entry time"
 msgid "Entry date"
@@ -366,86 +416,117 @@ msgstr ""
 msgid "Please login"
 msgstr "Por favor, identifique-se"
 
-#: .\flexelog\views.py:69
+#: .\flexelog\views.py:98
 msgid "Save"
 msgstr "Salvar"
 
-#: .\flexelog\views.py:119
+#: .\flexelog\views.py:148
 #, python-format
 msgid "Logbook \"%s\" does not exist on remote server"
 msgstr "Logbook \"%s\" não existe no servidor remoto"
 
-#: .\flexelog\views.py:129 .\flexelog\views.py:150
+#: .\flexelog\views.py:160 .\flexelog\views.py:197 .\flexelog\views.py:338
+#: .\flexelog\views.py:364 .\flexelog\views.py:441 .\flexelog\views.py:448
+msgid "New"
+msgstr "Novo"
+
+#: .\flexelog\views.py:162 .\flexelog\views.py:198
 msgid "Find"
 msgstr "Procurar"
 
-#: .\flexelog\views.py:138
+#: .\flexelog\views.py:177
 #, python-format
 msgid "Text fields are treated as %s"
 msgstr "Campos de texto são tratados como %s"
 
-#: .\flexelog\views.py:149
-msgid "New"
-msgstr "Novo"
+#: .\flexelog\views.py:178
+msgid "regular expressions"
+msgstr "expressões regulares"
 
-#: .\flexelog\views.py:151
+#: .\flexelog\views.py:187 .\flexelog\views.py:484
+#, python-format
+msgid "User \"%s\" has no access to this logbook"
+msgstr ""
+
+#: .\flexelog\views.py:199
 msgid "Import"
 msgstr "Importar"
 
-#: .\flexelog\views.py:152
+#: .\flexelog\views.py:200
 msgid "Config"
 msgstr "Configurar"
 
-#: .\flexelog\views.py:153 .\flexelog\views.py:158
+#: .\flexelog\views.py:201 .\flexelog\views.py:206
 msgid "Last day"
 msgstr "Último dia"
 
-#: .\flexelog\views.py:154
+#: .\flexelog\views.py:202
 msgid "Help"
 msgstr "Ajuda"
 
-#: .\flexelog\views.py:161
+#: .\flexelog\views.py:209
 msgid "Full"
 msgstr "Completo"
 
-#: .\flexelog\views.py:162
+#: .\flexelog\views.py:210
 msgid "Summary"
 msgstr "Resumo"
 
-#: .\flexelog\views.py:163
+#: .\flexelog\views.py:211
 msgid "Threaded"
 msgstr "Threaded"
 
-#: .\flexelog\views.py:170
+#: .\flexelog\views.py:220
 msgid "ID"
 msgstr "ID"
 
-#: .\flexelog\views.py:170 .\flexelog\views.py:208
+#: .\flexelog\views.py:220 .\flexelog\views.py:263
 msgid "Date"
 msgstr "Data"
 
-#: .\flexelog\views.py:240
+#: .\flexelog\views.py:305
 #, python-brace-format
 msgid "Page {num:d} of {count:d}"
 msgstr ""
 
-#: .\flexelog\views.py:273 .\flexelog\views.py:285
-msgid "List"
-msgstr "Lista"
-
-#: .\flexelog\views.py:275 .\flexelog\views.py:312 .\flexelog\views.py:313
+#: .\flexelog\views.py:341 .\flexelog\views.py:360 .\flexelog\views.py:441
+#: .\flexelog\views.py:449
 msgid "Edit"
 msgstr "Editar"
 
-#: .\flexelog\views.py:277 .\flexelog\views.py:312 .\flexelog\views.py:315
+#: .\flexelog\views.py:351 .\flexelog\views.py:441 .\flexelog\views.py:451
 msgid "Reply"
 msgstr "Responder"
 
-#: .\flexelog\views.py:290
+#: .\flexelog\views.py:355
+msgid "Quote"
+msgstr "Citação"
+
+#: .\flexelog\views.py:388 .\flexelog\views.py:436
+msgid "Yes"
+msgstr "Sim"
+
+#: .\flexelog\views.py:428 .\flexelog\views.py:430 .\flexelog\views.py:450
+msgid "Delete"
+msgstr "Apagar"
+
+#: .\flexelog\views.py:434
+msgid "Are you sure to delete this entry?"
+msgstr "Voce está certo de que deseja apagar essa entrada?"
+
+#: .\flexelog\views.py:437
+msgid "No"
+msgstr "Não"
+
+#: .\flexelog\views.py:441 .\flexelog\views.py:452
+msgid "Duplicate"
+msgstr "Duplicar"
+
+#: .\flexelog\views.py:447 .\flexelog\views.py:460
+msgid "List"
+msgstr "Lista"
+
+#: .\flexelog\views.py:467
 #, python-format
 msgid "Error: Command \"<b>%s</b>\" not allowed"
 msgstr "Erro: Comando \"<b>%s</b>\" não é permitido"
-
-#: .\flexelog\views.py:320
-msgid "Quote"
-msgstr "Citação"
