@@ -360,6 +360,13 @@ class LogbookConfig:
             if attr.options_type == "IOptions"
         ]
 
+    def Required(self, logbook: Logbook, lowercase=False):
+        return [
+            attr_name.lower() if lowercase else attr_name
+            for attr_name, attr in self.lb_attrs[logbook.name].items()
+            if attr.required
+        ]
+
 def active_config(cls) -> LogbookConfig:
     if cls._active_config is None:
         cls.reload_config()
