@@ -32,8 +32,8 @@
     <table width="100%" cellpadding="0" cellspacing="0">
         {% for attr, val in entry.attrs.items %}
         <tr>
-            <td class="attribname" nowrap>{{ attr }}:</td>
-            <td class="attribvalue">{{ val|attr_show }}</td>
+            <td class="attribname" nowrap>{{ attr|capfirst }}:</td>
+            <td class="attribvalue">{% if attr in IOptions %}{{ val|icon_show}}{% else %}{{ val|attr_show }}{% endif %}</td>
         </tr>
         {% endfor %}
     </table>

@@ -439,6 +439,7 @@ def logbook_get(request, logbook):
         "is_rsort": is_rsort,
         "filters": filters,
         "filter_attrs": filter_attrs,
+        "IOptions": [f"attrs__{attr_name}" for attr_name in cfg.IOptions(logbook, lowercase=True)],
     }
     return render(request, "flexelog/entry_list.html", context)
 
@@ -606,6 +607,7 @@ def entry_detail_get(request, logbook, entry):
         return render(request, "flexelog/show_error.html", context)
     form = EntryViewerForm(data={"text": entry.text or ""})
     context["form"] = form
+    context["IOptions"] = cfg.IOptions(logbook, lowercase=True)
     return render(request, "flexelog/entry_detail.html", context)
 
 

@@ -32,7 +32,7 @@ class Attribute:
     required: bool = False
     extendable: bool = False
     options_type: str = (
-        "Text"  #  or Options, MOptions, ROptions, [IOptions (not implemented)]
+        "Text"  #  or Options, MOptions, ROptions, IOptions
     )
     options: list[str] = field(default_factory=list)
     # for conditions in other attributes, which values here set what condition
@@ -147,7 +147,6 @@ class LogbookConfig:
         # Starts with Python's ConfigParser, so
         # cannot repeat keys (in default 'strict' mode) which is tolerated in psi elog
         # interpolation must be None because of date/time formats with "%"
-        print("Reloading config file")
         self.configp = configparser.ConfigParser(
             default_section="global",
             interpolation=None,
@@ -241,7 +240,7 @@ class LogbookConfig:
             # Set the Option Types (Text by default)
             # Logic here means if repeated, last one spec'd wins
             for attr_name, attr in attrs.items():
-                for option_type in ["Options", "MOptions", "ROptions"]:  # XX IOptions
+                for option_type in ["Options", "MOptions", "ROptions", "IOptions"]:
                     # XX below is specific to single space, could make whitespace tolerant
                     options = self.get(
                         lb_name, f"{option_type} {attr_name}", as_list=True
@@ -354,6 +353,12 @@ class LogbookConfig:
     def lb_attrs(self):
         return self._lb_attrs
 
+    def IOptions(self, logbook: Logbook, lowercase=False):
+        return [
+            attr_name.lower() if lowercase else attr_name
+            for attr_name, attr in self.lb_attrs[logbook.name].items()
+            if attr.options_type == "IOptions"
+        ]
 
 def active_config(cls) -> LogbookConfig:
     if cls._active_config is None:
