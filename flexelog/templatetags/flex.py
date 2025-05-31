@@ -1,4 +1,5 @@
 from django import template
+from django.conf import settings
 from django.utils.safestring import mark_safe
 from django.utils.html import conditional_escape
 from django.template.defaultfilters import stringfilter
@@ -36,4 +37,14 @@ def get_item(dictionary, key):
 def attr_show(val):
     if isinstance(val, list):
         return " | ".join(val)
+    return val
+
+@register.filter
+def icon_show(val):
+    if isinstance(val, str):
+        return mark_safe(  # XXX security - should escape the icon name
+            f'<img src="{settings.STATIC_URL}flexelog/icons/{val}" '
+            f'alt="{val}" title="{val}" '
+            " />"
+        )
     return val
