@@ -172,3 +172,18 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Flexelog custom -------
+# Names of Groups auto-created for a new logbook
+# Users are not automatically assigned to those groups
+_view = ("view_entries",)
+_own = ("add_entries", "edit_own_entries", "delete_own_entries",)
+_others = ("edit_others_entries", "delete_others_entries")
+_admin = ("configure_logbook",)
+
+DEFAULT_LOGBOOK_GROUP_PERMISSIONS = {
+    "Logbook {logbook.name} Viewers": _view,
+    "Logbook {logbook.name} Contributors": _view + _own,
+    "Logbook {logbook.name} Editors": _view + _own + _others,
+    "Logbook {logbook.name} Admin": _view + _own + _others + _admin,
+}

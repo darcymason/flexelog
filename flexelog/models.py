@@ -80,6 +80,7 @@ class Logbook(models.Model):
             ("edit_others_entries", _("Edit others' entries")),
             ("delete_own_entries", _("Delete own entries")),
             ("delete_others_entries", _("Delete others' entries")),
+            ("configure_logbook", _("Configure logbook")),  # XX need to code this ability
         )
 
     def __str__(self):

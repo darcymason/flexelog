@@ -6,8 +6,11 @@ from typing import Any
 import warnings
 import functools
 
+from django.conf import settings
 from django.db.models.signals import post_save  # update config when logbook changed
+from django.contrib.auth.models import Group
 from flexelog.models import ElogConfig, Logbook
+from guardian.shortcuts import assign_perm
 
 import logging
 
@@ -357,9 +360,26 @@ def active_config(cls) -> LogbookConfig:
         cls.reload_config()
     return cls._active_config
 
+
 def config_updated(sender, **kwargs):
     global _cfg
     reload_config()
+
+
+def logbook_updated(sender, **kwargs):
+    logbook = kwargs['instance']
+    created = kwargs['created']
+    raw = kwargs['raw']
+    if created and not raw:
+        # Create default groups for the logbook management
+        for group_name, group_perms in settings.DEFAULT_LOGBOOK_GROUP_PERMISSIONS.items():
+            group, was_created = Group.objects.get_or_create(name=group_name.format(logbook=logbook))
+            if was_created:  # don't add permission if group already existed
+                for perm in group_perms:
+                    assign_perm(perm, group, logbook)
+
+    reload_config()
+
 
 def reload_config():
     global _cfg
@@ -372,7 +392,7 @@ def reload_config():
 
 # Set up signal to reload config if ElogConfig changed
 post_save.connect(config_updated, sender=ElogConfig)
-post_save.connect(config_updated, sender=Logbook)
+post_save.connect(logbook_updated, sender=Logbook)
 
 def get_config() -> LogbookConfig:
     global _cfg
