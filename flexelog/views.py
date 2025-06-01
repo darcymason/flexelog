@@ -17,7 +17,7 @@ from django.utils.translation import gettext as _
 from flexelog.forms import EntryForm, EntryViewerForm, SearchForm
 from guardian.shortcuts import get_perms
 
-from .models import Logbook, Entry
+from .models import Logbook, LogbookGroup, Entry
 from .elog_cfg import get_config
 
 from urllib.parse import unquote_plus
@@ -33,6 +33,20 @@ def available_logbooks(request) -> list[Logbook]:
         or request.user.is_authenticated and request.user.has_perm("view_entries", lb)
         or not lb.is_unlisted
     ]
+
+
+def available_groups(logbooks: list[Logbook]):
+    """Return dict of {group name: logbooks for that group}, group name is None if logbook in no groups"""
+    groups = {}
+    for group in LogbookGroup.objects.all():
+        group_logbooks = [lb for lb in group.logbooks.all() if lb in logbooks]
+        if group_logbooks:  # don't store it if has no logbooks in the group
+            groups[group.name] = group_logbooks
+
+    unassigned = [lb for lb in logbooks if not lb.logbookgroup_set.count()]
+    if unassigned:
+        groups[None] = unassigned
+    return groups
 
 
 def command_perm_response(request, command, commands, logbook, entry=None) -> HttpResponse | None:
@@ -196,15 +210,9 @@ def logbook_post(request, logbook):
         lb_attrs = cfg.lb_attrs[logbook.name]
         form = EntryForm(data=request.POST, lb_attrs=lb_attrs)
         if not form.is_valid():
-            context = form.get_context()
-            context.update(
-                {
-                    "logbook": logbook,
-                    "logbooks": available_logbooks(request),  # XX will need to restrict to what user auth is, not show deactivated ones
-                    "main_tab": cfg.get(logbook, "main tab", valtype=str, default=""),
-                    "cfg_css": cfg.get(logbook, "css", valtype=str, default=""),
-                }
-            )
+            context = logbook_tabs_context(request, logbook)
+            context.update(form.get_context())
+            
             return render(request, "flexelog/edit.html", context)
 
         # Form is valid, now save the inputs to a database Entry
@@ -257,12 +265,40 @@ def logbook_view(request, lb_name):
     if isinstance(logbook, HttpResponse):
         return logbook
 
-    # New (incl Reply), Edit, Delete all POST to the logbook page
+    # New (incl Reply, Duplicate), Edit, Delete all POST to the logbook page
     # (makes some sense as New doesn't have an id yet)
     if request.method == "POST":
         return logbook_post(request, logbook)
     return logbook_get(request, logbook)
-    
+
+def logbook_tabs_context(request, logbook):
+    logbooks = available_logbooks(request)
+    groups_dict = available_groups(logbooks)
+    selected_group = None
+    if len(groups_dict) == 1:
+        group_tabs = []  # Won't display any
+    else:
+        for group_name, group_logbooks in groups_dict.items():
+            if logbook in group_logbooks:
+                selected_group = group_name
+                break
+        # Compose (name, url) for the group tabs
+        group_tabs = [
+            (group_name, reverse("flexelog:logbook", args=[group_logbooks[0].name]))
+            for group_name, group_logbooks in groups_dict.items()
+        ]
+                    
+    cfg = get_config()
+    return dict(
+        logbook=logbook, 
+        logbooks=groups_dict[selected_group] if len(groups_dict) > 1 else logbooks,
+        group_tabs=group_tabs,
+        selected_group=selected_group,
+        main_tab=cfg.get(logbook, "main tab", valtype=str, default=""),
+        cfg_css=cfg.get(logbook, "css", valtype=str, default=""),
+    )
+        
+
 def logbook_get(request, logbook):    
     cmd = get_param(request, "cmd")
     commands = [_("New"), _("Find")] # _("Select"), ("Import"), ("Config"), _("Help")
@@ -271,23 +307,21 @@ def logbook_get(request, logbook):
     if cmd == _("New"):
         return entry_detail_get(request, logbook, None)
     elif cmd == _("Find"):
+        cfg = get_config()
         lb_attrs = cfg.lb_attrs[logbook.name]
         # for lb_attr in lb_attrs.values():
         #     lb_attr.required = False
         form = SearchForm(
             initial={"options": ["reverse"], "mode": "Display full"}, lb_attrs=lb_attrs
         )
-        cfg = get_config()
-        context = {
-            "command_names": [_("Search"), _("Reset Form"), _("Back")],
-            "form": form,
-            "logbook": logbook,
-            "logbooks": available_logbooks(request),  # XX will need to restrict to what user auth is, not show deactivated ones
-            "main_tab": cfg.get(logbook, "main tab", valtype=str, default=""),
-            "cfg_css": cfg.get(logbook, "css", valtype=str, default=""),
-            "regex_message": _("Text fields are treated as %s")
+        
+        context = logbook_tabs_context(request, logbook)
+        context.update(
+            command_names=[_("Search"), _("Reset Form"), _("Back")],
+            form=form,
+            regex_message=_("Text fields are treated as %s")
             % f'<a href="https://docs.python.org/3/howto/regex.html">{_("regular expressions")}</a>',
-        }
+        )
 
         return render(request, "flexelog/search_form.html", context)
 
@@ -419,28 +453,25 @@ def logbook_get(request, logbook):
     else:
         page_n_of_N = None
 
-    context = {
-        "logbook": logbook,
-        "logbooks": available_logbooks(request),  # XX will need to restrict to what user auth is
-        "commands": commands,
-        "modes": modes,
-        "current_mode": current_mode,
-        "columns": columns,
-        "page_obj": page_obj,
-        "page_range": list(
+    context = logbook_tabs_context(request, logbook)
+    context.update(
+        commands=commands,
+        modes=modes,
+        current_mode=current_mode,
+        columns=columns,
+        page_obj=page_obj,
+        page_range=list(
             paginator.get_elided_page_range(page_obj.number, on_each_side=1, on_ends=3)
         ),
-        "page_n_of_N": page_n_of_N,
-        "selected_id": selected_id,
-        "summary_lines": summary_lines,
-        "main_tab": cfg.get(logbook, "main tab", valtype=str, default=""),
-        "cfg_css": cfg.get(logbook, "css", valtype=str, default=""),
-        "sort_attr_field": sort_attr_field,
-        "is_rsort": is_rsort,
-        "filters": filters,
-        "filter_attrs": filter_attrs,
-        "IOptions": [f"attrs__{attr_name}" for attr_name in cfg.IOptions(logbook, lowercase=True)],
-    }
+        page_n_of_N=page_n_of_N,
+        selected_id=selected_id,
+        summary_lines=summary_lines,
+        sort_attr_field=sort_attr_field,
+        is_rsort=is_rsort,
+        filters=filters,
+        filter_attrs=filter_attrs,
+        IOptions=[f"attrs__{attr_name}" for attr_name in cfg.IOptions(logbook, lowercase=True)],
+    )
     return render(request, "flexelog/entry_list.html", context)
 
 
@@ -485,13 +516,12 @@ def new_edit_get(request, logbook, command, entry):
         form = EntryForm.from_entry(entry, page_type)
 
     cfg = get_config()
-    context = {
-        "entry": entry,
-        "logbook": logbook,
-        "logbooks": available_logbooks(request),
-        "commands": [],
-        "Required": cfg.Required(logbook, lowercase=True),
-    }
+    context = logbook_tabs_context(request, logbook)
+    context.update(
+        entry=entry,
+        commands=[],
+        Required=cfg.Required(logbook, lowercase=True),
+    )
     context.update(form.get_context())
     return render(request, "flexelog/edit.html", context)
 
@@ -595,12 +625,9 @@ def entry_detail_get(request, logbook, entry):
             #         + " (not currently implemented)"
             #     )
 
-    context = {
-        "entry": entry,
-        "logbook": logbook,
-        "logbooks": available_logbooks(request),
-        "commands": commands,
-    }
+    context = logbook_tabs_context(request, logbook)
+    context.update(entry=entry, commands=commands)
+
     # If get here, then are just doing the detail view, no editing
     if logbook.auth_required and not request.user.has_perm("view_entries", logbook):
         context = {
@@ -623,7 +650,7 @@ def test(request, lb_name, entry_id):
         raise  # XXX
     entry = get_object_or_404(Entry, lb=logbook, id=entry_id)
     lb_attributes = cfg.lb_attrs[logbook.name]
-    attr_names = entry.attrs.keys()
+    attr_names = entry.attrs.keys() if entry.attrs else []
     # Error: translate: "Attribute <b>%s</b> not supplied" for required
 
     # form = EntryForm(instance=entry, initial={"date": timezone.now()})  # instance=entry for edit existing

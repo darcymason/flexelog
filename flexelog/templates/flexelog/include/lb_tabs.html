@@ -10,6 +10,14 @@
 {% endblock %}
 {# Table containing tabs and comment bar #}
 {# Logbook tabs across the top #}
+{% if group_tabs %}
+    <tr><td class="gtabs">
+    {% for group_name, group_url in group_tabs %}
+      <span class="{% if group_name == selected_group %}s{% endif %}gtab">
+        <a href="{{ group_url }}">{{ group_name }}</a></span>
+    {% endfor %}
+      </td></tr>
+{% endif %}
 <tr>
     <td class="tabs">
     {% if main_tab %}
