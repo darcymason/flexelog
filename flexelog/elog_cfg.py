@@ -38,7 +38,8 @@ class Attribute:
     # for conditions in other attributes, which values here set what condition
     # e.g. {"Linux": "1", "Windows", "2"}
     val_conditions: dict[str, str] = field(default_factory=dict)
-
+    val_type: str = ""  # psi elog had date | datetime | numeric | userlist | useremail | muserlist | museremail
+    
     def __post_init__(self):
         self.parse_conditions()
 
@@ -236,6 +237,11 @@ class LogbookConfig:
                     )
                 else:
                     attrs[attr].extendable = True
+            
+            # Categorize attribute value type e.g. `Type Start date = datetime`
+            for attr_name, attr in attrs.items():
+                if valtype := self.get(lb_name, f"Type {attr_name}"):
+                    attr.val_type = valtype
 
             # Set the Option Types (Text by default)
             # Logic here means if repeated, last one spec'd wins
@@ -249,7 +255,7 @@ class LogbookConfig:
                         attr.options_type = option_type
                         attr.options = options
                 attr.parse_conditions()
-
+            
         # Create Logbook class instance for each logbook
         # self._logbooks = {}
         # For migration only, get paths to original PSI file-based logbooks
@@ -291,10 +297,10 @@ class LogbookConfig:
         if valtype is bool:
             valtype = cfg_bool
 
-        lb_name = lb.name if isinstance(lb, Logbook) else lb
+        lb_name = lb.name if isinstance(lb, Logbook) else lb  # XX need to clean lb_name?
         if lb_name not in self._cfg:
             logging.warning(f"Unknown config section {lb_name}")
-            return None
+            return default
 
         param = param.lower()  # make case insensitive
 
@@ -348,6 +354,7 @@ class LogbookConfig:
 
     def logbook_names(self):
         return self.configp.sections()
+
 
     @property
     def lb_attrs(self):

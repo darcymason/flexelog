@@ -43,9 +43,10 @@ class ElogConfig(models.Model):
 def validate_logbook_name(value):
     if value.lower() in RESERVED_LB_NAMES:
         raise ValidationError(
-            _("'%(value)s' is reserved, it cannot be used for a logbook name"),
-            params={"value": value.lower()},
+            _("'%(name)s' is reserved, it cannot be used for a logbook or logbook group name"),
+            params={"name": value},
         )
+
 
 
 class Logbook(models.Model):
@@ -55,6 +56,7 @@ class Logbook(models.Model):
         validators=[validate_logbook_name],
         unique=True,
     )
+    # logbookgroup_set for LogbookGroups
     comment = models.CharField(max_length=50, blank=True)
     config = models.TextField(blank=True, null=True)
 
@@ -96,6 +98,24 @@ class Logbook(models.Model):
     @classmethod
     def active_logbooks(cls):
         return list(cls.objects.filter(active=True).order_by("order"))
+
+
+class LogbookGroup(models.Model):
+    name = models.CharField(
+        max_length=MAX_LOGBOOK_NAME,
+        blank=False,
+        null=False,
+        validators=[validate_logbook_name],
+        unique=True,
+    )
+
+    logbooks = models.ManyToManyField(Logbook)
+
+    def __str__(self):
+        show_limit = 3
+        lb_names = [lb.name for lb in self.logbooks.all()]
+        member_list = ", ".join(lb_names[:show_limit]) + (", ..." if len(lb_names) > show_limit else "" )
+        return f"'{self.name}'" + (" = " + member_list if member_list else "")
 
 
 class Entry(models.Model):
