@@ -33,10 +33,11 @@
         <tr><td>
         <table class="listframe" width="100%" cellspacing="0" cellpadding="0">
         {# XX make required field thing show only when any are required #}
-        <tr><td colspan="2" class="attribvalue">
+        
+        {% if Required %}<tr><td colspan="2" class="attribvalue">
             {% translate "Fields marked with" %}<font color="red"> * </font>
             {% translate "are required" %}
-        </td></tr>
+        </td></tr>{% endif %}
     <tr>
     <td>
     <table width="100%" cellpadding="0" cellspacing="0">
@@ -55,7 +56,9 @@
       {% for field, errors in fields %}
        
         <tr{% with classes=field.css_classes %}{% if classes %} class="{{ classes }}"{% endif %}{% endwith %}>
-            {% if field.label != "Text" %}<th class="attribname" nowrap>{% if field.label %}{{ field.label_tag }}{% endif %}</th>
+            {% if field.label != "Text" %}<th class="attribname" nowrap>
+                {% if field.label %}{{ field.label_tag }}{% endif %}
+                {% if field.label|lower in Required %}<font color=red>*</font>{% endif %}</th>
                 <td class="attribvalue">
                 {{ errors }}
                 {{ field }}

@@ -484,11 +484,13 @@ def new_edit_get(request, logbook, command, entry):
     else:
         form = EntryForm.from_entry(entry, page_type)
 
+    cfg = get_config()
     context = {
         "entry": entry,
         "logbook": logbook,
         "logbooks": available_logbooks(request),
         "commands": [],
+        "Required": cfg.Required(logbook, lowercase=True),
     }
     context.update(form.get_context())
     return render(request, "flexelog/edit.html", context)
@@ -608,6 +610,7 @@ def entry_detail_get(request, logbook, entry):
     form = EntryViewerForm(data={"text": entry.text or ""})
     context["form"] = form
     context["IOptions"] = cfg.IOptions(logbook, lowercase=True)
+    
     return render(request, "flexelog/entry_detail.html", context)
 
 
