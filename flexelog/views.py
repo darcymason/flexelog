@@ -30,8 +30,8 @@ def available_logbooks(request) -> list[Logbook]:
         lb
         for lb in Logbook.objects.filter(active=True).order_by("order")
         if not lb.auth_required
-        or request.user.is_authenticated and request.user.has_perm("view_entries", lb)
-        or not lb.is_unlisted
+        or (request.user.is_authenticated and request.user.has_perm("view_entries", lb))
+        or (not request.user.is_authenticated and not lb.is_unlisted)
     ]
 
 
