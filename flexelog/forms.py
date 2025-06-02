@@ -4,8 +4,12 @@ from django.forms import (
     CharField,
     CheckboxSelectMultiple,
     ChoiceField,
+    DateInput,
     DateTimeInput,
+    EmailField,
+    FloatField,
     Form,
+    DateField,
     DateTimeField,
     Select,
     SplitDateTimeField,
@@ -24,16 +28,52 @@ from django.utils.safestring import mark_safe
 from django.utils.datastructures import MultiValueDict
 
 from flexelog.elog_cfg import Attribute, get_config
+from flexelog.models import User
 from django_tuieditor.fields import MarkdownFormField, MarkdownViewerFormField
 from .models import Entry
 
+
+formfield_for_type = dict(
+    # Form field, widget
+    date=(DateField, DateInput),
+    datetime=(DateTimeField, SplitDateTimeWidget),
+    numeric=(FloatField, TextInput),
+    userlist=(ChoiceField, Select),
+    useremail=(ChoiceField, Select),
+    muserlist=(MultipleChoiceField, CheckboxSelectMultiple),
+    museremail=(MultipleChoiceField, CheckboxSelectMultiple),
+)
 
 def lb_attrs_to_form_fields(
     lb_attrs: dict[str, Attribute], data: MultiValueDict = None
 ) -> dict:
     fields = {}
     for name, lb_attr in lb_attrs.items():
-        if lb_attr.options_type in ("Options", "ROptions", "MOptions", "IOptions"):
+        if lb_attr.val_type:
+            field_cls, widget = formfield_for_type[lb_attr.val_type.lower()]  # XX could error here unless cfg ensures Type <attr> is in list
+            if widget is SplitDateTimeWidget:
+                widget = SplitDateTimeWidget(attrs={"type": "datetime-local"})
+            if lb_attr.val_type in ("userlist", "muserlist"):
+                choices = [
+                    (user.username, user.username)  # ? f"{user.first_name} {user.last_name}") 
+                    for user in User.objects.all()
+                    if not user.is_anonymous
+                ]
+            elif lb_attr.val_type in ("useremail", "museremail"):
+                choices = [
+                    (user.email, user.email)
+                    for user in User.objects.all()
+                    if user.email
+                ]
+            fields[name.lower()] = field_cls(
+                widget=widget,
+                required=lb_attr.required,
+                label=name,
+            )
+            if field_cls in (ChoiceField, MultipleChoiceField):
+                fields[name.lower()].choices = choices
+
+        elif lb_attr.options_type in ("Options", "ROptions", "MOptions", "IOptions"):
             # Show choices(options) in current logbook config, and if entry has another, add them to choices
             choices = lb_attr.options
             if data and name.lower() in data:
