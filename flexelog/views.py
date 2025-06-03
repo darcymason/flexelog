@@ -408,7 +408,10 @@ def logbook_get(request, logbook):
         sort_attr_field = columns[_("Date")]
 
     # try:
-    order_by = Lower(sort_attr_field).desc() if is_rsort else Lower(sort_attr_field)
+    if sort_attr_field in ("id", "date"):  # XXXX or attrs that are numberic or date-based
+        order_by = f"{'-' if is_rsort else ''}{sort_attr_field}"
+    else:  # text=based, make case-insensitive
+        order_by = Lower(sort_attr_field).desc() if is_rsort else Lower(sort_attr_field)
     qs = (
         logbook.entry_set.values(*columns.values())
         .filter(**filter_fields)
@@ -431,6 +434,7 @@ def logbook_get(request, logbook):
         per_page = get_param(request, "npp", valtype=int) or cfg.get(
             logbook.name, "entries per page"
         )
+    per_page = min(per_page, cfg.get(logbook, "all display limit"))
 
     paginator = Paginator(qs, per_page=per_page)
     # If query string has "id=#", then need to position to page with that id
