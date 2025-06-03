@@ -17,12 +17,12 @@
     <td class="attribhead">
         {% translate 'Message ID' %}:&nbsp;<b>{{ entry.id }}</b>
         &nbsp;&nbsp;&nbsp;&nbsp;{% translate 'Entry time' %}:&nbsp;<b>{{ entry.date }}</b>
-        {% if entry.author %}&nbsp;&nbsp;{% translate 'Username' %}:&nbsp;<b>{{ entry.author.username }}</b>{% endif %}
+        {% if entry.author %}&nbsp;&nbsp;{% translate 'Username' %}:&nbsp;<b>{{ entry.author.get_username }}</b>{% endif %}
     </td>
     </tr>
     {% if entry.last_modified_date %}
     <tr><td class="attribhead">{% translate 'Last submission' %}:&nbsp;{% translate 'Entry time' %}:&nbsp;<b>{{ entry.last_modified_date }}</b>
-    {% if entry.last_modified_author %}&nbsp;&nbsp;{% translate 'Username' %}:&nbsp;<b>{{ entry.last_modified_author.username }}</b>{% endif %}
+    {% if entry.last_modified_author %}&nbsp;&nbsp;{% translate 'Username' %}:&nbsp;<b>{{ entry.last_modified_author.get_username }}</b>{% endif %}
     {% endif %}</td></tr>
 
     <tr><td class="menuframe"><span class="menu1">

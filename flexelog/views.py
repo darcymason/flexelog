@@ -64,23 +64,22 @@ def command_perm_response(request, command, commands, logbook, entry=None) -> Ht
     def err_command_user():
         msg = _('Error: Command "<b>{command}</b>" is not allowed for user "<b>{user}</b>"').format(
                 command=command,
-                user = request.user.username
+                user = request.user.get_username()
         )
         return err(msg)
 
     # XX note - could possibly restrict defaults for no-auth logbook
     #   e.g. not allow deleting entries (but can use time restriction for that)
+
+    if logbook.auth_required and not request.user.is_authenticated:
+        return redirect(f"{settings.LOGIN_URL}?next={request.path}")
+
     perms = get_perms(request.user, logbook) if logbook.auth_required else [p[0] for p in logbook._meta.permissions]
 
     # If logbook is unlisted, then should look like doesn't exist to those without permissions
     if logbook.is_unlisted and not perms:
         return err(_('Logbook "%s" does not exist on remote server') % logbook.name)
     
-    if logbook.auth_required and not request.user.is_authenticated:
-        return redirect(f"{settings.LOGIN_URL}?next={request.path}")
-        # return err(_("This logbook requires authentication"))
-
-
     # Just viewing:
     if (not command or command == _("Find")):
         if 'view_entries' in perms:
@@ -90,7 +89,7 @@ def command_perm_response(request, command, commands, logbook, entry=None) -> Ht
             msg = _(
                 "You are authenticated as %(username)s, but are not authorized to access this "
                 "page. Would you like to login to a different account?"
-            ) % dict(username=request.user.username)
+            ) % dict(username=request.user.get_username())
             # XX offer link to logout or login as other person  
             # logout_url =  reverse("flexelog:do_logout")
             # link = f'<a href="{logout_url}>{_("Logout")}</a>'
@@ -121,9 +120,9 @@ def command_perm_response(request, command, commands, logbook, entry=None) -> Ht
         # XX below messages not quite true.  Some others might be able to edit the entry, just not current one
         # proper message would be 'you do not have rights to edit another user's entry' (in this logbook)
         if command==("Edit") and 'edit_others_entries' not in perms:
-            return err(_("Only user <b>%s</b> can edit this entry") % entry.author.username)
+            return err(_("Only user <b>%s</b> can edit this entry") % entry.author.get_username())
         if command==("Delete") and 'delete_others_entries' not in perms:
-            return err(_("Only user <b>%s</b> can delete this entry") % entry.author.username)
+            return err(_("Only user <b>%s</b> can delete this entry") % entry.author.get_username())
     elif (
         (command == _("Edit") and 'edit_own_entries' not in perms) 
         or (command == _("Delete") and 'delete_own_entries' not in perms)
@@ -187,15 +186,15 @@ def index(request):
     # Page title from [global] section
     #
     cfg = get_config()
-
-    context = {
-        "cfg": cfg,
-        "logbooks": available_logbooks(request),
-        "heading": "FlexElog Logbook Selection",
-        "cfg_css": cfg.get(
+    logbooks = available_logbooks(request)
+    context = dict(
+        cfg=cfg,
+        group_logbooks=available_groups(logbooks),
+        heading="FlexElog Logbook Selection",
+        cfg_css=cfg.get(
             "global", "css", valtype=str, default=""
         ),  # XXX admin forces global since lb can't exist
-    }
+    )
     return render(request, "flexelog/index.html", context)
 
 
@@ -329,7 +328,7 @@ def logbook_get(request, logbook):
         # If get here, then are just doing the detail view, no editing
     if logbook.auth_required and not request.user.has_perm("view_entries", logbook):
         context = {
-            "message": _('User "%s" has no access to this logbook') % request.user.username
+            "message": _('User "%s" has no access to this logbook') % request.user.get_username()
         }
         return render(request, "flexelog/show_error.html", context)
     selected_id = get_param(request, "id", valtype=int)
@@ -635,7 +634,7 @@ def entry_detail_get(request, logbook, entry):
     # If get here, then are just doing the detail view, no editing
     if logbook.auth_required and not request.user.has_perm("view_entries", logbook):
         context = {
-            "message": _('User "%s" has no access to this logbook') % request.user.username
+            "message": _('User "%s" has no access to this logbook') % request.user.get_username()
         }
         return render(request, "flexelog/show_error.html", context)
     form = EntryViewerForm(data={"text": entry.text or ""})
