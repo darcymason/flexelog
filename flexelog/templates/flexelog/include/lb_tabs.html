@@ -42,7 +42,7 @@
     {% endif %}
     &nbsp;</td>
     {% if request.user.is_authenticated %}
-      <td class="title2">{% translate "Logged in as" %} "{{ request.user.username }}"&nbsp;
+      <td class="title2">{% translate "Logged in as" %} "{{ request.user.get_username }}"&nbsp;
         &nbsp;&nbsp;<a href="{% url 'flexelog:do_logout' %}">{% translate "Logout" %}</a>
         {% if request.user.is_staff %}
           &nbsp;&nbsp;<a href="{% url 'admin:index' %}">{% translate "Admin" %}</a>

@@ -55,7 +55,7 @@ def lb_attrs_to_form_fields(
                 widget = SplitDateTimeWidget(attrs={"type": "datetime-local"})
             if lb_attr.val_type in ("userlist", "muserlist"):
                 choices = [
-                    (user.username, user.username)  # ? f"{user.first_name} {user.last_name}") 
+                    (user.get_username(), user.get_username())  # ? f"{user.get_full_name}") 
                     for user in User.objects.all()
                     if not user.is_anonymous
                 ]

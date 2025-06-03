@@ -33,12 +33,11 @@ class TestConditionalConfig(TestCase):
     )
 
     def setUp(self):
-        ElogConfig.objects.create(name="default", config_text=self.config_text)
+        self.cfg = LogbookConfig(self.config_text)
 
     def test_attr_conditions_parsed(self):
         """Ensure Attributes with vals, e.g. Linux{1}, Windows{2} are parsed"""
-        cfg = get_config()
-        lb_attrs = cfg.lb_attrs["Travel"]
+        lb_attrs = self.cfg.lb_attrs["Travel"]
         where = lb_attrs["Where"]
         self.assertEqual(where.options, "Canada Europe US Other".split())
         self.assertEqual(
@@ -53,36 +52,33 @@ class TestConditionalConfig(TestCase):
 
     def test_no_condition(self):
         # one not in the file:
-        cfg = get_config()
-        required = cfg.get("Travel", "Required Attributes", as_list=True)
+        required = self.cfg.get("Travel", "Required Attributes", as_list=True)
         assert required == []
 
         # non-list with a value
-        assert cfg.get("Travel", "Comment") == "Summarizing trips"
+        assert self.cfg.get("Travel", "Comment") == "Summarizing trips"
 
         # list of values:
-        who = cfg.get("Travel", "MOptions Who", as_list=True)
+        who = self.cfg.get("Travel", "MOptions Who", as_list=True)
         assert who == ["Alice", "Bob", "Christine", "Dave"]
 
     def test_conditional_config(self):
         # conditional value with condition set
-        cfg = get_config()
-        with cfg:
-            cfg.add_condition("eu")
-            where2 = cfg.get("Travel", "MOptions Where2", as_list=True)
+        with self.cfg:
+            self.cfg.add_condition("eu")
+            where2 = self.cfg.get("Travel", "MOptions Where2", as_list=True)
             assert where2 == "Germany France UK Italy Slovenia Czech Hungary".split()
 
-        with cfg:
-            cfg.add_condition("us")
-            where2 = cfg.get("Travel", "MOptions Where2", as_list=True)
+        with self.cfg:
+            self.cfg.add_condition("us")
+            where2 = self.cfg.get("Travel", "MOptions Where2", as_list=True)
             assert where2 == "FL NY Other".split()
 
         # test condition is case-insensitive
-        with cfg:
-            cfg.add_condition("US")
-            where2 = cfg.get("Travel", "MOptions Where2", as_list=True)
+        with self.cfg:
+            self.cfg.add_condition("US")
+            where2 = self.cfg.get("Travel", "MOptions Where2", as_list=True)
             assert where2 == "FL NY Other".split()            
-
 
 # XXX TO DO:
 # * logbook name "urlsafe" - spaces, etc.

@@ -8,7 +8,7 @@
     <table class="login_frame" cellspacing=0 align=center>
       {% if user.is_authenticated %}
         <tr><td class="login_title">
-          {% translate 'Login name' %}: {{ user.username }}
+          {% translate 'Login name' %}: {{ user.get_username }}
         </td></tr>
         <tr><td class="login_form">
           <button type="submit">{% translate 'Logout' %}</button>
