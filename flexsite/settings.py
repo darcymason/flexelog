@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django_tuieditor.apps.DjangoTUIEditorConfig",
     "guardian",
+    "attachments",
 ]
 
 if not TESTING:
@@ -61,6 +62,8 @@ MIDDLEWARE = [
 
 if not TESTING:
     MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
+
+X_FRAME_OPTIONS = "SAMEORIGIN"  # allow viewing attachments in iframe
 
 ROOT_URLCONF = "flexsite.urls"
 
@@ -93,6 +96,7 @@ DATABASES = {
         "NAME": BASE_DIR / "flexelog.db", # "test.db", #
     }
 }
+
 
 
 AUTHENTICATION_BACKENDS = (
@@ -187,3 +191,11 @@ DEFAULT_LOGBOOK_GROUP_PERMISSIONS = {
     "Logbook {logbook.name} Editors": _view + _own + _others,
     "Logbook {logbook.name} Admin": _view + _own + _others + _admin,
 }
+
+
+# ATTACHMENTS:
+if DEBUG:
+    MEDIA_ROOT = BASE_DIR / "media"
+    MEDIA_URL = "media/"
+
+FILE_UPLOAD_MAX_SIZE = 10485760  # 10 MiB

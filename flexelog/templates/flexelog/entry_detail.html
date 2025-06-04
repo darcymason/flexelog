@@ -1,6 +1,7 @@
 {% extends "flexelog/base.html" %}
 {% load flex %}
 {% load i18n %}
+{% load attachments_tags %}
 
 {% block title %}Fl'og {{ entry.attrs.subject }}{% endblock title %}
 {% block more_head_links %}
@@ -47,7 +48,26 @@
         {{ form.text }}
     </td>
     </tr>
-
+    {% get_attachments_for entry as attachments_list %}
+    {% if attachments_list %}
+    
+    {% for attachment in attachments_list %}
+    <tr>
+        <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+            <td nowrap width="10%" class="attribname">{% translate "Attachment" %} {{ forloop.counter }}:</td>
+            <td class="attribvalue"><a href="{{ attachment.attachment_file.url }}">{{ attachment.filename }}</a>
+                &nbsp;<span class="bytes">{{ attachment.attachment_file.size|filesizeformat }}</span></td>
+        </tr>
+    </table>
+        <tr><td width="100%">
+            <table width="100%" cellpadding="0" cellspacing="0">
+            <tr><td><iframe id="frame" src="{{ attachment.attachment_file.url }}" scrolling="yes"></iframe></td></tr>
+        </table></td></tr>
+    </table>
+    {% endfor %}
+    
+    {% endif %}
   </table>
 </table>
 </form>
