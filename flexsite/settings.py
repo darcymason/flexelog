@@ -43,7 +43,6 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django_tuieditor.apps.DjangoTUIEditorConfig",
     "guardian",
-    "attachments",
 ]
 
 if not TESTING:

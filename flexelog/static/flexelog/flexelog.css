@@ -26,14 +26,23 @@ Flexelog additional CSS
     text-align:center;
   }
   
-  
+  .selgroup {
+  border:1px solid #308000;
+  border-top:1px solid white;
+  border-left:1px solid white;
+  background-color:#f8facb;
+  padding:3px;
+  text-align:left;
+  font-weight:bold;
+  font-size:14pt;
+}
  
   
   .sellogbook {
     border:1px solid #308000;
     border-top:1px solid white;
-    border-left:1px solid white;
-    background-color:#ffffee;
+    border-left:1px solid #f8facb;
+    background-color:whitesmoke;
     padding:3px;
     text-align:left;
     font-weight:bold;
@@ -44,7 +53,7 @@ Flexelog additional CSS
   }
   
   .selentries {
-    background-color:#ffffdd;
+    background-color:#e0e2e4;
     border:1px solid #0000FF;
     border-top:1px solid white;
     border-left:1px solid white;
@@ -107,16 +116,23 @@ Flexelog additional CSS
     text-align:center;
     width:0%;
   }
-  
-  
+
+  .listtitle3 {
+  border:1px solid #0000FF;
+  border-top:1px solid white;
+  border-left:1px solid white;
+  background-color:lightgoldenrodyellow;
+  text-align:center;
+  width:0%;
+  }
   
   /* odd and even lines in message listing */
   
   .list1 {
     border:1px solid darkgrey;
     border-top:1px solid lightgrey;
-    border-left:1px solid lightgrey;
-    background-color:#e0e0e0;
+    border-left:1px solid #d3d3d3;
+    background-color:#e4e4e4;
     text-align:center;
   }
   
@@ -124,7 +140,7 @@ Flexelog additional CSS
     border:1px solid darkgrey;
     border-top:1px solid white;
     border-left:1px solid white;
-    background-color:whitesmoke;
+    background-color:#f0f0f0;
     text-align:center;
   }
 
@@ -138,8 +154,42 @@ Flexelog additional CSS
   }  
 
   
+  /* summary display */
+.summary1 {
+  border:1px solid darkgrey;
+  border-top:1px solid white;
+  border-left:1px solid white;
+  background-color:#f9f9f9;
+  font-family:'lucida console',courier,monospace;
+  font-size:8pt;
+  }
   
+  .summary2 {
+  border:1px solid darkgrey;
+  border-top:1px solid white;
+  border-left:1px solid white;
+  background-color:#ffffff;
+  font-family:'lucida console',courier,monospace;
+  font-size:8pt;
+  }
+
+  .listatt2 {
+    border:1px solid #808040;
+    border-top:1px solid white;
+    border-left:1px solid white;
+    background-color:#F0F0F0;
+    text-align:center;
+  }
+
+  .listatt1 {
+    border:1px solid #808040;
+    border-top:1px solid white;
+    border-left:1px solid white;
+    background-color:#e4e4e4;
+    text-align:center;
+  }
   
+
   .dlgtitle {
     background-color:rgb(117, 150, 194);
     color:white;

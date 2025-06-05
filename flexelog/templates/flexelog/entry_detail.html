@@ -1,7 +1,6 @@
 {% extends "flexelog/base.html" %}
 {% load flex %}
 {% load i18n %}
-{% load attachments_tags %}
 
 {% block title %}Fl'og {{ entry.attrs.subject }}{% endblock title %}
 {% block more_head_links %}
@@ -48,10 +47,8 @@
         {{ form.text }}
     </td>
     </tr>
-    {% get_attachments_for entry as attachments_list %}
-    {% if attachments_list %}
     
-    {% for attachment in attachments_list %}
+    {% for attachment in entry.attachments.all %}
     <tr>
         <table width="100%" cellpadding="0" cellspacing="0">
             <tr>
@@ -67,7 +64,6 @@
     </table>
     {% endfor %}
     
-    {% endif %}
   </table>
 </table>
 </form>

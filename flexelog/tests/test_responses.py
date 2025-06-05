@@ -110,7 +110,7 @@ class TestEmptyLogbook(TestCase):
         response = self.client.post(url, data=data)
 
         # check entry in db created
-        entry = self.lb.entry_set.last()
+        entry = self.lb.entries.last()
         self.assertEqual(entry.id, 1)
     
     def test_delete_last_entry_redirect(self):
@@ -214,7 +214,7 @@ class TestResponsesNoAuth(TestCase):
 
         # check entry in db created
         lb = Logbook.objects.get(name="Log 1")
-        entry = lb.entry_set.last()
+        entry = lb.entries.last()
 
         self.assertEqual(entry.attrs, {'status': 'Started', 'category': ['Cat 2'], 'subject': 'Test edit'})
         self.assertEqual(entry.text, data['text'])

@@ -54,15 +54,15 @@
             </th>
           {% endif %}
           {% endfor %}
-          {# <th class="listtitle3"><img src="attachment.png" alt="Attachments" title="Attachments" </th> #}
+          {% comment %} <th class="listtitle3"><img src="{% static 'flexelog/attachment.png' %}" alt="{% translate 'Attachments'}" title="{% translate 'Attachments'}" </th> {% endcomment %}
         </tr>
 
         {# ENTRIES --------------- #}
         {% for entry in page_obj %}
-        <div style="display: none;">{% cycle 'list2' 'list1' as listX %}</div>{# XXX kludge #}
+        <div style="display: none;">{% cycle '2' '1' as listX %}</div>{# XXX kludge #}
         <tr>
           {% for key, val in entry.items %}
-          <td class="{% if key == 'text' %}summary{% else %}{{ listX }}{% if entry.id == selected_id %}h{% endif %}{% endif %}"{% if key == "date" %} nowrap{% endif %}>
+          <td class="{% if key == 'text' %}summary{{ listX }}{% else %}list{{ listX }}{% if entry.id == selected_id %}h{% endif %}{% endif %}"{% if key == "date" %} nowrap{% endif %}>
             {% if not key == "text" %}<a href="{% url 'flexelog:entry_detail' logbook.name entry.id %}">{% endif %}
             {% if key == "id" %}&nbsp;&nbsp;{% endif %}
             {% with filter_attrs|get_item:key as search_text %}
@@ -74,6 +74,7 @@
             {% if not key == "text" %}</a>{% endif %}
           </td>
           {% endfor %}
+          <td class="listatt{{ listX }}">&nbsp;&nbsp;{% attachments_count entry %}</td>
         </tr>
         {% empty %}
             </table><tr><td class="errormsg">{% translate 'No entries found' %}</td></tr>

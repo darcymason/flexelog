@@ -178,6 +178,9 @@ def do_logout(request):
     return render(request, "flexelog/do_logout.html")
 
 
+def attachments(request, lb_name, id, filename):
+    return render(request, "flexelog/show_error.html", {"message": _("Not Implemented")})
+
 def index(request):
     # XXX need to check Protect Selection page whether the list is shown only to registered users,
     #   (or do equivalent permissions "view logbook index" or similar)
@@ -234,7 +237,7 @@ def logbook_post(request, logbook):
             entry.date = form.cleaned_data["date"]
             # Find max id for this logbook and add 1
             # XXX is this thread-safe?  
-            max_entry = logbook.entry_set.order_by("-id").first()
+            max_entry = logbook.entries.order_by("-id").first()
             entry.id = max_entry.id + 1 if max_entry else 1
         entry.save(force_insert=is_new_entry)  # XXX Could trap exists error and try again id +=1
         redirect_url = reverse("flexelog:entry_detail", args=[logbook.name, entry.id])
@@ -412,17 +415,13 @@ def logbook_get(request, logbook):
     else:  # text=based, make case-insensitive
         order_by = Lower(sort_attr_field).desc() if is_rsort else Lower(sort_attr_field)
     qs = (
-        logbook.entry_set.values(*columns.values())
+        logbook.entries.values(*columns.values())
         .filter(**filter_fields)
         .order_by(order_by)
     )
 
-    # 'Manually' filter attrs if case sensitive search
-    if get_param(request, "casesensitive", valtype=bool):
-        filter_qs_case_sensitive(qs, filter_fields)
-
     # except FieldError:
-    #     qs = logbook.entry_set.values(*columns.values()).order_by("-date")
+    #     qs = logbook.entries.values(*columns.values()).order_by("-date")
 
     # Get page requested with "?page=#" or ?page=all else 1
     req_page_number = get_param(request, "page", default="1")
@@ -439,7 +438,7 @@ def logbook_get(request, logbook):
     # If query string has "id=#", then need to position to page with that id
     # ... assuming it exists.  Check that first. If not, then ignore the setting
     page_obj = paginator.get_page(req_page_number)
-    if selected_id and logbook.entry_set.filter(id=selected_id):
+    if selected_id and logbook.entries.filter(id=selected_id):
         # go through each page to find one with the id.
         # XX  Might be a faster way for very large logbooks
         for page_obj in paginator:
@@ -540,9 +539,9 @@ def entry_detail_post(request, logbook: Logbook, entry: Entry):
         entry.delete()
 
         # Find new entry to redirect to ... next higher available number or the last entry
-        next_entry = logbook.entry_set.filter(id__gt=entry.id).order_by("id").first()
+        next_entry = logbook.entries.filter(id__gt=entry.id).order_by("id").first()
         if not next_entry:
-            next_entry = logbook.entry_set.order_by("-id").first()  # max id entry
+            next_entry = logbook.entries.order_by("-id").first()  # max id entry
             if not next_entry:  # no entries at all, go to logbook main listing:
                 return redirect(reverse("flexelog:logbook", args=[logbook.name]))
 
