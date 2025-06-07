@@ -62,6 +62,8 @@ MIDDLEWARE = [
 if not TESTING:
     MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
 
+X_FRAME_OPTIONS = "SAMEORIGIN"  # allow viewing attachments in iframe
+
 ROOT_URLCONF = "flexsite.urls"
 
 TEMPLATES = [
@@ -88,11 +90,14 @@ WSGI_APPLICATION = "flexsite.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    "default": {
+    "default": {                                                                                                                                    
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "flexelog.db", # "test.db", #
+        "NAME": BASE_DIR / "flexelog.db",
+        # "NAME": r"c:\git\xx_flexelog\trivia-216K-entries.db",
+        #"NAME": r"c:\git\xx_flexelog\trivia-8K-entries.db",
     }
 }
+
 
 
 AUTHENTICATION_BACKENDS = (
@@ -187,3 +192,11 @@ DEFAULT_LOGBOOK_GROUP_PERMISSIONS = {
     "Logbook {logbook.name} Editors": _view + _own + _others,
     "Logbook {logbook.name} Admin": _view + _own + _others + _admin,
 }
+
+
+# ATTACHMENTS:
+if DEBUG:
+    MEDIA_ROOT = BASE_DIR / "media"
+    MEDIA_URL = "media/"
+
+FILE_UPLOAD_MAX_SIZE = 10485760  # 10 MiB

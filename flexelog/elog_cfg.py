@@ -81,6 +81,7 @@ ELOGCONFIG_DEFAULTS = {
     #  "Page Title": "FlexElog Logbook Selection", if global section
     "max content length": 10485760,
     "protect selection page": 0,
+    "reverse sort": True,  # different from PSI elog, default is in order
     "search all logbooks": 1,
     "show attachments": True,
     "show text": True, # False = no Text attribute in logbook

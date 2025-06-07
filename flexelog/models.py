@@ -1,6 +1,9 @@
+from datetime import datetime
+from pathlib import Path
 from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
 
@@ -93,7 +96,7 @@ class Logbook(models.Model):
             f"{'   unlisted' if self.is_unlisted else ''}"
         )
     def latest_date(self):
-        return self.entry_set.latest("date").date  # XXX need to check if no entries
+        return self.entries.latest("date").date  # XXX need to check if no entries
     
     @classmethod
     def active_logbooks(cls):
@@ -116,11 +119,14 @@ class LogbookGroup(models.Model):
         lb_names = [lb.name for lb in self.logbooks.all()]
         member_list = ", ".join(lb_names[:show_limit]) + (", ..." if len(lb_names) > show_limit else "" )
         return f"'{self.name}'" + (" = " + member_list if member_list else "")
-
+    
+    @property
+    def slug_name(self):
+        return slugify(self.name)
 
 class Entry(models.Model):
     rowid = models.AutoField(primary_key=True, blank=True)
-    lb = models.ForeignKey(Logbook, on_delete=models.PROTECT)
+    lb = models.ForeignKey(Logbook, on_delete=models.PROTECT, related_name="entries")
     id = models.IntegerField(blank=False, null=False)
     date = models.DateTimeField()
     author = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True) # XX should never delete authors, ## temp
@@ -129,7 +135,6 @@ class Entry(models.Model):
     attrs = models.JSONField(blank=True, null=True)
     reply_to = models.IntegerField(blank=True, null=True)
     encoding = models.TextField(blank=True, null=True)
-    attachments = models.JSONField(blank=True, null=True)
     locked_by = models.TextField(blank=True, null=True)
     text = models.TextField(blank=True, null=True)
 
@@ -147,9 +152,40 @@ class Entry(models.Model):
         verbose_name_plural = _("Entries")
         indexes = [
             models.Index(fields=["lb", "-id"]),
+            models.Index(fields=["lb", "-date"])
         ]
 
 
-def logbook_names():
-    return list(Entry.objects.values_list("lb", flat=True).distinct())
+def upload_path(instance, filename):
+    """Folder/filename to store"""
+    # Making this similar to what PSI elog used but adding logbook name folder.
+    # Can't use entry id (if a new entry, id doesn't exist yet). Similarly for the attachment pk.
+    # But logbook is for sure known.
+    now = datetime.now()
+    return (
+        f"attachments/{instance.entry.lb.slug_name}"
+        f"/{now.strftime('%Y')}"  # 4-digit year
+        f"/{now.strftime('%y%m%d_%H%M%S')}_{filename}"  # e.g. '250325_100259_filename.png'
+    )
+
+class Attachment(models.Model):
+    entry = models.ForeignKey(Entry, related_name="attachments", verbose_name=_("entry"), on_delete=models.CASCADE)
+    attachment_file = models.FileField(
+        _("attachment"), upload_to=upload_path
+    )
+    uploaded = models.DateTimeField(_("uploaded"), auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("attachment")
+        verbose_name_plural = _("attachments")
+        ordering = ["uploaded"]
+
+    def __str__(self):
+        return self.attachment_file.name
+
+    @property
+    def filename(self):
+        return Path(self.attachment_file.name).name[14:]  # strip leading d6_d6_ datetime
+
+
 
