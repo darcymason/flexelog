@@ -1,6 +1,8 @@
 from copy import copy
 from datetime import datetime
 import logging
+from operator import itemgetter
+import operator
 import textwrap
 from typing import Any
 from django.conf import settings
@@ -8,6 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout
 from django.core.paginator import Paginator, Page
 from django.db.models.functions import Lower
+from django.db.models import Count
 from django.http import HttpResponse, QueryDict
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse
@@ -23,7 +26,6 @@ from .elog_cfg import get_config
 from urllib.parse import unquote_plus
 
 from django_tuieditor.widgets import MarkdownViewerWidget
-
 
 def available_logbooks(request) -> list[Logbook]:
     return [
@@ -365,7 +367,8 @@ def logbook_get(request, logbook):
     attrs_lower = [attr.lower() for attr in attrs]
     # XX col order could be changed in config
     col_names = [_("ID"), _("Date")] + attrs
-    col_fields = ["id", "date"] + [f"attrs__{attr.lower()}" for attr in attrs]
+    col_fields = ["id", "date"] + [f"attrs__{attr.lower()}" for attr in attrs] 
+    
     # Add Text column if config'd to do so
     summary_lines = cfg.get(logbook, "Summary lines", valtype=int)
     show_text = cfg.get(logbook, "Show text", valtype=bool)
@@ -374,6 +377,7 @@ def logbook_get(request, logbook):
             _("Text")
         )  # XX even if text not shown, should still be in filters below
         col_fields.append("text")
+    
     columns = dict(zip(col_names, col_fields))
 
     col_names_lower = [x.lower() for x in col_names] + ["subtext"]
@@ -393,7 +397,7 @@ def logbook_get(request, logbook):
     }
 
     # Some db backends (e.g. sqlite, oracle?) do not do case sensitive on unicode,
-    # and/or on JSONFields.  So do case insensitive and filter entires in code below
+    # and/or on JSONFields. 
     filter_fields = {f"{k}__icontains": v for k, v in filter_attrs.items()}
 
     # XX Need to exclude date, id from 'contains'-style search, translate back
@@ -408,18 +412,22 @@ def logbook_get(request, logbook):
     else:
         is_rsort = cfg.get(logbook, "Reverse sort")
         sort_attr_field = columns[_("Date")]
-
+    
     # try:
-    if sort_attr_field in ("id", "date"):  # XXXX or attrs that are numberic or date-based
+    if sort_attr_field in ("id", "date"):  # XXXX or attrs that are numeric or date-based
         order_by = f"{'-' if is_rsort else ''}{sort_attr_field}"
     else:  # text=based, make case-insensitive
         order_by = Lower(sort_attr_field).desc() if is_rsort else Lower(sort_attr_field)
-    qs = (
+    
+    cfg_reverse = cfg.get(logbook, "Reverse sort", valtype=bool)
+    secondary_order = "-id" if cfg_reverse else "id"
+    qs_values = (
         logbook.entries.values(*columns.values())
         .filter(**filter_fields)
-        .order_by(order_by)
+        .order_by(order_by, secondary_order)  # secondary so ?id=# page find manageable for huge logbooks
     )
 
+    
     # except FieldError:
     #     qs = logbook.entries.values(*columns.values()).order_by("-date")
 
@@ -427,25 +435,62 @@ def logbook_get(request, logbook):
     req_page_number = get_param(request, "page", default="1")
     if req_page_number.lower() == "all":
         req_page_number = 1
-        per_page = qs.count() + 1
+        per_page = cfg.get(logbook, "all display limit")
     else:
         per_page = get_param(request, "npp", valtype=int) or cfg.get(
             logbook.name, "entries per page"
         )
     per_page = min(per_page, cfg.get(logbook, "all display limit"))
 
-    paginator = Paginator(qs, per_page=per_page)
+    paginator = Paginator(qs_values, per_page=per_page)
+    
     # If query string has "id=#", then need to position to page with that id
     # ... assuming it exists.  Check that first. If not, then ignore the setting
     page_obj = paginator.get_page(req_page_number)
-    if selected_id and logbook.entries.filter(id=selected_id):
-        # go through each page to find one with the id.
-        # XX  Might be a faster way for very large logbooks
-        for page_obj in paginator:
-            if selected_id in page_obj.object_list.values_list("id", flat=True):
-                break
-        else:  # shouldn't be necessary since checked it exists already...
-            page_obj = paginator.get_page(req_page_number)
+
+    if selected_id:
+        try:
+            sel_entry = logbook.entries.filter(**filter_fields).get(id=selected_id)
+        except Entry.DoesNotExist:
+            sel_entry = None
+    if selected_id and sel_entry:
+        # Get just the sort field and id, even in huge logbooks should still be quick
+        pairs = (
+            logbook.entries
+            .filter(**filter_fields)
+            .order_by(order_by, secondary_order)  # secondary so ?id=# page find manageable for huge logbooks
+            .values_list(sort_attr_field.removeprefix("-"), "id")
+        )
+        if sort_attr_field.removeprefix("-") in ("id", "date", "text"):
+            sel_sort_val = getattr(sel_entry, sort_attr_field.removeprefix("-"))
+        else: # XX just attributes left?
+            sel_sort_val = sel_entry.attrs[sort_attr_field.removeprefix("attrs__")]
+        
+        # Tried bisect, but was quite slow. Instead just count number before it in sort order
+        sort_cmp = "gt" if is_rsort else "lt"
+        id_cmp = "gt" if cfg_reverse else "lt"
+        lo = logbook.entries.filter(**filter_fields, **{f"{sort_attr_field}__{sort_cmp}": sel_sort_val}).count()
+        exact_field_find_id = {f"{sort_attr_field}":sel_sort_val, f"id__{id_cmp}": selected_id}
+        inner_index = logbook.entries.filter(**filter_fields, **exact_field_find_id).count()  # __gt if -id sort
+        
+        # For some unknown reason this doesn't always get to the right page
+        #   ? difference between ordering and comparing individually?
+        # So use that as start index and seek to the correct one.
+        # In my tests, page repaint is ~4-8 seconds for 216K entries logbook also with sorted column
+        #   (python bisect was ~30-50 seconds for same)
+        sel_index = lo + inner_index
+        op = operator.gt if is_rsort else operator.lt
+        direction = 1 if op(pairs[sel_index][0], sel_sort_val) else -1
+        while pairs[sel_index][0] != sel_sort_val:
+            sel_index += direction
+        # Same, but for id
+        op = operator.gt if cfg_reverse else operator.lt
+        direction = 1 if op(pairs[sel_index][1], selected_id) else -1
+        while pairs[sel_index][1] != selected_id:  # Must know that selected_id is there
+            sel_index += direction
+        
+        # now calc the page we found
+        page_obj = paginator.get_page(sel_index // per_page + 1)
 
     num_pages = paginator.num_pages
     if num_pages > 1:

@@ -90,9 +90,10 @@ WSGI_APPLICATION = "flexsite.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    "default": {
+    "default": {                                                                                                                                    
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "flexelog.db", # "test.db", #
+        "NAME": BASE_DIR / "flexelog.db",
+        # "NAME": r"c:\git\xx_flexelog\trivia-216K-entries.db",
     }
 }
 
