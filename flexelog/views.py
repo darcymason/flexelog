@@ -421,8 +421,8 @@ def logbook_get(request, logbook):
     
     cfg_reverse = cfg.get(logbook, "Reverse sort", valtype=bool)
     secondary_order = "-id" if cfg_reverse else "id"
-    qs_values = (
-        logbook.entries.values(*columns.values())
+    queryset = (
+        logbook.entries # .values(*columns.values())
         .filter(**filter_fields)
         .order_by(order_by, secondary_order)  # secondary so ?id=# page find manageable for huge logbooks
     )
@@ -442,7 +442,7 @@ def logbook_get(request, logbook):
         )
     per_page = min(per_page, cfg.get(logbook, "all display limit"))
 
-    paginator = Paginator(qs_values, per_page=per_page)
+    paginator = Paginator(queryset, per_page=per_page)
     
     # If query string has "id=#", then need to position to page with that id
     # ... assuming it exists.  Check that first. If not, then ignore the setting

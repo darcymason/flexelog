@@ -59,9 +59,9 @@
 
         {# ENTRIES --------------- #}
         {% for entry in page_obj %}
-        <div style="display: none;">{% cycle '2' '1' as listX %}</div>{# XXX kludge #}
-        <tr>
-          {% for key, val in entry.items %}
+        {% cycle '2' '1' as listX silent %}
+        <tr>{% summary_line entry columns selected_id filter_attrs search_text listX %}
+          {% comment %} {% for key, val in entry.items %}
           <td class="{% if key == 'text' %}summary{{ listX }}{% else %}list{{ listX }}{% if entry.id == selected_id %}h{% endif %}{% endif %}"{% if key == "date" %} nowrap{% endif %}>
             {% if key != "text" %}<a href="{% url 'flexelog:entry_detail' logbook.name entry.id %}">{% endif %}
             {% if key == "id" %}&nbsp;&nbsp;{% endif %}
@@ -74,7 +74,9 @@
             {% if not key == "text" %}</a>{% endif %}
           </td>
           {% endfor %}
+           
           {% if forloop.last%}<td class="listatt{{ listX }}">&nbsp;&nbsp;{{ val }}</td>{% endif %}
+          {% endcomment %}
         </tr>
         {% empty %}
             </table><tr><td class="errormsg">{% translate 'No entries found' %}</td></tr>
