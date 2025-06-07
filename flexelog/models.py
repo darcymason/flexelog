@@ -152,6 +152,7 @@ class Entry(models.Model):
         verbose_name_plural = _("Entries")
         indexes = [
             models.Index(fields=["lb", "-id"]),
+            models.Index(fields=["lb", "-date"])
         ]
 
 
