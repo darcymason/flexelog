@@ -86,7 +86,7 @@ ELOGCONFIG_DEFAULTS = {
     "show attachments": True,
     "show text": True, # False = no Text attribute in logbook
     "summary lines": 3,
-    "summary line length": 40,
+    "summary line length": 100,  # PSI default was 40
     # date-time displayed for logbook entries,
     # Default in PSI elog was e.g. "09/30/2023 12:57:03 pm"
     "time format": "%m/%d/%Y %I:%M:%S %p",  # likely ignore in favor of locale settings on computer/browser
