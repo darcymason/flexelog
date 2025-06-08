@@ -77,7 +77,7 @@ ELOGCONFIG_DEFAULTS = {
     "entries per page": 20,
     "hide comments": False,  # lb comment on logbook selection page
     "language": "english",
-    "list display": "ID, Date, Author, *attributes",  # *attributes means all Attributes  
+    "list display": "ID, Date, Author, *attributes, Text, Attachments", # *attributes means all Attributes not explicitly listed
     #  "Page Title": "FlexElog Logbook Selection", if global section
     "max content length": 10485760,
     "protect selection page": 0,

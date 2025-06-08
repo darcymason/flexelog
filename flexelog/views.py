@@ -303,6 +303,46 @@ def logbook_tabs_context(request, logbook):
     )
         
 
+def get_list_titles_and_fields(logbook):
+    cfg = get_config()
+
+    config_attr_names = list(
+        cfg.lb_attrs[logbook.name].keys()
+    )
+    config_attr_names_lower = [attr.lower() for attr in config_attr_names]
+
+    # Get configured database and column titles
+    # Don't include Text even if listed, if config Show text=False
+    # "*attributes" puts in the Attributes for the logbook not otherwise listed
+    list_display = cfg.get(logbook, "list display", as_list=True) or []
+    list_display_lower = [x.lower() for x in list_display]
+    try:
+        i_star_attr = list_display_lower.index("*attributes")
+    except ValueError:
+        pass
+    else:
+        used_attributes = [name for name in config_attr_names if name.lower() in list_display_lower]
+        adding_attributes = [name for name in config_attr_names if name not in used_attributes]
+        list_display = list_display[:i_star_attr] + adding_attributes + list_display[i_star_attr + 1:]
+
+    col_db_fields = []
+    col_titles = []
+    show_text = cfg.get(logbook, "Show text", valtype=bool)
+    for attr_name in list_display:
+        if hasattr(Entry, attr_name.lower()):
+            # Don't add Text if configd Show text = False
+            if attr_name.lower() != "text" or show_text:
+                col_db_fields.append(attr_name.lower())
+                col_titles.append(_(attr_name))
+        elif attr_name.lower() in config_attr_names_lower:
+            col_db_fields.append(f"attrs__{attr_name.lower()}")
+            col_titles.append(attr_name)
+        # else ignore those not in Entry or config'd
+        # ^- XX could allow to show old attributes? 
+
+    return col_titles, col_db_fields
+
+
 def logbook_get(request, logbook):    
     cmd = get_param(request, "cmd")
     commands = [_("New"), _("Find")] # _("Select"), ("Import"), ("Config"), _("Help")
@@ -361,26 +401,10 @@ def logbook_get(request, logbook):
     )
     current_mode = _(get_param(request, "mode", default="Summary").capitalize())
 
-    attrs = list(
-        cfg.lb_attrs[logbook.name].keys()
-    )  # XX can also config Attributes shown
-    attrs_lower = [attr.lower() for attr in attrs]
-    # XX col order could be changed in config
-    col_names = [_("ID"), _("Date")] + attrs
-    col_fields = ["id", "date"] + [f"attrs__{attr.lower()}" for attr in attrs] 
-    
-    # Add Text column if config'd to do so
-    summary_lines = cfg.get(logbook, "Summary lines", valtype=int)
-    show_text = cfg.get(logbook, "Show text", valtype=bool)
-    if show_text and summary_lines > 0:
-        col_names.append(
-            _("Text")
-        )  # XX even if text not shown, should still be in filters below
-        col_fields.append("text")
-    
-    columns = dict(zip(col_names, col_fields))
-
-    col_names_lower = [x.lower() for x in col_names] + ["subtext"]
+    col_titles, col_db_fields = get_list_titles_and_fields(logbook)
+   
+    columns = dict(zip(col_titles, col_db_fields))
+    col_names_lower = [x.lower() for x in col_titles] + ["subtext"]
     # XX could also be in columns not shown in display
     filters = {
         k: v
@@ -391,14 +415,14 @@ def logbook_get(request, logbook):
     if "subtext" in filters:
         filters["text"] = filters.pop("subtext")
 
+    config_attr_names_lower = [attr.lower() for attr in cfg.lb_attrs[logbook.name].keys()]
     filter_attrs = {  # actually text and attrs
-        f"{'attrs__' if k.lower() in attrs_lower else ''}{k.lower()}": v
+        f"{'attrs__' if k.lower() in config_attr_names_lower else ''}{k.lower()}": v
         for k, v in filters.items()
     }
 
-    # Some db backends (e.g. sqlite, oracle?) do not do case sensitive on unicode,
-    # and/or on JSONFields. 
-    filter_fields = {f"{k}__icontains": v for k, v in filter_attrs.items()}
+    # XXX need to handle case-(in)sensitive
+    filter_fields = {f"{k}__regex": v for k, v in filter_attrs.items()}
 
     # XX Need to exclude date, id from 'contains'-style search, translate back
 
@@ -512,7 +536,7 @@ def logbook_get(request, logbook):
         ),
         page_n_of_N=page_n_of_N,
         selected_id=selected_id,
-        summary_lines=summary_lines,
+        summary_lines=cfg.get(logbook, "Summary lines"),
         sort_attr_field=sort_attr_field,
         is_rsort=is_rsort,
         filters=filters,

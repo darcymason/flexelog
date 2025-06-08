@@ -1,11 +1,13 @@
 import textwrap
 from django import template
 from django.conf import settings
+from django.templatetags.static import static
 from django.urls import reverse
 from django.utils import formats
 from django.utils.safestring import mark_safe
 from django.utils.html import conditional_escape, format_html
 from django.template.defaultfilters import stringfilter
+
 import re
 
 from flexelog.elog_cfg import get_config
@@ -99,12 +101,10 @@ def highlight_text(text, pattern, case_sensitive=False, autoescape=True):
 
 @register.simple_tag
 def entry_summary(entry, columns, selected_id, filter_attrs, cycle, autoescape=True):
-    # Note double {{ and }} here, so first (Python) format leaves {val} for format_html()
     text_fmt = """<td class="summary{cycle}">{val}</td>"""
     non_text_fmt = """<td class="list{cycle}{h_sel}"{nowrap}>{href_open}{val}</a></td>"""
-    #   <td class="listatt"> + "&nbsp;".join(att_href_imgs)" + "&nbsp;</td>"
-    # paperclip_img = """<img border="0" align="absmiddle" src="{paperclip_file}" alt="{att_name}" title="{att_name}" />"""
-    # att_ref_img = """<a href="{att_url}" target="_blank"></a>""""
+    attachment_fmt = """<td class="listatt{cycle}">{linked_icons}</td>"""
+
     cfg = get_config()
     htmls = []
     detail_url = reverse("flexelog:entry_detail", args=[entry.lb.name, entry.id])
@@ -129,22 +129,39 @@ def entry_summary(entry, columns, selected_id, filter_attrs, cycle, autoescape=T
             max_lines = cfg.get(entry.lb, "summary lines", valtype=int)
             lines =  _text_summary_lines(entry.text, width, max_lines)
             if search_pattern:
-                val = mark_safe("<br/>".join(highlight_text(line, search_pattern) for line in lines))
+                val = "<br/>".join(highlight_text(line, search_pattern) for line in lines)
             else:
-                val = mark_safe("<br/>".join(esc(line) for line in lines))
+                val = "<br/>".join(esc(line) for line in lines)
             
-            htmls.append(mark_safe(text_fmt.format(cycle=cycle, val=val)))
-        else:
-                
-            htmls.append(
-                mark_safe(
-                    non_text_fmt.format(
-                        cycle=cycle,
-                        h_sel = h_sel,
-                        nowrap=" nowrap" if field == "date" else "",
-                        href_open=href_open,
-                        val = highlight_text(val, search_pattern), 
+            htmls.append(text_fmt.format(cycle=cycle, val=val))
+        elif field == "attachments":
+            if entry.attachments.count():
+                attachment_img_fmt = """<img border="0" align="absmiddle" src="{img_src_url}" alt="{attach_name}" title="{attach_name}" />"""
+                link_icons = []
+                for attachment in entry.attachments.all():
+                    attachment_img = attachment_img_fmt.format(
+                        img_src_url=static("flexelog/attachment.png"),
+                        attach_name=attachment.filename,
                     )
+                    link_icons.append(
+                        f"""<a href="{attachment.attachment_file.url}" target="_blank">{attachment_img}</a>""".format(
+                            attachment=attachment, 
+                            attachment_img=attachment_img,
+                        )
+                    )
+                linked_icons = "&nbsp;".join(link_icons)
+            else:
+                linked_icons = "&nbsp;"                
+            
+            htmls.append(attachment_fmt.format(linked_icons=linked_icons, cycle=cycle))
+        else:
+            htmls.append(
+                non_text_fmt.format(
+                    cycle=cycle,
+                    h_sel = h_sel,
+                    nowrap=" nowrap" if field == "date" else "",
+                    href_open=href_open,
+                    val = highlight_text(val, search_pattern), 
                 )
             )
 
