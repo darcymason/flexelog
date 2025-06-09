@@ -1,6 +1,9 @@
 {% load i18n %}
 
 {% if page_obj.has_other_pages %}
+
+<tr><td class="menuframe"><span class="menu3">
+
 {% translate "Goto page" %}
 {% if page_obj.has_previous %}
   <a href="{% querystring page=page_obj.previous_page_number id=None %}">{% translate "Previous" %}</a>
@@ -21,4 +24,9 @@
 {% endif %}
 
 &nbsp;&nbsp;<a href="{% querystring page='all' npp=None id=None %}">{% translate "All" %}</a>
+
+
+</span>
+</td></tr>
+
 {% endif %}
