@@ -395,11 +395,11 @@ def logbook_get(request, logbook):
     commands[4] = (_("Last day"), f"{lb_url}past1?mode=Summary")
 
     modes = (  # First text is translated, url param is not
-        (_("Full"), "?mode=full"),
-        (_("Summary"), "?mode=summary"),
-        (_("Threaded"), "?mode=threaded"),
+        (_("Full"), "full"),
+        (_("Summary"), "summary"),
+        (_("Threaded"), "threaded"),
     )
-    current_mode = _(get_param(request, "mode", default="Summary").capitalize())
+    mode = _(get_param(request, "mode", default=cfg.get(logbook, "display mode", default="summary")))
 
     col_titles, col_db_fields = get_list_titles_and_fields(logbook)
    
@@ -435,7 +435,7 @@ def logbook_get(request, logbook):
         is_rsort = True
     else:
         is_rsort = cfg.get(logbook, "Reverse sort")
-        sort_attr_field = columns[_("Date")]
+        sort_attr_field = columns.get(_("Date"), "id")  # use ID if date not shown, likely id is usually shown
     
     # try:
     if sort_attr_field in ("id", "date"):  # XXXX or attrs that are numeric or date-based
@@ -528,7 +528,7 @@ def logbook_get(request, logbook):
     context.update(
         commands=commands,
         modes=modes,
-        current_mode=current_mode,
+        mode=mode,
         columns=columns,
         page_obj=page_obj,
         page_range=list(
@@ -541,6 +541,7 @@ def logbook_get(request, logbook):
         is_rsort=is_rsort,
         filters=filters,
         filter_attrs=filter_attrs,
+        casesensitive=get_param(request, "casesensitive", valtype=bool, default=False),
         IOptions=[f"attrs__{attr_name}" for attr_name in cfg.IOptions(logbook, lowercase=True)],
     )
     return render(request, "flexelog/entry_list.html", context)

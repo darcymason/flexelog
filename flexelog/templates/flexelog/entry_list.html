@@ -19,14 +19,15 @@
     {% include "flexelog/include/list_display_header.html"%}
     {% for entry in page_obj %}
       {% cycle '2' '1' as listX silent %}
-      <tr>{% entry_summary entry columns selected_id filter_attrs listX %}</tr>
-    {% empty %}
-      </table><tr><td class="errormsg">{% translate 'No entries found' %}</td></tr>
+      {% entry_listing entry columns selected_id filter_attrs casesensitive mode listX %}
     {% endfor %}
-    {% if page_obj %}</table>{% endif %}
-    {% include "flexelog/include/pagination.html" %}
   </table>
+  {% include "flexelog/include/pagination.html" %}
+  {% if not page_obj %}
+    <tr><td class="errormsg">{% translate 'No entries found' %}</td></tr>
+  {% endif %}
   </td></tr>
+
 </table>
 </form>
 {% endblock body %}

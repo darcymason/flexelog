@@ -4,9 +4,13 @@
     {% for col_name, col_field in columns.items %}
     {# XX need urlencoded version of col_name for url #}
     {% if col_field == "text" %}
-      <th class="listtitle2">{{ col_name }}</th>
+      {% if mode == "summary" %}
+        <th class="listtitle2">{{ col_name }}</th>
+      {% endif %}
     {% elif col_field == "attachments" %}
-      <th class="listtitle3"><img src="{% static 'flexelog/attachment.png' %}" alt="{% translate 'Attachments'}" title="{% translate 'Attachments'}"</th>
+      {% if mode == "summary" %}
+        <th class="listtitle3"><img src="{% static 'flexelog/attachment.png' %}" alt="{% translate 'Attachments'}" title="{% translate 'Attachments'}"</th>
+      {% endif %}
     {% else %}
       <th class="listtitle">  
       {% if col_field == sort_attr_field %}

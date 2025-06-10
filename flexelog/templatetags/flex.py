@@ -100,40 +100,55 @@ def highlight_text(text, pattern, case_sensitive=False, autoescape=True):
     )
 
 @register.simple_tag
-def entry_summary(entry, columns, selected_id, filter_attrs, cycle, autoescape=True):
-    text_fmt = """<td class="summary{cycle}">{val}</td>"""
+def entry_listing(entry, columns, selected_id, filter_attrs, casesensitive, mode, cycle, autoescape=True):
+    text_fmt_summary = """<td class="summary{cycle}">{val}</td>"""
+    text_fmt_full = """<tr><td class="messagelist" colspan="{colspan}">{val}</td></tr>"""
     non_text_fmt = """<td class="list{cycle}{h_sel}"{nowrap}>{href_open}{val}</a></td>"""
     attachment_fmt = """<td class="listatt{cycle}">{linked_icons}</td>"""
 
     cfg = get_config()
-    htmls = []
+    htmls = [] 
     detail_url = reverse("flexelog:entry_detail", args=[entry.lb.name, entry.id])
     href_open = f'<a href="{detail_url}">'
     h_sel = "h" if entry.id == selected_id else ""
 
     esc = conditional_escape if autoescape else lambda x: x
 
+    # For mode=full track text and attachments separately
+    mode_full_row1_tds = []
+    mode_full_row2 = ""
+    mode_full_row3 = ""
+    
+    if mode == "summary":
+        htmls.append("<tr>")
+    
     for field in columns.values():
         val = getattr(entry, field, None) or entry.attrs.get(field.removeprefix("attrs__")) or ""
         if isinstance(val, list):
             val = " | ".join(val)
         is_text = (field == "text")
-        if field == "date":  # XX need to localize other date fields
+        if field == "date":  # XX need to localize other date fields, XX need to use configd date format
             val = str(formats.localize(val, use_l10n=True))
         search_pattern = filter_attrs.get(field)
 
-        if is_text:
+        if is_text and mode == "summary":
             # if entry.encoding == "HTML":
             #     text = markdownify(self.text)
-            width = cfg.get(entry.lb, "summary line length", valtype=int)
-            max_lines = cfg.get(entry.lb, "summary lines", valtype=int)
+            width = cfg.get(entry.lb, "summary line length", valtype=int, default="100")
+            max_lines = cfg.get(entry.lb, "summary lines", valtype=int, default="3")
             lines =  _text_summary_lines(entry.text, width, max_lines)
             if search_pattern:
-                val = "<br/>".join(highlight_text(line, search_pattern) for line in lines)
+                val = "<br/>".join(highlight_text(line, search_pattern, casesensitive) for line in lines)
             else:
                 val = "<br/>".join(esc(line) for line in lines)
+            htmls.append(text_fmt_summary.format(cycle=cycle, val=val))                    
+        elif is_text and mode == "full":
+            highlighted_lines = (highlight_text(line, search_pattern, casesensitive) for line in entry.text.splitlines())
+            mode_full_row2 = text_fmt_full.format(
+                val="<br/>".join(highlighted_lines),
+                colspan=len(columns)-1
+            )
             
-            htmls.append(text_fmt.format(cycle=cycle, val=val))
         elif field == "attachments":
             if entry.attachments.count():
                 attachment_img_fmt = """<img border="0" align="absmiddle" src="{img_src_url}" alt="{attach_name}" title="{attach_name}" />"""
@@ -152,17 +167,30 @@ def entry_summary(entry, columns, selected_id, filter_attrs, cycle, autoescape=T
                 linked_icons = "&nbsp;".join(link_icons)
             else:
                 linked_icons = "&nbsp;"                
-            
-            htmls.append(attachment_fmt.format(linked_icons=linked_icons, cycle=cycle))
+            if mode == "summary":
+                htmls.append(attachment_fmt.format(linked_icons=linked_icons, cycle=cycle))
+            elif mode == "full":
+                pass  # XXX needs fix to display attachements
+                # mode_full_row3 = attachment_fmt.format(linked_icons=linked_icons, cycle=cycle)  
         else:
-            htmls.append(
-                non_text_fmt.format(
-                    cycle=cycle,
-                    h_sel = h_sel,
-                    nowrap=" nowrap" if field == "date" else "",
-                    href_open=href_open,
-                    val = highlight_text(val, search_pattern), 
-                )
+            attr_td = non_text_fmt.format(
+                cycle=cycle,
+                h_sel = h_sel,
+                nowrap=" nowrap" if field == "date" else "",
+                href_open=href_open,
+                val = highlight_text(val, search_pattern), 
             )
+
+            if mode == "summary":
+                htmls.append(attr_td)
+            elif mode == "full":
+                mode_full_row1_tds.append(attr_td)
+
+    if mode == "full":
+        htmls.append("<tr>" + "".join(mode_full_row1_tds) + "</tr>")
+        htmls.append(mode_full_row2)
+        htmls.append(mode_full_row3)
+    elif mode == "summary":
+        htmls.append("</tr>")
 
     return mark_safe("\n".join(htmls))

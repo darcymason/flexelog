@@ -74,6 +74,7 @@ ELOGCONFIG_DEFAULTS = {
     "all display limit": 500,
     "attachment lines": 300,
     "charset": "UTF-8",  # PSI elog default was ISO-8859-1
+    "display mode": "summary",  # default mode for search, and used by "Last xxx"
     "entries per page": 20,
     "hide comments": False,  # lb comment on logbook selection page
     "language": "english",
@@ -295,13 +296,15 @@ class LogbookConfig:
         if as_list and default is None:
             default = []
 
+        if valtype is None:
+            valtype = str
         if valtype is bool:
             valtype = cfg_bool
 
         lb_name = lb.name if isinstance(lb, Logbook) else lb  # XX need to clean lb_name?
         if lb_name not in self._cfg:
             logging.warning(f"Unknown config section {lb_name}")
-            return default
+            return valtype(default)
 
         param = param.lower()  # make case insensitive
 
