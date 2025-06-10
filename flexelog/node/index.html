@@ -3,39 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Milkdown Crepe Editor Local Example</title>
+    <title>Milkdown Crepe Editor Markdown & WYSIWYG</title>
 
     <style>
         body {
-            font-family: -apple-system, BlinkMacMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-            margin: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            margin: 0;
             background-color: #f7f7f7;
             color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
         h1 {
             text-align: center;
-            margin-bottom: 30px;
+            margin: 20px 0;
             color: #2c3e50;
         }
-        #editor-container {
-            max-width: 800px;
-            margin: 0 auto;
+        #content-wrapper {
+            flex-grow: 1;
+            display: flex;
+            padding: 0 20px 20px;
+            gap: 20px;
+        }
+        .panel {
+            flex: 1;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
             overflow: hidden;
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
         }
-        /* Minimal custom styling, Crepe handles most of it */
-        .crepe .milkdown {
+        .panel h2 {
+            font-size: 1.2em;
+            padding: 10px 15px;
+            margin: 0;
+            background-color: #eef;
+            border-bottom: 1px solid #ddd;
+            color: #555;
+        }
+        #editor-container {
+            /* Milkdown Crepe will mount here */
+        }
+        .crepe .milkdown { /* Target the Milkdown editor view */
             min-height: 400px;
-            padding: 10px;
+            flex-grow: 1;
             box-sizing: border-box;
+            overflow-y: auto;
+        }
+        #markdown-output-raw { /* Renamed ID */
+            flex-grow: 1;
+            padding: 15px;
+            background-color: #f8f8f8; /* Slightly different background for raw */
+            border-radius: 0 0 8px 8px;
+            overflow-y: auto; /* Allow scrolling for raw markdown content */
+            font-family: monospace; /* Monospaced font for code */
+            font-size: 0.9em;
+            white-space: pre-wrap; /* Preserve whitespace and wrap long lines */
+            word-wrap: break-word; /* Break long words */
+            tab-size: 4; /* Define tab width */
         }
     </style>
 </head>
 <body>
-    <h1>Milkdown Crepe Editor (Local, not in dist)</h1>
-    <div id="editor-container">
+    <h1>Milkdown Crepe Editor (WYSIWYG & Markdown Source)</h1>
+
+    <div id="content-wrapper">
+        <div class="panel">
+            <h2>WYSIWYG Editor</h2>
+            <div id="editor-container">
+                </div>
         </div>
+
+        <div class="panel">
+            <h2>Raw Markdown Source</h2>
+            <pre><code id="markdown-output-raw">
+                </code></pre>
+        </div>
+    </div>
 
     <script type="module" src="/src/main.js"></script>
 </body>
