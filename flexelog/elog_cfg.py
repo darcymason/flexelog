@@ -393,7 +393,7 @@ def logbook_updated(sender, **kwargs):
     logbook = kwargs['instance']
     created = kwargs['created']
     raw = kwargs['raw']
-    if created and not raw:
+    if created and not raw and logbook.auth_required:
         # Create default groups for the logbook management
         for group_name, group_perms in settings.DEFAULT_LOGBOOK_GROUP_PERMISSIONS.items():
             group, was_created = Group.objects.get_or_create(name=group_name.format(logbook=logbook))

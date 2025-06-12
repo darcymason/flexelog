@@ -25,7 +25,7 @@ from .elog_cfg import get_config
 
 from urllib.parse import unquote_plus
 
-from django_tuieditor.widgets import MarkdownViewerWidget
+from flexelog.editor.widgets_toastui import MarkdownViewerWidget
 
 def available_logbooks(request) -> list[Logbook]:
     return [
@@ -735,6 +735,7 @@ def test(request, lb_name, entry_id):
             "logbooks": available_logbooks(request),  # XX will need to restrict to what user auth is, not show deactivated ones
             "main_tab": cfg.get(logbook, "main tab", valtype=str, default=""),
             "cfg_css": cfg.get(logbook, "css", valtype=str, default=""),
+            "content": entry.text,
         }
     )
-    return render(request, "flexelog/edit.html", context)
+    return render(request, "flexelog/xx_test_viewer.html", context)
