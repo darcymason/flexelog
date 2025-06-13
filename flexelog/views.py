@@ -462,9 +462,9 @@ def logbook_get(request, logbook):
         per_page = cfg.get(logbook, "all display limit")
     else:
         per_page = get_param(request, "npp", valtype=int) or cfg.get(
-            logbook.name, "entries per page"
+            logbook.name, "entries per page", valtype=int
         )
-    per_page = min(per_page, cfg.get(logbook, "all display limit"))
+    per_page = min(per_page, cfg.get(logbook, "all display limit", valtype=int))
 
     paginator = Paginator(queryset, per_page=per_page)
     
