@@ -3,45 +3,43 @@
 
 <div><div id="{{ editorid }}"></div></div>
 
-
 <script language="javascript" type="text/javascript">
-    function latexPlugin() {
-        const toHTMLRenderers = {
-            latex(node) {
-                const html = katex.renderToString(node.literal);
+    function chkform() {
+        // if (last_key == 13) {
+        //     var ret = confirm('Really submit this entry?');
+        //     if (!ret) {
+        //         last_key = 0;
+        //         return false;
+        //     }
+        // }
+        
+        // if (autoSaveTimer != null)
+        // clearTimeout(autoSaveTimer);
+        // submitted = true;
+        document.getElementById("id_text").value = editor.getMarkdown();
 
-                return [
-                    { type: 'openTag', tagName: 'div', outerNewLine: true },
-                    { type: 'html', content: html },
-                    { type: 'closeTag', tagName: 'div', outerNewLine: true }
-                ];
-            }
-        }
-        return { toHTMLRenderers };
+        return true;
     }
 
-    const { Editor } = toastui;
-    const { chart, codeSyntaxHighlight, colorSyntax, tableMergedCell } = Editor.plugin;
+    const editor = new Editor({
+        el: document.querySelector('#{{ editorid }}'),
+        previewStyle: 'vertical',
+        height: '500px',
+        initialValue: '',
+        usageStatistics: false,
+        mathSupport: true,
+        placeHolder: '',
+        autofocus: false,
+        plugins: [[chart, {maxWidth:750, maxHeight:500}], [codeSyntaxHighlight, {highlighter: Prism}], colorSyntax, tableMergedCell, latexPlugin],
+    });
+
 
     document.addEventListener('DOMContentLoaded', function () {
         // Initialize the ToastUI Editor
-
-        const editor = new Editor({
-            el: document.querySelector('#{{ editorid }}'),
-            previewStyle: 'vertical',
-            height: '500px',
-            initialValue: '',
-            usageStatistics: false,
-            mathSupport: true,
-            placeHolder: '',
-            autofocus: false,
-            plugins: [[chart, {maxWidth:750, maxHeight:500}], [codeSyntaxHighlight, {highlighter: Prism}], colorSyntax, tableMergedCell, latexPlugin],
-        });
 
         var text = document.getElementById("{{ widget.attrs.id }}").value;
         editor.setMarkdown(text);
         return true;
     })
-
 </script>
 {% endwith %}

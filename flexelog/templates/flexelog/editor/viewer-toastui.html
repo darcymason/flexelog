@@ -3,26 +3,7 @@
 
 <div><div id="{{ viewer_id }}"></div></div>
 
-
 <script language="javascript" type="text/javascript">
-    function latexPlugin() {
-        const toHTMLRenderers = {
-            latex(node) {
-                const html = katex.renderToString(node.literal);
-
-                return [
-                    { type: 'openTag', tagName: 'div', outerNewLine: true },
-                    { type: 'html', content: html },
-                    { type: 'closeTag', tagName: 'div', outerNewLine: true }
-                ];
-            }
-        }
-        return { toHTMLRenderers };
-    }
-
-    const { Editor } = toastui;
-    const { chart, codeSyntaxHighlight, colorSyntax, tableMergedCell } = Editor.plugin;
-
     document.addEventListener('DOMContentLoaded', function () {
 
         const viewer = toastui.Editor.factory({
@@ -39,6 +20,5 @@
         viewer.setMarkdown(text);
         return true;
     })
-
 </script>
 {% endwith %}

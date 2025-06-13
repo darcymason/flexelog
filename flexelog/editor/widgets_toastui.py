@@ -1,4 +1,5 @@
 from django import forms
+from django.templatetags.static import static
 
 # Adapted from django-tuieditor (https://github.com/nhn/tui.editor)
 # Changed to CDN rather than local scripts
@@ -25,7 +26,8 @@ common_js = (
     "https://uicdn.toast.com/editor-plugin-code-syntax-highlight/latest/toastui-editor-plugin-code-syntax-highlight-all.min.js",
     "https://uicdn.toast.com/editor-plugin-color-syntax/latest/toastui-editor-plugin-color-syntax.min.js",
     "https://uicdn.toast.com/editor-plugin-table-merged-cell/latest/toastui-editor-plugin-table-merged-cell.min.js",
-    "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js",    
+    "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js",   
+    static("flexelog/toastui-local.js"),
 )
 
 
