@@ -17,7 +17,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from flexelog.forms import EntryForm, EntryViewerForm, SearchForm
+from flexelog.forms import EntryForm, EntryViewerForm, ListingModeFullForm, SearchForm
 from guardian.shortcuts import get_perms
 
 from .models import Logbook, LogbookGroup, Entry
@@ -526,6 +526,7 @@ def logbook_get(request, logbook):
 
     context = logbook_tabs_context(request, logbook)
     context.update(
+        form = ListingModeFullForm(), # dummy to get media for Full mode
         commands=commands,
         modes=modes,
         mode=mode,

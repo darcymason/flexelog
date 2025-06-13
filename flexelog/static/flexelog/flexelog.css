@@ -128,12 +128,20 @@ Flexelog additional CSS
   
   /* odd and even lines in message listing */
   
-  .list1 {
+  .list1, .list1full, .list1fullh {
     border:1px solid darkgrey;
     border-top:1px solid lightgrey;
     border-left:1px solid #d3d3d3;
     background-color:#e4e4e4;
     text-align:center;
+  }
+
+  .list1full {
+    background-color:rgb(201, 201, 152);
+  }
+
+  .list1fullh {
+    font-weight:bold;
   }
   
   .list2 {
@@ -143,6 +151,7 @@ Flexelog additional CSS
     background-color:#f0f0f0;
     text-align:center;
   }
+
 
   .list1h {
     border:1px solid #308000;

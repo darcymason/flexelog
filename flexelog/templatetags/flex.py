@@ -11,7 +11,7 @@ from django.template.defaultfilters import stringfilter
 import re
 
 from flexelog.elog_cfg import get_config
-
+from flexelog.editor.widgets_toastui import MarkdownViewerWidget
 
 register = template.Library()
 
@@ -100,10 +100,13 @@ def highlight_text(text, pattern, case_sensitive=False, autoescape=True):
     )
 
 @register.simple_tag
-def entry_listing(entry, columns, selected_id, filter_attrs, casesensitive, mode, cycle, autoescape=True):
+def entry_listing(entry, columns, selected_id, filter_attrs, casesensitive, mode, cycle, index, autoescape=True):
     text_fmt_summary = """<td class="summary{cycle}">{val}</td>"""
     text_fmt_full = """<tr><td class="messagelist" colspan="{colspan}">{val}</td></tr>"""
-    non_text_fmt = """<td class="list{cycle}{h_sel}"{nowrap}>{href_open}{val}</a></td>"""
+    non_text_fmt = {
+        "summary": '<td class="list{cycle}{h_sel}"{nowrap}>{href_open}{val}</a></td>',
+        "full": '<td class="list1full{h_sel}"{nowrap}>{href_open}{val}</a></td>',
+    }
     attachment_fmt = """<td class="listatt{cycle}">{linked_icons}</td>"""
 
     cfg = get_config()
@@ -144,10 +147,15 @@ def entry_listing(entry, columns, selected_id, filter_attrs, casesensitive, mode
             htmls.append(text_fmt_summary.format(cycle=cycle, val=val))                    
         elif is_text and mode == "full":
             highlighted_lines = (highlight_text(line, search_pattern, casesensitive) for line in entry.text.splitlines())
+            widget = MarkdownViewerWidget(attrs={"id": f"viewer{index}"})
             mode_full_row2 = text_fmt_full.format(
-                val="<br/>".join(highlighted_lines),
-                colspan=len(columns)-1
+                val = widget.render(name=f"viewer_name{index}", value="\n".join(highlighted_lines)),
+                colspan=len(columns) -2,
             )
+            # mode_full_row2 = text_fmt_full.format(
+            #     val="<br/>".join(highlighted_lines),
+            #     colspan=len(columns)-1
+            # )
             
         elif field == "attachments":
             if entry.attachments.count():
@@ -173,7 +181,7 @@ def entry_listing(entry, columns, selected_id, filter_attrs, casesensitive, mode
                 pass  # XXX needs fix to display attachements
                 # mode_full_row3 = attachment_fmt.format(linked_icons=linked_icons, cycle=cycle)  
         else:
-            attr_td = non_text_fmt.format(
+            attr_td = non_text_fmt[mode].format(
                 cycle=cycle,
                 h_sel = h_sel,
                 nowrap=" nowrap" if field == "date" else "",

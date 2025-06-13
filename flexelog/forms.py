@@ -282,3 +282,7 @@ class SearchForm(Form):
             name: field.get_bound_field(self, name)
             for name, field in attr_fields.items()
         }
+
+class ListingModeFullForm(Form):
+    """dummy form to get media loaded on the page"""
+    text = MarkdownViewerFormField()
