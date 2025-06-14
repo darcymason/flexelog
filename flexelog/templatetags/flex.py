@@ -80,11 +80,16 @@ def _text_summary_lines(text, width, max_lines):
 def highlight_text(text, pattern, case_sensitive=False, autoescape=True):
     """Place html highlighting around matched pattern in the string
     
-    Returns a marksafe string
+    Does NOT return a safe string in general, because it is used for
+    markdown text with possibly span and br and latex brackets, etc. 
+    and the EDITOR / viewer MUST sanitize the markdown to present as html.
+
+    However, if a search pattern is used, then escapes all values to avoid any issues
+    with the search string entered by the user, when used in Summary listing mode.
     """
     esc = conditional_escape if autoescape else lambda x:x
     if not pattern:
-        return mark_safe(esc(text))
+        return text
     
     # Note is case-sensitive, so if need insensitive pattern should start with "(?i)"
     case_sens = "" if case_sensitive else "(?i)"
