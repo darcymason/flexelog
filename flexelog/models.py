@@ -125,6 +125,7 @@ class LogbookGroup(models.Model):
         return slugify(self.name)
 
 class Entry(models.Model):
+    fixed_attr_names = ["date", "id", "author", "text"]
     rowid = models.AutoField(primary_key=True, blank=True)
     lb = models.ForeignKey(Logbook, on_delete=models.PROTECT, related_name="entries")
     id = models.IntegerField(blank=False, null=False)
@@ -133,11 +134,17 @@ class Entry(models.Model):
     last_modified_author = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True, related_name="modified_entry") # XX should never delete authors, ## temp
     last_modified_date = models.DateTimeField(null=True)
     attrs = models.JSONField(blank=True, null=True)
-    reply_to = models.IntegerField(blank=True, null=True)
+    in_reply_to = models.ForeignKey("self", models.SET_NULL, null=True, related_name="replies")
     encoding = models.TextField(blank=True, null=True)
     locked_by = models.TextField(blank=True, null=True)
     text = models.TextField(blank=True, null=True)
 
+    def get(self, attr_name, default=None):
+        if attr_name.lower() in self.fixed_attr_names:
+            return getattr(self, attr_name.lower())
+        else:
+            return self.attrs.get(attr_name.lower(), default=default) if self.attrs else default
+   
     def __str__(self):
         return (
             f"{self.lb} {self.id}: {self.date} {self.attrs} "

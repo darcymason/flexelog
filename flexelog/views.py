@@ -17,6 +17,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
+from flexelog import subst
 from flexelog.forms import EntryForm, EntryViewerForm, ListingModeFullForm, SearchForm
 from guardian.shortcuts import get_perms
 
@@ -550,7 +551,7 @@ def logbook_get(request, logbook):
 
 def new_edit_get(request, logbook, command, entry):
     # XXXX check request.user permissions for each of these, for the logbook
-
+    cfg = get_config()
     if command == _("New"):
         entry = Entry(lb=logbook)
         entry.author = None if request.user.is_anonymous else request.user
@@ -559,16 +560,22 @@ def new_edit_get(request, logbook, command, entry):
         page_type = "Edit"
         entry.last_modified_author = None if request.user.is_anonymous else request.user
     else:  # _("Reply"), _("Duplicate")
+        parent_is_reply = entry.in_reply_to
         entry = copy(entry)
         entry.author = None if request.user.is_anonymous else request.user
         entry.pk = None
         entry.id = None
-        entry.reply_to = None
+        entry.in_reply_to = None
         # XXXX entry.author = <current user>
         page_type = "Duplicate"
         if command == _("Reply"):
             page_type = "Reply"
-            entry.reply_to = entry.id
+            entry.in_reply_to = entry.id
+            # Check Preset on first reply <attribute> = string
+            if not parent_is_reply and entry.attrs:
+                for attr_name in entry.attrs.keys():
+                    if cfg_subst := cfg.get(logbook, f"Preset on first reply {attr_name}"):
+                        entry.attrs[attr_name] = subst.subst(cfg_subst, logbook, entry=entry)
             entry.text = (
                 f"\n{_('Quote')}:\n"
                 + textwrap.indent(entry.text or "", "> ", lambda _: True)

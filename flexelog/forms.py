@@ -163,7 +163,7 @@ class EntryForm(Form):
         # XXX add any extra attrs now in lb config that aren't in this entry
         data = MultiValueDict()
         data["date"] = entry.date
-        data["reply_to"] = entry.reply_to
+        # data["in_reply_to"] = entry.in_reply_to
         data["edit_id"] = entry.id
         data["text"] = entry.text
         data["page_type"] = page_type

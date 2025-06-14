@@ -3,7 +3,10 @@ from textwrap import dedent
 
 from flexelog.models import Logbook, ElogConfig, ValidationError
 from flexelog.elog_cfg import LogbookConfig, get_config
+from flexelog import subst
 
+class _MockEntry:
+    pass
 
 class ConfigTests(TestCase):
     def test_restricted_logbook_name(self):
@@ -83,3 +86,12 @@ class TestConditionalConfig(TestCase):
 # XXX TO DO:
 # * logbook name "urlsafe" - spaces, etc.
 # * check index page when latest_date has no entries 
+
+class TestSubstitutions(TestCase):
+    def test_re_on_reply(self):
+        entry = _MockEntry()
+        entry.attrs = {"subject": "Subject of entry"}
+        subst_text = "Re: $Subject"
+        expected = "Re: Subject of entry"
+        got = subst.subst(subst_text, logbook=None, entry=entry)
+        self.assertEqual(got, expected)
