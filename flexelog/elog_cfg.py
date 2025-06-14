@@ -1,5 +1,6 @@
 from collections import defaultdict
 import configparser
+import csv
 from dataclasses import dataclass, field
 import re
 from typing import Any
@@ -337,8 +338,10 @@ class LogbookConfig:
                 return val
 
         # Convert all to list temporarily
+        # Can have commas inside a quoted string so use csv to split
+        temp_rdr = csv.reader((val,),  delimiter=',', skipinitialspace=True)  # quotechar='"',
         val = (
-            [x.strip() for x in val.split(",") if x.strip()]
+            [x.strip() for x in next(temp_rdr) if x.strip()]
             if as_list
             else [val]
         )
