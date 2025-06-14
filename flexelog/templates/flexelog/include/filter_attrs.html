@@ -1,0 +1,12 @@
+{% load flex %}
+
+{% if filters %}
+    <tr><td class="listframe">
+    <table width="100%" border="0" cellpadding="0" cellspacing="0">
+    {% for name, val in filters.items %}
+      <tr><td nowrap width="10%" class="attribname">{{ name }}:</td>
+      <td class="attribvalue">{{ val|highlight:val }}</td></tr>
+    {% endfor %}
+    </table>
+    </td></tr>
+{% endif %}

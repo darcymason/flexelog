@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown Input & HTML Output</title>
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            margin: 0;
+            background-color: #f7f7f7;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        h1 {
+            text-align: center;
+            margin: 20px 0;
+            color: #2c3e50;
+        }
+        #content-wrapper {
+            flex-grow: 1;
+            display: flex;
+            padding: 0 20px 20px;
+            gap: 20px;
+        }
+        .panel {
+            flex: 1;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+        .panel h2 {
+            font-size: 1.2em;
+            padding: 10px 15px;
+            margin: 0;
+            background-color: #eef;
+            border-bottom: 1px solid #ddd;
+            color: #555;
+        }
+        #markdown-input-raw { /* Styling for the textarea */
+            flex-grow: 1; /* Make it fill available height */
+            width: 100%; /* Make it fill available width */
+            padding: 15px;
+            box-sizing: border-box; /* Include padding in element's total width/height */
+            border: none; /* Remove default textarea border */
+            resize: none; /* Disable textarea resizing */
+            font-family: monospace;
+            font-size: 1em;
+            line-height: 1.5;
+            overflow-y: auto; /* Allow scrolling for content */
+            background-color: #fcfcfc;
+            border-radius: 0 0 8px 8px;
+        }
+        #html-output { /* Styling for the HTML display panel */
+            flex-grow: 1;
+            padding: 15px;
+            background-color: #fff; /* Keep white for content background */
+            border-radius: 0 0 8px 8px;
+            overflow-y: auto; /* Allow scrolling for HTML content */
+        }
+        /* Basic styling for rendered HTML elements to make them readable */
+        #html-output h1, #html-output h2, #html-output h3, #html-output h4, #html-output h5, #html-output h6 {
+            margin-top: 1em;
+            margin-bottom: 0.5em;
+            line-height: 1.2;
+        }
+        #html-output p {
+            margin-bottom: 0.8em;
+        }
+        #html-output pre {
+            background-color: #eee;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap; /* Ensure pre content wraps */
+            word-wrap: break-word; /* Ensure long words break */
+        }
+        #html-output code {
+            font-family: monospace;
+            background-color: #f0f0f0;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        #html-output ul, #html-output ol {
+            margin-left: 20px;
+            margin-bottom: 0.8em;
+        }
+        #html-output table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 1em;
+        }
+        #html-output th, #html-output td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        #html-output img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Markdown Input & HTML Output</h1>
+
+    <div id="content-wrapper">
+        <div class="panel">
+            <h2>Markdown Input</h2>
+            <textarea id="markdown-input-raw" spellcheck="false"></textarea>
+        </div>
+
+        <div class="panel">
+            <h2>HTML Output</h2>
+            <div id="html-output">
+                </div>
+        </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>

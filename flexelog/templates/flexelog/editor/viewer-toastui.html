@@ -1,0 +1,24 @@
+{% include "django/forms/widgets/textarea.html" %}
+{% with 'viewer-'|add:widget.attrs.id as viewer_id %}
+
+<div><div id="{{ viewer_id }}"></div></div>
+
+<script language="javascript" type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const viewer = toastui.Editor.factory({
+          el: document.querySelector('#{{ viewer_id }}'),
+          viewer: true,
+          initialValue: '',
+          usageStatistics: false,
+          mathSupport: true,
+          plugins: [[chart, { maxWidth: 750, maxHeight: 500 }], [codeSyntaxHighlight, { highlighter: Prism }], colorSyntax, tableMergedCell, latexPlugin]
+        })
+      
+        // Set the Markdown content in the viewer
+        var text = document.getElementById("{{ widget.attrs.id }}").value;
+        viewer.setMarkdown(text);
+        return true;
+    })
+</script>
+{% endwith %}

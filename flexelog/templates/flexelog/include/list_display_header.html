@@ -1,0 +1,29 @@
+  {% load static %}
+  {% load i18n %}
+  <tr>
+    {% for col_name, col_field in columns.items %}
+    {# XX need urlencoded version of col_name for url #}
+    {% if col_field == "text" %}
+      {% if mode == "summary" %}
+        <th class="listtitle2">{{ col_name }}</th>
+      {% endif %}
+    {% elif col_field == "attachments" %}
+      {% if mode == "summary" %}
+        <th class="listtitle3"><img src="{% static 'flexelog/attachment.png' %}" alt="{% translate 'Attachments'}" title="{% translate 'Attachments'}"</th>
+      {% endif %}
+    {% else %}
+      <th class="listtitle">  
+      {% if col_field == sort_attr_field %}
+        {% if is_rsort %}
+          <a href="{% querystring sort=col_name rsort=None %}">{{ col_name }}&nbsp;↓</a>
+        {% else %}
+          <a href="{% querystring rsort=col_name sort=None %}">{{ col_name }}&nbsp;↑</a>
+        {% endif %}
+      {% else %}
+        <a href="{% querystring sort=col_name rsort=None %}">{{ col_name }}</a>
+      {% endif %}
+      </th>
+    {% endif %}
+    {% endfor %}
+    
+  </tr>

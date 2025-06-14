@@ -1,0 +1,45 @@
+{% include "django/forms/widgets/textarea.html" %}
+{% with 'editor-'|add:widget.attrs.id as editorid %}
+
+<div><div id="{{ editorid }}"></div></div>
+
+<script language="javascript" type="text/javascript">
+    function chkform() {
+        // if (last_key == 13) {
+        //     var ret = confirm('Really submit this entry?');
+        //     if (!ret) {
+        //         last_key = 0;
+        //         return false;
+        //     }
+        // }
+        
+        // if (autoSaveTimer != null)
+        // clearTimeout(autoSaveTimer);
+        // submitted = true;
+        document.getElementById("id_text").value = editor.getMarkdown();
+
+        return true;
+    }
+
+    const editor = new Editor({
+        el: document.querySelector('#{{ editorid }}'),
+        previewStyle: 'vertical',
+        height: '500px',
+        initialValue: '',
+        usageStatistics: false,
+        mathSupport: true,
+        placeHolder: '',
+        autofocus: false,
+        plugins: [[chart, {maxWidth:750, maxHeight:500}], [codeSyntaxHighlight, {highlighter: Prism}], colorSyntax, tableMergedCell, latexPlugin],
+    });
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Initialize the ToastUI Editor
+
+        var text = document.getElementById("{{ widget.attrs.id }}").value;
+        editor.setMarkdown(text);
+        return true;
+    })
+</script>
+{% endwith %}

@@ -25,8 +25,10 @@ global_config = dedent(
     Default Encoding = 0
     Reverse sort = 1
     Main Tab = Index
-
-    [Log 1]
+    """
+)
+log_1_config = dedent(
+    """\
     Comment = Comment for Log 1
     Attributes = Status, Category, Subject
     ROptions Status = Not started, Started, Done
@@ -34,8 +36,11 @@ global_config = dedent(
     Required Attributes = Category, Subject
     Page Title = Log 1 - $Subject
     Quick filter = Category, Status
+    """ 
+)
 
-    [Log2]
+log2_config = dedent(
+    """\
     Comment = Comment for Log 2
     Attributes = Status, Category, Subject
     ROptions Status = Not started, Started, Done
@@ -43,11 +48,13 @@ global_config = dedent(
     Required Attributes = Category, Subject
     Page Title = Log 2 - $Subject
     Quick filter = Category, Status
+    """
+)
 
-    [EmptyLog]
+emptylog_config = dedent(
+    """\
     Comment = No entries to start
     Attributes = Subject
-    
     """
 )
 
@@ -88,6 +95,7 @@ class TestEmptyLogbook(TestCase):
             config_text=global_config,
         )
         cls.lb = Logbook.objects.create(name="EmptyLog")
+        cls.lb.config = emptylog_config
         cls.lb.save()
 
     def test_empty_list_entries(self):
@@ -130,9 +138,13 @@ class TestResponsesNoAuth(TestCase):
 
         cls.lb1 = Logbook.objects.create(
             name="Log 1",  # NOTE: has space for url quoting testing
+            config=log_1_config,
+            auth_required=False,
         )
         cls.lb2 = Logbook.objects.create(
             name="Log2",
+            config = log2_config,
+            auth_required = False,
         )
 
         # Add some entries
@@ -189,9 +201,9 @@ class TestResponsesNoAuth(TestCase):
         rstr = response.content.decode()
         print(rstr)
         pattern = (
-            r"<tr.*subject:.*Second entry.*</tr>"
-            r".*<tr.*category:.*Cat 2.*</tr>"
-            r".*<tr.*status:.*Done.*</tr>"
+            r"<tr.*Subject:.*Second entry.*</tr>"
+            r".*<tr.*Category:.*Cat 2.*</tr>"
+            r".*<tr.*Status:.*Done.*</tr>"
             r".*<tr.*>.*<textarea.*>.*Log 1 entry 2.*</textarea>.*</tr>"
         )
         self.assertTrue(re.search(pattern, rstr, re.DOTALL))

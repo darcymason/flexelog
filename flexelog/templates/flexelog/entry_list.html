@@ -3,90 +3,36 @@
 {% load static %}
 {% load flex %}
 
+{% block more_head_links %}
+ {% if mode == "full" %}
+    {{ form.media }}
+ {% endif %}
+{% endblock more_head_links %}
 {% block body %}
 
 <form name="form1" method="GET" action=".">
-  {% csrf_token %}
-  <table class="frame" cellpadding="0" cellspacing="0">
+
+<table class="frame" cellpadding="0" cellspacing="0">
   {% include "flexelog/include/lb_tabs.html" %}
   {% include "flexelog/include/commands.html" %}
-
-  {% if filters %}
-    <tr><td class="listframe">
-    <table width="100%" border="0" cellpadding="0" cellspacing="0">
-    {% for name, val in filters.items %}
-      <tr>
-        <td nowrap width="10%" class="attribname">{{ name }}:</td>
-        <td class="attribvalue">{{ val|highlight:val }}</span></td>
-      </tr>
-    {% endfor %}
-    </table></td></tr>
-  {% endif %}
-
+  {% include "flexelog/include/filter_attrs.html"%}
   {% include "flexelog/include/list_modes.html" %}
-  {% if page_obj.has_other_pages %}
-    <tr>
-      <td class="menuframe"><span class="menu3">
-          {% include "flexelog/include/pagination.html" %}
-        </span></td>
-    </tr>
-  {% endif %}
-  <tr>
-    <td>
-      <table class="listframe" width="100%" cellspacing=0>
-        {# COLUMN HEADERS ------------ #}
-        <tr>
-          {% for col_name, col_field in columns.items %}
-          {# XX need urlencoded version of col_name for url #}
-          {% if col_field == "text" %}
-            <th class="listtitle2">{{ col_name }}</th>
-          {% else %}
-            <th class="listtitle">  
-            {% if col_field == sort_attr_field %}
-              {% if is_rsort %}
-                 <a href="{% querystring sort=col_name rsort=None %}">{{ col_name }}&nbsp;↓</a>
-              {% else %}
-                <a href="{% querystring rsort=col_name sort=None %}">{{ col_name }}&nbsp;↑</a>
-              {% endif %}
-            {% else %}
-              <a href="{% querystring sort=col_name rsort=None %}">{{ col_name }}</a>
-            {% endif %}
-            </th>
-          {% endif %}
-          {% endfor %}
-          <th class="listtitle3"><img src="{% static 'flexelog/attachment.png' %}" alt="{% translate 'Attachments'}" title="{% translate 'Attachments'}" </th>
-        </tr>
+  {% include "flexelog/include/pagination.html" %}
 
-        {# ENTRIES --------------- #}
-        {% for entry in page_obj %}
-        <div style="display: none;">{% cycle '2' '1' as listX %}</div>{# XXX kludge #}
-        <tr>
-          {% for key, val in entry.items %}
-          <td class="{% if key == 'text' %}summary{{ listX }}{% else %}list{{ listX }}{% if entry.id == selected_id %}h{% endif %}{% endif %}"{% if key == "date" %} nowrap{% endif %}>
-            {% if key != "text" %}<a href="{% url 'flexelog:entry_detail' logbook.name entry.id %}">{% endif %}
-            {% if key == "id" %}&nbsp;&nbsp;{% endif %}
-            {% with filter_attrs|get_item:key as search_text %}
-              {% if key in IOptions %}{{ val|icon_show }}
-              {% else %}{{ val|attr_show|highlight:search_text }}
-              {% endif %}
-            {% endwith %}
-            {% if key == "id" %}&nbsp;&nbsp;{% endif %}
-            {% if not key == "text" %}</a>{% endif %}
-          </td>
-          {% endfor %}
-          {% if forloop.last%}<td class="listatt{{ listX }}">&nbsp;&nbsp;{{ val }}</td>{% endif %}
-        </tr>
-        {% empty %}
-            </table><tr><td class="errormsg">{% translate 'No entries found' %}</td></tr>
-        {% endfor %}
-    {% if page_obj %}</table>{% endif %}
-  {% if page_obj.has_other_pages %}
-    <tr>
-      <td class="menuframe"><span class="menu3">
-          {% include "flexelog/include/pagination.html" %}
-        </span></td>
-    </tr>
-  {% endif %}
+  <tr><td>
+  <table class="listframe" width="100%" cellspacing=0>
+    {% include "flexelog/include/list_display_header.html"%}
+    {% for entry in page_obj %}
+      {% cycle '2' '1' as listX silent %}
+      {% entry_listing entry columns selected_id filter_attrs casesensitive mode listX forloop.counter %}
+    {% endfor %}
   </table>
+  {% include "flexelog/include/pagination.html" %}
+  {% if not page_obj %}
+    <tr><td class="errormsg">{% translate 'No entries found' %}</td></tr>
+  {% endif %}
+  </td></tr>
+
+</table>
 </form>
 {% endblock body %}

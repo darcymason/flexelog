@@ -1,5 +1,6 @@
 from collections import defaultdict
 import configparser
+import csv
 from dataclasses import dataclass, field
 import re
 from typing import Any
@@ -74,10 +75,11 @@ ELOGCONFIG_DEFAULTS = {
     "all display limit": 500,
     "attachment lines": 300,
     "charset": "UTF-8",  # PSI elog default was ISO-8859-1
+    "display mode": "summary",  # default mode for search, and used by "Last xxx"
     "entries per page": 20,
     "hide comments": False,  # lb comment on logbook selection page
     "language": "english",
-    "list display": "ID, Date, Author, *attributes",  # *attributes means all Attributes  
+    "list display": "ID, Date, Author, *attributes, Text, Attachments", # *attributes means all Attributes not explicitly listed
     #  "Page Title": "FlexElog Logbook Selection", if global section
     "max content length": 10485760,
     "protect selection page": 0,
@@ -86,7 +88,7 @@ ELOGCONFIG_DEFAULTS = {
     "show attachments": True,
     "show text": True, # False = no Text attribute in logbook
     "summary lines": 3,
-    "summary line length": 40,
+    "summary line length": 100,  # PSI default was 40
     # date-time displayed for logbook entries,
     # Default in PSI elog was e.g. "09/30/2023 12:57:03 pm"
     "time format": "%m/%d/%Y %I:%M:%S %p",  # likely ignore in favor of locale settings on computer/browser
@@ -295,13 +297,15 @@ class LogbookConfig:
         if as_list and default is None:
             default = []
 
+        if valtype is None:
+            valtype = str
         if valtype is bool:
             valtype = cfg_bool
 
         lb_name = lb.name if isinstance(lb, Logbook) else lb  # XX need to clean lb_name?
         if lb_name not in self._cfg:
             logging.warning(f"Unknown config section {lb_name}")
-            return default
+            return valtype(default)
 
         param = param.lower()  # make case insensitive
 
@@ -334,8 +338,10 @@ class LogbookConfig:
                 return val
 
         # Convert all to list temporarily
+        # Can have commas inside a quoted string so use csv to split
+        temp_rdr = csv.reader((val,),  delimiter=',', skipinitialspace=True)  # quotechar='"',
         val = (
-            [x.strip() for x in val.split(",") if x.strip()]
+            [x.strip() for x in next(temp_rdr) if x.strip()]
             if as_list
             else [val]
         )
@@ -390,7 +396,7 @@ def logbook_updated(sender, **kwargs):
     logbook = kwargs['instance']
     created = kwargs['created']
     raw = kwargs['raw']
-    if created and not raw:
+    if created and not raw and logbook.auth_required:
         # Create default groups for the logbook management
         for group_name, group_perms in settings.DEFAULT_LOGBOOK_GROUP_PERMISSIONS.items():
             group, was_created = Group.objects.get_or_create(name=group_name.format(logbook=logbook))

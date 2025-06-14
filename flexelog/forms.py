@@ -29,8 +29,15 @@ from django.utils.datastructures import MultiValueDict
 
 from flexelog.elog_cfg import Attribute, get_config
 from flexelog.models import User
-from django_tuieditor.fields import MarkdownFormField, MarkdownViewerFormField
 from .models import Entry
+from flexelog.editor.widgets_toastui import MarkdownEditorWidget, MarkdownViewerWidget
+
+
+class MarkdownFormField(CharField):
+    widget = MarkdownEditorWidget
+
+class MarkdownViewerFormField(CharField):
+    widget = MarkdownViewerWidget
 
 
 formfield_for_type = dict(
@@ -45,7 +52,7 @@ formfield_for_type = dict(
 )
 
 def lb_attrs_to_form_fields(
-    lb_attrs: dict[str, Attribute], data: MultiValueDict = None
+    lb_attrs: dict[str, Attribute], data: MultiValueDict | None = None
 ) -> dict:
     fields = {}
     for name, lb_attr in lb_attrs.items():
@@ -275,3 +282,7 @@ class SearchForm(Form):
             name: field.get_bound_field(self, name)
             for name, field in attr_fields.items()
         }
+
+class ListingModeFullForm(Form):
+    """dummy form to get media loaded on the page"""
+    text = MarkdownViewerFormField()
