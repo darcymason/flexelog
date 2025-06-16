@@ -24,7 +24,7 @@ python manage.py compilemessages
 ```
 which produces the final .mo files used by Django's internationalization/localization.
 
-The `psi_translations` script reads the translation files from PSI (copies in flexelog/psi_elog/lang).  NOTE: some of those files were renamed to put the charset into the file extension, where it was not `latin1`.  If the files are later updated from the PSI elog source code, remember to rename them appropriately.
+The `psi_translations` script reads the translation files from PSI (copies in flexelog/psi_elog/lang).  Background info for developers: those files were all converted to utf-8 encoding and renamed using script `eloglang_to_utf.py` in the same folder. That should not need to be run again, unless updates to PSI elog language files were needed -- however would overwrite any edits made in those files, so use with caution.
 
 NOTE: if do *not* want users to be able to each have their own language (set by the browser),
 then remove the line

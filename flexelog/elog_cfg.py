@@ -78,7 +78,7 @@ ELOGCONFIG_DEFAULTS = {
     "display mode": "summary",  # default mode for search, and used by "Last xxx"
     "entries per page": 20,
     "hide comments": False,  # lb comment on logbook selection page
-    "language": "english",
+    # "language": "english", --> define in django settings.py instead
     "list display": "ID, Date, Author, *attributes, Text, Attachments", # *attributes means all Attributes not explicitly listed
     #  "Page Title": "FlexElog Logbook Selection", if global section
     "max content length": 10485760,
@@ -305,7 +305,7 @@ class LogbookConfig:
         lb_name = lb.name if isinstance(lb, Logbook) else lb  # XX need to clean lb_name?
         if lb_name not in self._cfg:
             logging.warning(f"Unknown config section {lb_name}")
-            return valtype(default)
+            return default
 
         param = param.lower()  # make case insensitive
 

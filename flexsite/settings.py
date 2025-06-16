@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     "guardian",
 ]
 
-if not TESTING:
+if DEBUG and not TESTING:
     INSTALLED_APPS.append("debug_toolbar")
 
 MIDDLEWARE = [ 
@@ -155,13 +155,12 @@ LANGUAGES = [
     ('tr', _("Turkish")),
     ('zh', _("Chinese")),
 ]
+
+TIME_ZONE = "America/Toronto"  # "UTC"
+USE_TZ = True  # Recommend True, dates still displayed in local timezone.
+
 LANGUAGE_CODE = "en-us"
-
-TIME_ZONE = "UTC"
-
 USE_I18N = True
-
-USE_TZ = True
 
 LOCALE_PATHS = [
     BASE_DIR / "flexelog" / "locale",

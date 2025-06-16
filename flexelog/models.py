@@ -3,6 +3,7 @@ from pathlib import Path
 from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
@@ -168,7 +169,7 @@ def upload_path(instance, filename):
     # Making this similar to what PSI elog used but adding logbook name folder.
     # Can't use entry id (if a new entry, id doesn't exist yet). Similarly for the attachment pk.
     # But logbook is for sure known.
-    now = datetime.now()
+    now = timezone.now()
     return (
         f"attachments/{instance.entry.lb.slug_name}"
         f"/{now.strftime('%Y')}"  # 4-digit year
