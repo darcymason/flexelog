@@ -12,6 +12,7 @@ import re
 
 from flexelog.elog_cfg import get_config
 from flexelog.editor.widgets_toastui import MarkdownViewerWidget
+from flexelog.models import Entry
 
 register = template.Library()
 
@@ -58,6 +59,18 @@ def icon_show(val):
         )
     return val
 
+
+@register.filter
+def list_replies(entry):
+    if not isinstance(entry, Entry) or not entry.replies:
+        return mark_safe("")
+    lb_name = entry.lb.name
+    reply_htmls = []
+    for reply in entry.replies.all():
+        link = reverse('flexelog:entry_detail', args=[lb_name, reply.id])
+        reply_htmls.append(f'&nbsp;<a href="{link}">{reply.id}</a>')
+    return mark_safe("nbsp;".join(reply_htmls))
+ 
 
 def _text_summary_lines(text, width, max_lines):
     if not text:

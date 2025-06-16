@@ -148,8 +148,8 @@ class Entry(models.Model):
    
     def __str__(self):
         return (
-            f"{self.lb} {self.id}: {self.date} {self.attrs} "
-            f"{shorten(self.text or "", 50)}"
+            f"{self.lb.name} {self.id}: {self.date} {shorten(str(self.attrs) or "", 20)} "
+            f"{shorten(self.text or "", 30)}"
         )
 
     class Meta:

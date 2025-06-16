@@ -223,7 +223,7 @@ def logbook_post(request, logbook):
         # Form is valid, now save the inputs to a database Entry
         attrs = {attr_name: form.cleaned_data[attr_name] for attr_name in attr_names}
         if page_type == "Edit":
-            entry = Entry.objects.get(lb=logbook, id=form.cleaned_data["edit_id"])
+            entry = Entry.objects.get(lb=logbook, id=form.cleaned_data["edit_id"])  # XXX catch errors
             is_new_entry = False
             entry.last_modified_author = None if request.user.is_anonymous else request.user
             entry.last_modified_date = timezone.now()
@@ -232,8 +232,13 @@ def logbook_post(request, logbook):
             entry.author = None if request.user.is_anonymous else request.user
             entry.lb = logbook  # XX security - should check logbook = original entry if a reply
             is_new_entry = True
+            if page_type == "Reply":
+                try:
+                    entry.in_reply_to = Entry.objects.get(lb=logbook, id=form.cleaned_data["in_reply_to"])
+                except Entry.DoesNotExist:
+                    entry.in_reply_to = None
+            
         # Fill in edit object
-        
         entry.attrs = attrs
         entry.text = form.cleaned_data["text"]
         if page_type in ("New", "Reply"):
@@ -560,22 +565,27 @@ def new_edit_get(request, logbook, command, entry):
         page_type = "Edit"
         entry.last_modified_author = None if request.user.is_anonymous else request.user
     else:  # _("Reply"), _("Duplicate")
-        parent_is_reply = entry.in_reply_to
+        parent_entry = entry
         entry = copy(entry)
         entry.author = None if request.user.is_anonymous else request.user
         entry.pk = None
         entry.id = None
-        entry.in_reply_to = None
+        entry.in_reply_to = None  # for Duplicate, Reply set below
         # XXXX entry.author = <current user>
         page_type = "Duplicate"
         if command == _("Reply"):
             page_type = "Reply"
-            entry.in_reply_to = entry.id
+            try:
+                entry.in_reply_to = Entry.objects.get(lb=logbook, id=parent_entry.id)
+            except:
+                pass  # leave as None
             # Check Preset on first reply <attribute> = string
-            if not parent_is_reply and entry.attrs:
+            if not parent_entry.in_reply_to and entry.attrs:
                 for attr_name in entry.attrs.keys():
                     if cfg_subst := cfg.get(logbook, f"Preset on first reply {attr_name}"):
-                        entry.attrs[attr_name] = subst.subst(cfg_subst, logbook, entry=entry)
+                        entry.attrs[attr_name] = subst.subst(cfg_subst, logbook, user=request.user, entry=entry)
+            # XXX check other 'Preset on reply' config
+            # XX the Quote here can be set by Preset config
             entry.text = (
                 f"\n{_('Quote')}:\n"
                 + textwrap.indent(entry.text or "", "> ", lambda _: True)

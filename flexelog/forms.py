@@ -142,7 +142,7 @@ class EntryForm(Form):
     page_type = CharField(widget=HiddenInput(), initial="New")
     attr_names = CharField(widget=HiddenInput(), required=False)
     edit_id = IntegerField(widget=HiddenInput(), required=False)
-    reply_to = IntegerField(widget=HiddenInput(), required=False)
+    in_reply_to = IntegerField(widget=HiddenInput(), required=False)
 
     def __init__(self, data=None, *args, **kwargs):
         self.entry_attrs = lb_attrs = kwargs.pop(
@@ -163,7 +163,7 @@ class EntryForm(Form):
         # XXX add any extra attrs now in lb config that aren't in this entry
         data = MultiValueDict()
         data["date"] = entry.date
-        # data["in_reply_to"] = entry.in_reply_to
+        data["in_reply_to"] = entry.in_reply_to.id if entry.in_reply_to else ""
         data["edit_id"] = entry.id
         data["text"] = entry.text
         data["page_type"] = page_type

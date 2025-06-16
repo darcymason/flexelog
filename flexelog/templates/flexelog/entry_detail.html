@@ -18,6 +18,10 @@
     <td class="attribhead">Message ID:&nbsp;<b>{{ entry.id }}</b>
         &nbsp;&nbsp;&nbsp;&nbsp;Entry time:&nbsp;<b>{{ entry.date }}</b>
         {% if entry.author %}&nbsp;&nbsp;{% translate 'Username' %}:&nbsp;<b>{{ entry.author.get_username }}</b>{% endif %}
+        {% if entry.in_reply_to %}
+        &nbsp;&nbsp;&nbsp;&nbsp;{% translate 'In reply to' %}:&nbsp;<b><a href="{% url 'flexelog:entry_detail' logbook.name entry.in_reply_to.id %}">{{ entry.in_reply_to.id }}</a></b>
+        {% endif %}
+        {% if entry.replies.count %}&nbsp;&nbsp;&nbsp;&nbsp;{% translate 'Reply to this' %}:{{ entry|list_replies }}{% endif %}
     </td>
     </tr>
     </td></tr>
