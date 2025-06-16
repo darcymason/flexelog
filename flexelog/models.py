@@ -151,6 +151,13 @@ class Entry(models.Model):
             f"{self.lb.name} {self.id}: {self.date} {shorten(str(self.attrs) or "", 20)} "
             f"{shorten(self.text or "", 30)}"
         )
+    
+    def reply_ancestor(self):
+        """Return self, or first ancestor that is not a reply to another entry"""
+        root = self
+        while root.in_reply_to:
+            root = root.in_reply_to
+        return root
 
     class Meta:
         constraints = [

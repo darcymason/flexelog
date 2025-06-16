@@ -100,7 +100,7 @@ def command_perm_response(request, command, commands, logbook, entry=None) -> Ht
 
     # if read-only logbook, cannot do anything other than viewing-type commands
     if logbook.readonly:
-        extra = "nbsp;nbsp;" + _('Logbook "%s" is read-only') % logbook.name
+        extra = "&nbsp;&nbsp;" + _('Logbook "%s" is read-only') % logbook.name
         return err_command(extra)
  
     if command not in commands:

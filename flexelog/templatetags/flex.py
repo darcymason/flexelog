@@ -1,4 +1,5 @@
 import textwrap
+from typing import List
 from django import template
 from django.conf import settings
 from django.templatetags.static import static
@@ -69,7 +70,7 @@ def list_replies(entry):
     for reply in entry.replies.all():
         link = reverse('flexelog:entry_detail', args=[lb_name, reply.id])
         reply_htmls.append(f'&nbsp;<a href="{link}">{reply.id}</a>')
-    return mark_safe("nbsp;".join(reply_htmls))
+    return mark_safe("&nbsp;".join(reply_htmls))
  
 
 def _text_summary_lines(text, width, max_lines):
@@ -220,3 +221,48 @@ def entry_listing(entry, columns, selected_id, filter_attrs, casesensitive, mode
         htmls.append("</tr>")
 
     return mark_safe("\n".join(htmls))
+
+# THREAD_INDENT_CHARACTER = "↳"  # \u21b3, Downwards Arrow With Tip Rightwards
+# THREAD_INDENT_CHARACTER = '⇨'  # ⇒
+THREAD_INDENT_CHARACTER = '<span style="background-color:white">⇒</span>' 
+INDENT = "&nbsp;&nbsp;&nbsp;"
+
+thread_line_fmt = (
+    '<tr><td align="left" class="threadreply">'
+    '{indent}<a href="{link}">'
+    '{indent_chr}&nbsp;{entry_summary}'
+    '</a></td></tr>'
+)
+
+def _thread_tree(entry, indent_level, selected_id, esc) -> List[str]:
+    """Return html lines for an entry and descendants.  Used recursively"""
+    lines = []
+    # Render self first
+    entry_summary = f"&nbsp;{entry.date}&nbsp;"
+    if entry.attrs:
+        entry_summary += "&nbsp;".join(esc(val) for val in entry.attrs.values())
+    
+    if entry.id == selected_id:
+        entry_summary = "<b>" + entry_summary + "</b>"
+    
+    lines.append(
+        thread_line_fmt.format(
+            indent = INDENT * indent_level,
+            link = reverse("flexelog:entry_detail", args=[entry.lb.name, entry.id]),
+            indent_chr = THREAD_INDENT_CHARACTER,
+            entry_summary=entry_summary,
+        )
+    )
+    for reply in entry.replies.all():
+        lines.extend(_thread_tree(reply, indent_level + 1, selected_id, esc))
+    
+    return lines
+    
+
+@register.simple_tag
+def thread_tree(entry: Entry, autoescape=True):
+    # <a href="../Biz/227">
+    root = entry.reply_ancestor()
+    esc = conditional_escape if autoescape else lambda x:x
+    lines = _thread_tree(root, 0, entry.id, esc)
+    return mark_safe("\n".join(lines))
