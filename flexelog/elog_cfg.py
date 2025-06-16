@@ -282,7 +282,7 @@ class LogbookConfig:
         self,
         lb: str | Logbook,
         param: str,
-        default: str | None = None,
+        default: Any | None = None,
         valtype: type | None = None,
         as_list: bool = False,
     ) -> Any:

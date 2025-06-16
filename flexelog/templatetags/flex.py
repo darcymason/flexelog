@@ -226,6 +226,7 @@ def entry_listing(entry, columns, selected_id, filter_attrs, casesensitive, mode
 # THREAD_INDENT_CHARACTER = '⇨'  # ⇒
 THREAD_INDENT_CHARACTER = '<span style="background-color:white">⇒</span>' 
 INDENT = "&nbsp;&nbsp;&nbsp;"
+MAX_SUMMMARY_WIDTH = 200  # XX make a config items for this?
 
 thread_line_fmt = (
     '<tr><td align="left" class="threadreply">'
@@ -234,14 +235,23 @@ thread_line_fmt = (
     '</a></td></tr>'
 )
 
+
+def _entry_thread_summary(entry, esc):
+    """Return a brief summary of the entry: date, attr vals, some of text"""
+    cfg = get_config()    
+    parts = [f"&nbsp;{entry.date}&nbsp;"]
+    if entry.attrs:
+        parts.append("; ".join(esc(attr_show(val)) for val in entry.attrs.values()))
+    if entry.text:
+        parts.append("\N{RIGHTWARDS ARROW} " + esc(entry.text[:MAX_SUMMMARY_WIDTH]))
+    return textwrap.shorten("  ".join(parts), MAX_SUMMMARY_WIDTH)
+
+
 def _thread_tree(entry, indent_level, selected_id, esc) -> List[str]:
     """Return html lines for an entry and descendants.  Used recursively"""
     lines = []
     # Render self first
-    entry_summary = f"&nbsp;{entry.date}&nbsp;"
-    if entry.attrs:
-        entry_summary += "&nbsp;".join(esc(val) for val in entry.attrs.values())
-    
+    entry_summary = _entry_thread_summary(entry, esc)
     if entry.id == selected_id:
         entry_summary = "<b>" + entry_summary + "</b>"
     
