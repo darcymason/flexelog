@@ -1,5 +1,4 @@
 import textwrap
-from typing import List
 from django import template
 from django.conf import settings
 from django.templatetags.static import static
@@ -247,7 +246,7 @@ def _entry_thread_summary(entry, esc):
     return textwrap.shorten("  ".join(parts), MAX_SUMMMARY_WIDTH)
 
 
-def _thread_tree(entry, indent_level, selected_id, esc) -> List[str]:
+def _thread_tree(entry, indent_level, selected_id, esc) -> list[str]:
     """Return html lines for an entry and descendants.  Used recursively"""
     lines = []
     # Render self first

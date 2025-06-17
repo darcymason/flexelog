@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "guardian",
+    "django.contrib.humanize",
 ]
 
 if DEBUG and not TESTING:
