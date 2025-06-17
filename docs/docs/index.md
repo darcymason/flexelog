@@ -12,12 +12,18 @@
 
 This will install the django server and various other packages
 
-#### Set up the database
+#### Configure database / time / language settings
 * choose whether to use sqlite (default) or some other database system
-* create/edit `local_settings.py` to point to your own database type and file
+* edit `settings.py` to:
+  * point to your own database engine or file (under `DATABASES`)
+  * set your default local time zone (`TIME_ZONE`).  Leave `USE_TZ` as `True`
+  * set your default language (`LANGUAGE_CODE`).  The users' browser settings can override this language to provide each with their own language, if it is available.
+  * adjust `FILE_UPLOAD_MAX_SIZE` if you need a higher or lower limit
 * python manage.py makemigrations
 * python manage.py migrate
-* set up an admin user: ...
+* python manage.py createsuperuser  (for a new blank database to set up the admin user)
+* python manage.py runserver (to try running in debug mode, before setting up a proper webserver)
+
 
 ### Activate language support
 Many translation documents (gettext .po files) are in the distribution.  To compile them and make them visible to Django, run:

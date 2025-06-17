@@ -12,6 +12,7 @@ import re
 
 from flexelog.elog_cfg import get_config
 from flexelog.editor.widgets_toastui import MarkdownViewerWidget
+from flexelog.models import Entry
 
 register = template.Library()
 
@@ -58,6 +59,18 @@ def icon_show(val):
         )
     return val
 
+
+@register.filter
+def list_replies(entry):
+    if not isinstance(entry, Entry) or not entry.replies:
+        return mark_safe("")
+    lb_name = entry.lb.name
+    reply_htmls = []
+    for reply in entry.replies.all():
+        link = reverse('flexelog:entry_detail', args=[lb_name, reply.id])
+        reply_htmls.append(f'&nbsp;<a href="{link}">{reply.id}</a>')
+    return mark_safe("&nbsp;".join(reply_htmls))
+ 
 
 def _text_summary_lines(text, width, max_lines):
     if not text:
@@ -207,3 +220,58 @@ def entry_listing(entry, columns, selected_id, filter_attrs, casesensitive, mode
         htmls.append("</tr>")
 
     return mark_safe("\n".join(htmls))
+
+# THREAD_INDENT_CHARACTER = "↳"  # \u21b3, Downwards Arrow With Tip Rightwards
+# THREAD_INDENT_CHARACTER = '⇨'  # ⇒
+THREAD_INDENT_CHARACTER = '<span style="background-color:white">⇒</span>' 
+INDENT = "&nbsp;&nbsp;&nbsp;"
+MAX_SUMMMARY_WIDTH = 200  # XX make a config items for this?
+
+thread_line_fmt = (
+    '<tr><td align="left" class="threadreply">'
+    '{indent}<a href="{link}">'
+    '{indent_chr}&nbsp;{entry_summary}'
+    '</a></td></tr>'
+)
+
+
+def _entry_thread_summary(entry, esc):
+    """Return a brief summary of the entry: date, attr vals, some of text"""
+    cfg = get_config()    
+    parts = [f"&nbsp;{entry.date}&nbsp;"]
+    if entry.attrs:
+        parts.append("; ".join(esc(attr_show(val)) for val in entry.attrs.values()))
+    if entry.text:
+        parts.append("\N{RIGHTWARDS ARROW} " + esc(entry.text[:MAX_SUMMMARY_WIDTH]))
+    return textwrap.shorten("  ".join(parts), MAX_SUMMMARY_WIDTH)
+
+
+def _thread_tree(entry, indent_level, selected_id, esc) -> list[str]:
+    """Return html lines for an entry and descendants.  Used recursively"""
+    lines = []
+    # Render self first
+    entry_summary = _entry_thread_summary(entry, esc)
+    if entry.id == selected_id:
+        entry_summary = "<b>" + entry_summary + "</b>"
+    
+    lines.append(
+        thread_line_fmt.format(
+            indent = INDENT * indent_level,
+            link = reverse("flexelog:entry_detail", args=[entry.lb.name, entry.id]),
+            indent_chr = THREAD_INDENT_CHARACTER,
+            entry_summary=entry_summary,
+        )
+    )
+    for reply in entry.replies.all():
+        lines.extend(_thread_tree(reply, indent_level + 1, selected_id, esc))
+    
+    return lines
+    
+
+@register.simple_tag
+def thread_tree(entry: Entry, autoescape=True):
+    # <a href="../Biz/227">
+    root = entry.reply_ancestor()
+    esc = conditional_escape if autoescape else lambda x:x
+    lines = _thread_tree(root, 0, entry.id, esc)
+    return mark_safe("\n".join(lines))

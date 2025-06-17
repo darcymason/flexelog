@@ -14,12 +14,22 @@
   {% include "flexelog/include/lb_tabs.html" %}
   {% include "flexelog/include/commands.html" %}
   <table class="listframe" width="100%" cellspacing="0" cellpadding="0">
-    <tr>
-    <td class="attribhead">Message ID:&nbsp;<b>{{ entry.id }}</b>
+    {% if entry.replies.count or entry.in_reply_to %}
+      <tr><td>
+        <table width="100%" border="0" cellpadding="0" cellspacing="0">
+            {% thread_tree entry %}
+        </table>
+      </td></tr>
+      
+    {% endif %}
+    <tr><td class="attribhead">Message ID:&nbsp;<b>{{ entry.id }}</b>
         &nbsp;&nbsp;&nbsp;&nbsp;Entry time:&nbsp;<b>{{ entry.date }}</b>
         {% if entry.author %}&nbsp;&nbsp;{% translate 'Username' %}:&nbsp;<b>{{ entry.author.get_username }}</b>{% endif %}
-    </td>
-    </tr>
+        {% if entry.in_reply_to %}
+        &nbsp;&nbsp;&nbsp;&nbsp;{% translate 'In reply to' %}:&nbsp;<b><a href="{% url 'flexelog:entry_detail' logbook.name entry.in_reply_to.id %}">{{ entry.in_reply_to.id }}</a></b>
+        {% endif %}
+        {% if entry.replies.count %}&nbsp;&nbsp;&nbsp;&nbsp;{% translate 'Reply to this' %}:{{ entry|list_replies }}{% endif %}
+    </td></tr>
     </td></tr>
     {% if entry.last_modified_date %}
     <tr><td class="attribhead">{% translate 'Last submission' %}:&nbsp;{% translate 'Entry time' %}:&nbsp;<b>{{ entry.last_modified_date }}</b>

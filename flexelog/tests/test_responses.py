@@ -94,7 +94,7 @@ class TestEmptyLogbook(TestCase):
             name="global",
             config_text=global_config,
         )
-        cls.lb = Logbook.objects.create(name="EmptyLog")
+        cls.lb = Logbook.objects.create(name="EmptyLog", auth_required=False)
         cls.lb.config = emptylog_config
         cls.lb.save()
 

@@ -3,6 +3,7 @@ from pathlib import Path
 from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
@@ -125,6 +126,7 @@ class LogbookGroup(models.Model):
         return slugify(self.name)
 
 class Entry(models.Model):
+    fixed_attr_names = ["date", "id", "author", "text"]
     rowid = models.AutoField(primary_key=True, blank=True)
     lb = models.ForeignKey(Logbook, on_delete=models.PROTECT, related_name="entries")
     id = models.IntegerField(blank=False, null=False)
@@ -133,16 +135,29 @@ class Entry(models.Model):
     last_modified_author = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True, related_name="modified_entry") # XX should never delete authors, ## temp
     last_modified_date = models.DateTimeField(null=True)
     attrs = models.JSONField(blank=True, null=True)
-    reply_to = models.IntegerField(blank=True, null=True)
+    in_reply_to = models.ForeignKey("self", models.SET_NULL, null=True, related_name="replies")
     encoding = models.TextField(blank=True, null=True)
     locked_by = models.TextField(blank=True, null=True)
     text = models.TextField(blank=True, null=True)
 
+    def get(self, attr_name, default=None):
+        if attr_name.lower() in self.fixed_attr_names:
+            return getattr(self, attr_name.lower())
+        else:
+            return self.attrs.get(attr_name.lower(), default=default) if self.attrs else default
+   
     def __str__(self):
         return (
-            f"{self.lb} {self.id}: {self.date} {self.attrs} "
-            f"{shorten(self.text or "", 50)}"
+            f"{self.lb.name} {self.id}: {self.date} {shorten(str(self.attrs) or "", 20)} "
+            f"{shorten(self.text or "", 30)}"
         )
+    
+    def reply_ancestor(self):
+        """Return self, or first ancestor that is not a reply to another entry"""
+        root = self
+        while root.in_reply_to:
+            root = root.in_reply_to
+        return root
 
     class Meta:
         constraints = [
@@ -161,7 +176,7 @@ def upload_path(instance, filename):
     # Making this similar to what PSI elog used but adding logbook name folder.
     # Can't use entry id (if a new entry, id doesn't exist yet). Similarly for the attachment pk.
     # But logbook is for sure known.
-    now = datetime.now()
+    now = timezone.now()
     return (
         f"attachments/{instance.entry.lb.slug_name}"
         f"/{now.strftime('%Y')}"  # 4-digit year

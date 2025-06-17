@@ -1,9 +1,12 @@
 from django.test import TestCase
 from textwrap import dedent
 
-from flexelog.models import Logbook, ElogConfig, ValidationError
+from flexelog.models import Logbook, Entry, ValidationError, User
 from flexelog.elog_cfg import LogbookConfig, get_config
+from flexelog import subst
 
+class _MockEntry:
+    pass
 
 class ConfigTests(TestCase):
     def test_restricted_logbook_name(self):
@@ -83,3 +86,27 @@ class TestConditionalConfig(TestCase):
 # XXX TO DO:
 # * logbook name "urlsafe" - spaces, etc.
 # * check index page when latest_date has no entries 
+
+class TestSubstitutions(TestCase):
+    def setUp(self):
+        self.logbook = Logbook(name="test")
+        self.entry = Entry(lb=self.logbook)
+        self.entry.attrs = {}
+        self.user = User(username="sam", last_name="Carter", first_name="Samantha", email="sam@example.com")
+    def test_re_on_reply(self):
+        self.entry.attrs = {"subject": "Subject of entry"}
+        subst_text = "Re: $Subject"
+        expected = "Re: Subject of entry"
+        got = subst.subst(subst_text, logbook=self.logbook, user=self.user, entry=self.entry)
+        self.assertEqual(got, expected)
+    def test_other_subst(self):
+        subst_text = (
+            "On $date (UTC: $utcdate), "
+            "user '$short_name' ($long_name, email:$user_email) "
+            "made an entry in logbook '$logbook' "
+            "using flexelog v$version"
+        )
+        got = subst.subst(subst_text, logbook=self.logbook, user=self.user, entry=self.entry)
+        self.assertTrue("$" not in got)
+        # XX could actually check some substituted values to be more complete
+        
