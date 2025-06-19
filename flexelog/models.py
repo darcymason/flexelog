@@ -131,8 +131,8 @@ class Entry(models.Model):
     lb = models.ForeignKey(Logbook, on_delete=models.PROTECT, related_name="entries")
     id = models.IntegerField(blank=False, null=False)
     date = models.DateTimeField()
-    author = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True) # XX should never delete authors, ## temp
-    last_modified_author = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True, related_name="modified_entry") # XX should never delete authors, ## temp
+    author = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True, related_name="entries") # XX should never delete authors
+    last_modified_author = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True, related_name="entries_modified") # XX should never delete authors
     last_modified_date = models.DateTimeField(null=True)
     attrs = models.JSONField(blank=True, null=True)
     in_reply_to = models.ForeignKey("self", models.SET_NULL, null=True, related_name="replies")

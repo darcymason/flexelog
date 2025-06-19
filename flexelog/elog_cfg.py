@@ -400,7 +400,7 @@ def logbook_updated(sender, **kwargs):
         # Create default groups for the logbook management
         for group_name, group_perms in settings.DEFAULT_LOGBOOK_GROUP_PERMISSIONS.items():
             group, was_created = Group.objects.get_or_create(name=group_name.format(logbook=logbook))
-            if was_created:  # don't add permission if group already existed
+            if was_created:  # don't add permissions if group already existed
                 for perm in group_perms:
                     assign_perm(perm, group, logbook)
 
