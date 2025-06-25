@@ -31,7 +31,7 @@ RESERVED_ATTRIBUTES = [
 def parse_pwd_file(filename) -> list[dict[str, str]]:
     """Return list of user information from the PSI password file
     For each user, returns dict with the tags and their values,
-    which from examples seen should include 'name, 'full_name', 'email',
+    which from examples seen should include 'name', 'full_name', 'email',
     'password' (not useful), 'last_logout', 'last_activity', 
     'inactive' (0=False) and 'email_notify' (possibly None value).
     """
@@ -221,17 +221,3 @@ class PSILogbook:
                 entries.append(entry)
 
         return entries
-
-
-def migrate_logs(db, psi_logs: list[PSILogbook]):
-    """Migrate PSI elog's through a database connection"""
-    # Create db schema
-
-    for psi_log in psi_logs:
-        print(f"Migrating log '{psi_log.name}'")
-        migrate_log(db, psi_log)
-
-
-def migrate_log(db, lb: PSILogbook):
-    """Migrate a PSI elog to the database"""
-    db.add_lb_entries(lb.name, lb.entries())

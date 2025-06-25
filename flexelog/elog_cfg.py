@@ -14,7 +14,7 @@ from flexelog.models import ElogConfig, Logbook
 from guardian.shortcuts import assign_perm
 
 import logging
-
+logger = logging.getLogger("flexelog")
 
 _cfg = None  # singleton of LogbookConfig class
 
@@ -181,14 +181,16 @@ class LogbookConfig:
         for section_name in cp.sections() + ["global"]:
             self._cfg[section_name] = section_dict = defaultdict(dict)
             for key, val in cp[section_name].items():
+                # match [{<conditionals>}]<bare_key>
                 match = re.search(r"(?:\{(.*?)\})?\s*(.*?)$", key)
                 if not match:
-                    print(
-                        f"Unable to parse config file key {key} in section {section_name}"
+                    logger.error(
+                        f"Unable to parse config file option '{key}' in section '{section_name}'"
                     )
-                conditions, bare_key = match.groups(0)
+                    continue
+                conditions, bare_key = match.groups()
                 bare_key = bare_key.lower()  # to use in case-insensitive `get`
-                if conditions == 0:
+                if conditions is None:
                     section_dict[bare_key][""] = val
                 else:
                     conditions = [
@@ -206,7 +208,7 @@ class LogbookConfig:
             if lb_name.lower().startswith("global"):
                 continue
             if lb_name.lower().startswith("group "):
-                logging.warning(
+                logger.warning(
                     f"Found section [{lb_name}] in ElogConfig: "
                     "[Group xxx] sections are ignored in this "
                     "version of FlexElog"
@@ -234,7 +236,7 @@ class LogbookConfig:
             # Set Extendable Options (attributes)
             for attr in self.get(lb_name, "Extendable Options", as_list=True):
                 if attr not in attrs:
-                    logging.warning(
+                    logger.warning(
                         f"In config for logbook '{lb_name}', "
                         f"Extendable Options '{attr}' is not listed in Attributes line and is ignored"
                     )
@@ -282,13 +284,15 @@ class LogbookConfig:
         self,
         lb: str | Logbook,
         param: str,
+        *,
         default: Any | None = None,
         valtype: type | None = None,
         as_list: bool = False,
     ) -> Any:
         """Return the config key's value
 
-        First looks in elogd.cfg logbook section, then global section,
+        First looks in elogd.cfg logbook section,
+        then global section (if logbook_only is False),
         then the passed default (e.g. from request.args), if not None,
         then in ELOGCONFIG_DEFAULTS in elog_cfg.py.
 
@@ -304,7 +308,7 @@ class LogbookConfig:
 
         lb_name = lb.name if isinstance(lb, Logbook) else lb  # XX need to clean lb_name?
         if lb_name not in self._cfg:
-            logging.warning(f"Unknown config section {lb_name}")
+            logger.warning(f"Unknown config section {lb_name}")
             return default
 
         param = param.lower()  # make case insensitive

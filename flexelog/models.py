@@ -36,12 +36,13 @@ class ElogConfig(models.Model):
         choices=[
             ("global", "Default config for all logbooks if not otherwise specified")
         ],  # XX later could have different configs
-        
+        unique=True,
     )
     config_text = models.TextField(blank=True)
 
     def __str__(self):
         return f"{self.name}"
+
 
 
 def validate_logbook_name(value):

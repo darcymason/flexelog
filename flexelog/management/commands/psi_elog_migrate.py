@@ -14,8 +14,8 @@ import argparse
 
 import json
 from typing import Generator
-from flexelog.models import Logbook, Entry
-from flexelog.psi_elog.psi_elogs import PSIEntry, PSILogbook
+from flexelog.models import Logbook, Entry, ElogConfig, User
+from flexelog.psi_elog.psi_elogs import PSIEntry, PSILogbook, parse_pwd_file
 import datetime
 
 import logging
@@ -34,13 +34,19 @@ def config_sections_texts(config_text):
     return {section: "\n".join(lines) for section, lines in section_lines.items()}
 
 
-def convert_psi_entry(logbook, psi_entry):
+def convert_psi_entry(logbook, lb_attrs, psi_entry):
+    attrs = {k.lower(): v for k,v in psi_entry.attrs.items()}
+    # try to convert date:
+    try:
+        date = datetime.datetime.fromisoformat(psi_entry.date)
+    except:
+        date = psi_entry.date  # str
     entry = Entry(
         lb=logbook,
         id=psi_entry.id,
-        date=psi_entry.date,
+        date=date,
         # XXX try to extract Author field, if given
-        attrs=psi_entry.attrs,
+        attrs={k.lower(): v for k,v in attrs.items()}, # store keys lower case for searching etc.
         encoding=psi_entry.encoding,
         # locked_by  -- not used currently
         # in_reply_to handled below
@@ -53,6 +59,23 @@ def convert_psi_entry(logbook, psi_entry):
             logger.warning(f"In message {entry.id}, 'in_reply_to' message id {psi_entry.in_reply_to} not found. Setting to None")
     
     return entry
+
+def create_users(users: list[dict[str, str]]):
+    for psi_user in users:
+        user, was_created = User.objects.get_or_create(username=psi_user["name"])
+        first, last = psi_user.get("full_name", "").split(" ", maxsplit=1)
+        user.first_name = first
+        user.last_name = last
+        user.email = psi_user.get("email", "")
+        if bool(psi_user.get("inactive")):
+            user.is_active = False
+        user.save()
+        action = "Created" if was_created else "Updated"
+        logger.info(
+            f"{action} user '{user.get_username()}' "
+            f"('{user.get_full_name()}', {user.email})"
+        )
+    
 
 def yes_no(prompt: str) -> bool:
     answer = ""
@@ -123,14 +146,19 @@ class Command(BaseCommand):
             ]
         else:
             lb_names = options["logbooks"]
-            not_configd = ", ".join(lb_name for lb_name in lb_names if lb_name not in psi_cfg._cfg)
+            not_configd = ", ".join(f"'{lb_name}'" for lb_name in lb_names if lb_name not in psi_cfg._cfg)
             if not_configd:
                 raise CommandError(f"Logbook(s) {not_configd} not defined in config file '{elogd}'")
         
         # Find logbook folders:
-        logbooks_dir = Path(
-            psi_cfg.get("global", "Logbook dir", default=elogd.parent / "logbooks")
-        )
+        logbooks_dir = psi_cfg.get("global", "Logbook dir")
+        if logbooks_dir is None:
+            logbooks_dir = elogd.parent / "logbooks"
+        else:
+            logbooks_dir = Path(logbooks_dir)
+            if not logbooks_dir.is_absolute():
+                logbooks_dir = elogd.parent / logbooks_dir
+        
         if not logbooks_dir.exists():
             raise CommandError(f"Logbook dir '{logbooks_dir}' does not exist")
         
@@ -144,9 +172,10 @@ class Command(BaseCommand):
             except OSError:
                 missing_logbooks.append(lb_name)
         if missing_logbooks:
-            raise CommandError(
-                f"Did not find logbook folders for logbook(s) {','.join(missing_logbooks)}"
-            )
+            msg = f"Did not find logbook folders for logbook(s): {','.join(missing_logbooks)}"
+            sys.stdout.write(msg)
+            if not (options["yes"] or yes_no("Ignore these logbooks and continue?  (yes/no)...:")):
+                return
         flex_lb_names = [lb.name for lb in Logbook.objects.all()]
         existing_logbooks = [lb_name for lb_name in lb_names if lb_name in flex_lb_names]
 
@@ -158,13 +187,57 @@ class Command(BaseCommand):
             if not yes_no(prompt):
                 return
 
-        # XXX CREATE USERS
-        #  XXX
+        # CREATE GLOBAL CONFIG
+        # Note: for now just copying previous text (including comments etc.)
+        #   even if flexelog might not handle all the same config
+        #  XX should at least delete irrelevant things related to server config etc.
+        original_config_texts = config_sections_texts(config_text)
+        if None in original_config_texts:
+            logger.warning("Config file {elogd.name} has lines outside of a section heading, which are ignored")
+        
+        global_cfg, _ = ElogConfig.objects.get_or_create(name="global")
+        global_cfg.config_text = original_config_texts["global"]
+        global_cfg.save()
+        logger.info("Copied [global] config to flexelog ElogConfig database entry")
 
-        # Split elogd.cfg into global and per logbook config sections for flexelog
+        # CREATE USERS
+        #  XXX for now only accept one password file.
+        global_pwd_file = psi_cfg.get("global", "Password file")
+        lb_pwd_files = set(psi_cfg.get(lb_name, "Password file") for lb_name in lb_names)
+        if global_pwd_file:
+            if any(lb_pwd_file != global_pwd_file for lb_pwd_file in lb_pwd_files):
+                logger.warning(
+                    "Only the PSI elog global password file will be used for creating users. "
+                    "Please create others as needed in flexelog admin webpages."
+                )
+            pwd_file = global_pwd_file
+        elif lb_pwd_files:
+            # Just do one arbitrary file -- later can do more but avoiding 
+            # collisions issue for now.
+            pwd_file = lb_pwd_files.pop()  # pick one, probably only 1 or a few anyway
+            logger.warning(
+                f"Can currently only migrate users from one password file. Using '{pwd_file}'. "
+                "Please create other users as needed in flexelog admin webpages."
+            )            
+        else:
+            pwd_file = None
+
+        
+        if pwd_file: 
+            pwd_file = logbooks_dir / pwd_file
+            if not pwd_file.exists():
+                logger.error(
+                    f"Password file '{pwd_file}' not found. "
+                    "Please set up users manually in flexelog admin webpages."
+                )
+                pwd_file = None
+
+        if pwd_file:
+            users = parse_pwd_file(pwd_file)
+            create_users(users)
+        # XXX CREATE LOGBOOK GROUPS
 
         # Migrate logbook entries
-        original_config_texts = config_sections_texts(config_text)
         for lb_name in lb_names:
             self.stdout.write(f"Migrating PSI logbook '{lb_name}'", ending="...")
             
@@ -173,7 +246,8 @@ class Command(BaseCommand):
             logbook.config = original_config_texts[lb_name]
             if options["readonly"]:
                 logbook.readonly = True
-
+            if psi_cfg.get(logbook, "Hidden"):
+                logbook.is_unlisted = True
             # Check for auth needed - note these will also find [global] entries if specified there
             if psi_cfg.get(lb_name, "Password file") or psi_cfg.get(lb_name, "Authentication"):
                 logbook.auth_required = True
@@ -202,7 +276,7 @@ class Command(BaseCommand):
                         )
                     batch = []
 
-                batch.append(convert_psi_entry(logbook, psi_entry))
+                batch.append(convert_psi_entry(logbook, psi_cfg.lb_attrs[lb_name], psi_entry))
             
             if batch:
                 created = Entry.objects.bulk_create(batch)  # XX not possible if overwriting existing ones? need bulk_update?
