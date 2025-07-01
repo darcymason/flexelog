@@ -51,7 +51,7 @@ class Attribute:
             match = re.search(r"\{(.*?)\}", option)
             if match:
                 opt_name = re.sub(r"\{.*?\}", "", option)
-                condition = match.groups(0)[0]
+                condition = match.groups()[0]
                 self.val_conditions[opt_name] = condition
                 # Remove the `{<condition>}` from the option name
                 self.options[i] = opt_name
@@ -289,7 +289,7 @@ class LogbookConfig:
         valtype: type | None = None,
         as_list: bool = False,
     ) -> Any:
-        """Return the config key's value
+        """Return the config key's value based on current conditions (if any)
 
         First looks in elogd.cfg logbook section,
         then global section (if logbook_only is False),

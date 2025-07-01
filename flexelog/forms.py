@@ -72,19 +72,19 @@ def lb_attrs_to_form_fields(
                     for user in User.objects.all()
                     if user.email
                 ]
-            fields[name.lower()] = field_cls(
+            fields[name] = field_cls(
                 widget=widget,
                 required=lb_attr.required,
                 label=name,
             )
             if field_cls in (ChoiceField, MultipleChoiceField):
-                fields[name.lower()].choices = choices
+                fields[name].choices = choices
 
         elif lb_attr.options_type in ("Options", "ROptions", "MOptions", "IOptions"):
             # Show choices(options) in current logbook config, and if entry has another, add them to choices
             choices = lb_attr.options
-            if data and name.lower() in data:
-                for entry_choice in data.getlist(name.lower()):
+            if data and name in data:
+                for entry_choice in data.getlist(name):
                     if entry_choice not in choices:
                         choices.append(entry_choice)
 
@@ -111,14 +111,14 @@ def lb_attrs_to_form_fields(
                 field_cls = MultipleChoiceField
                 widget = CheckboxSelectMultiple
 
-            fields[name.lower()] = field_cls(
+            fields[name] = field_cls(
                 widget=widget,
                 required=lb_attr.required,
                 choices=choices,
                 label=name,
             )
         else:
-            fields[name.lower()] = CharField(
+            fields[name] = CharField(
                 required=lb_attr.required,
                 max_length=1500,
                 widget=TextInput(attrs={"size": 80}),
@@ -152,7 +152,7 @@ class EntryForm(Form):
 
         # XXX need to check entry for attrs that are no longer configd for the logbook
         self.fields.update(lb_attrs_to_form_fields(lb_attrs, data=data))
-        attr_names = [x.lower() for x in lb_attrs.keys()]
+        attr_names = list(lb_attrs.keys())
         self.order_fields(["date", *attr_names, "text"])
         attr_str = ",".join(attr_names)
         self.fields["attr_names"].initial = attr_str
@@ -168,13 +168,14 @@ class EntryForm(Form):
         data["text"] = entry.text
         data["page_type"] = page_type
         data["attr_names"] = (
-            ",".join(x.lower() for x in entry.attrs.keys()) if entry.attrs else "{}"
+            ",".join(entry.attrs.keys()) if entry.attrs else "{}"
         )
-        for attr_name, val in entry.attrs.items():
-            if isinstance(val, list):
-                data.setlist(attr_name.lower(), val)
-            else:
-                data[attr_name.lower()] = val
+        if entry.attrs is not None:
+            for attr_name, val in entry.attrs.items():
+                if isinstance(val, list):
+                    data.setlist(attr_name, val)
+                else:
+                    data[attr_name] = val
         lb_attrs = cfg.lb_attrs[entry.lb.name]
         form = cls(data=data, lb_attrs=lb_attrs)
 
