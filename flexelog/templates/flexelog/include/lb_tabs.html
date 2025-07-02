@@ -14,7 +14,7 @@
     <tr><td class="gtabs">
     {% for group_name, group_url in group_tabs %}
       <span class="{% if group_name == selected_group %}s{% endif %}gtab">
-        <a href="{{ group_url }}">{{ group_name }}</a></span>
+        <a href="{{ group_url }}" hx-boost="true">{{ group_name }}</a></span>
     {% endfor %}
       </td></tr>
 {% endif %}
@@ -27,7 +27,7 @@
     {% endif %}
     {% for lb in logbooks %}
       <span class="{% if lb.name == logbook.name %}s{% endif %}ltab">
-        <a href="{% url 'flexelog:logbook' lb.name %}" title="{{ lb.comment }}">{{ lb.name }}</a>
+        <a href="{% url 'flexelog:logbook' lb.name %}" title="{{ lb.comment }}" hx-boost="true">{{ lb.name }}</a>
       </span>
     {% endfor %}
     </td>
