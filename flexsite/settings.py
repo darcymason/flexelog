@@ -93,8 +93,8 @@ DATABASES = {
     "default": {                                                                                                                                    
         "ENGINE": "django.db.backends.sqlite3",
         # "NAME": BASE_DIR / "flexelog.db",
-        # "NAME": BASE_DIR / "psiport.db",
-        "NAME": r"c:\temp\gate.db",
+        "NAME": BASE_DIR / "psiport.db",
+        # "NAME": r"c:\temp\gate.db",
         # "NAME": r"c:\git\xx_flexelog\trivia-216K-entries.db",
         #"NAME": r"c:\git\xx_flexelog\trivia-8K-entries.db",
     }

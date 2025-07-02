@@ -135,7 +135,7 @@ class Entry(models.Model):
     author = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True, related_name="entries") # XX should never delete authors
     last_modified_author = models.ForeignKey(User, on_delete=models.DO_NOTHING, blank=True, null=True, related_name="entries_modified") # XX should never delete authors
     last_modified_date = models.DateTimeField(blank=True, null=True)
-    attrs = models.JSONField(default={}, null=True)
+    attrs = models.JSONField(default=dict, null=True)
     in_reply_to = models.ForeignKey("self", models.SET_NULL, blank=True, null=True, related_name="replies")
     encoding = models.TextField(blank=True, null=True)
     locked_by = models.TextField(blank=True, null=True)
