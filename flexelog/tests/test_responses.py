@@ -107,9 +107,9 @@ class TestEmptyLogbook(TestCase):
         data = {
             'cmd': 'Submit',
             'date': '2025-05-23 22:05:40',
-            'subject': 'Test edit',
+            'Subject': 'Test edit',
             'page_type': 'New',
-            'attr_names': 'subject',
+            'attr_names': 'Subject',
             'edit_id': '',
             'reply_to': '',
             'text': 'Test New entry empty logbook',
@@ -152,14 +152,14 @@ class TestResponsesNoAuth(TestCase):
             lb=cls.lb1,
             id=1,
             date=timezone.make_aware(datetime(2025,1,1,9,0,0)),
-            attrs={"subject": "First entry", "category": ["Cat 1", "Cat 2"], "status": "Started"},
+            attrs={"Subject": "First entry", "Category": ["Cat 1", "Cat 2"], "Status": "Started"},
             text = "Log 1 entry 1",
         )
         cls.entry2 = Entry(
             lb=cls.lb1,
             id=2,
             date=timezone.make_aware(datetime(2025,1,1,9,0,0)),
-            attrs={"subject": "Second entry", "category": ["Cat 2"], "status": "Done"},
+            attrs={"Subject": "Second entry", "Category": ["Cat 2"], "Status": "Done"},
             text = "Log 1 entry 2",
         )
         cls.entry1.save()
@@ -212,11 +212,11 @@ class TestResponsesNoAuth(TestCase):
         data = {
             'cmd': 'Submit',
             'date': '2025-05-23 22:05:40',
-            'status': 'Started',
-            'category': ['Cat 2'],
-            'subject': 'Test edit',
+            'Status': 'Started',
+            'Category': ['Cat 2'],
+            'Subject': 'Test edit',
             'page_type': 'New',
-            'attr_names': 'status,category,subject',
+            'attr_names': 'Status,Category,Subject',
             'edit_id': '',
             'reply_to': '',
             'text': 'Test New entry',
@@ -228,6 +228,6 @@ class TestResponsesNoAuth(TestCase):
         lb = Logbook.objects.get(name="Log 1")
         entry = lb.entries.last()
 
-        self.assertEqual(entry.attrs, {'status': 'Started', 'category': ['Cat 2'], 'subject': 'Test edit'})
+        self.assertEqual(entry.attrs, {'Status': 'Started', 'Category': ['Cat 2'], 'Subject': 'Test edit'})
         self.assertEqual(entry.text, data['text'])
         self.assertEqual(entry.id, 3)

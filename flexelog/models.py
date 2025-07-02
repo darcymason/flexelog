@@ -36,12 +36,13 @@ class ElogConfig(models.Model):
         choices=[
             ("global", "Default config for all logbooks if not otherwise specified")
         ],  # XX later could have different configs
-        
+        unique=True,
     )
     config_text = models.TextField(blank=True)
 
     def __str__(self):
         return f"{self.name}"
+
 
 
 def validate_logbook_name(value):
@@ -131,11 +132,11 @@ class Entry(models.Model):
     lb = models.ForeignKey(Logbook, on_delete=models.PROTECT, related_name="entries")
     id = models.IntegerField(blank=False, null=False)
     date = models.DateTimeField()
-    author = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True) # XX should never delete authors, ## temp
-    last_modified_author = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True, related_name="modified_entry") # XX should never delete authors, ## temp
-    last_modified_date = models.DateTimeField(null=True)
-    attrs = models.JSONField(blank=True, null=True)
-    in_reply_to = models.ForeignKey("self", models.SET_NULL, null=True, related_name="replies")
+    author = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True, related_name="entries") # XX should never delete authors
+    last_modified_author = models.ForeignKey(User, on_delete=models.DO_NOTHING, blank=True, null=True, related_name="entries_modified") # XX should never delete authors
+    last_modified_date = models.DateTimeField(blank=True, null=True)
+    attrs = models.JSONField(default=dict, null=True)
+    in_reply_to = models.ForeignKey("self", models.SET_NULL, blank=True, null=True, related_name="replies")
     encoding = models.TextField(blank=True, null=True)
     locked_by = models.TextField(blank=True, null=True)
     text = models.TextField(blank=True, null=True)

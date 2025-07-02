@@ -341,7 +341,7 @@ def get_list_titles_and_fields(logbook):
                 col_db_fields.append(attr_name.lower())
                 col_titles.append(_(attr_name))
         elif attr_name.lower() in config_attr_names_lower:
-            col_db_fields.append(f"attrs__{attr_name.lower()}")
+            col_db_fields.append(f"attrs__{attr_name}")
             col_titles.append(attr_name)
         # else ignore those not in Entry or config'd
         # ^- XX could allow to show old attributes? 
@@ -423,7 +423,7 @@ def logbook_get(request, logbook):
 
     config_attr_names_lower = [attr.lower() for attr in cfg.lb_attrs[logbook.name].keys()]
     filter_attrs = {  # actually text and attrs
-        f"{'attrs__' if k.lower() in config_attr_names_lower else ''}{k.lower()}": v
+        f"{'attrs__' if k.lower() in config_attr_names_lower else ''}{k}": v
         for k, v in filters.items()
     }
 
@@ -549,7 +549,7 @@ def logbook_get(request, logbook):
         filters=filters,
         filter_attrs=filter_attrs,
         casesensitive=get_param(request, "casesensitive", valtype=bool, default=False),
-        IOptions=[f"attrs__{attr_name}" for attr_name in cfg.IOptions(logbook, lowercase=True)],
+        IOptions=[f"attrs__{attr_name}" for attr_name in cfg.IOptions(logbook)],
     )
     return render(request, "flexelog/entry_list.html", context)
 
@@ -610,7 +610,7 @@ def new_edit_get(request, logbook, command, entry):
     context.update(
         entry=entry,
         commands=[],
-        Required=cfg.Required(logbook, lowercase=True),
+        Required=cfg.Required(logbook),
     )
     context.update(form.get_context())
     return render(request, "flexelog/edit.html", context)
@@ -726,7 +726,7 @@ def entry_detail_get(request, logbook, entry):
         return render(request, "flexelog/show_error.html", context)
     form = EntryViewerForm(data={"text": entry.text or ""})
     context["form"] = form
-    context["IOptions"] = cfg.IOptions(logbook, lowercase=True)
+    context["IOptions"] = cfg.IOptions(logbook)
     
     return render(request, "flexelog/entry_detail.html", context)
 

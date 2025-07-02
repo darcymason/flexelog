@@ -4,7 +4,19 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-    
+        {
+            "name": "psi_elog_migrate",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "c:\\git\\flexelog\\manage.py",
+            "console": "integratedTerminal",
+            "args": [
+                "psi_elog_migrate", 
+                "C:\\git\\flexelog\\flexelog\\tests\\test_data\\psi_elog\\stargate.cfg", 
+                "-y",
+                "-v3"
+            ]
+        },
         {
             "name": "Python Debugger: Django",
             "type": "debugpy",
