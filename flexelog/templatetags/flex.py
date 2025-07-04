@@ -126,6 +126,7 @@ def entry_listing(entry, columns, selected_id, filter_attrs, casesensitive, mode
         "full": '<td class="list1full{h_sel}"{nowrap}>{href_open}{val}</a></td>',
     }
     attachment_fmt = """<td class="listatt{cycle}">{linked_icons}</td>"""
+    attachment_img_fmt = """<img border="0" align="absmiddle" src="{img_src_url}" alt="{attach_name}" title="{attach_name}" />"""
 
     cfg = get_config()
     htmls = [] 
@@ -177,7 +178,6 @@ def entry_listing(entry, columns, selected_id, filter_attrs, casesensitive, mode
             
         elif field == "attachments":
             if entry.attachments.count():
-                attachment_img_fmt = """<img border="0" align="absmiddle" src="{img_src_url}" alt="{attach_name}" title="{attach_name}" />"""
                 link_icons = []
                 for attachment in entry.attachments.all():
                     attachment_img = attachment_img_fmt.format(

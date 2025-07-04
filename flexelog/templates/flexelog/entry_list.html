@@ -1,7 +1,5 @@
 {% extends "flexelog/base.html" %}
-{% load i18n %}
 {% load static %}
-{% load flex %}
 
 {% block more_head_links %}
  {% if mode == "full" %}
@@ -17,21 +15,7 @@
   {% include "flexelog/include/commands.html" %}
   {% include "flexelog/include/filter_attrs.html"%}
   {% include "flexelog/include/list_modes.html" %}
-  {% include "flexelog/include/pagination.html" %}
-
-  <tr><td>
-  <table class="listframe" width="100%" cellspacing=0>
-    {% include "flexelog/include/list_display_header.html"%}
-    {% for entry in page_obj %}
-      {% cycle '2' '1' as listX silent %}
-      {% entry_listing entry columns selected_id filter_attrs casesensitive mode listX forloop.counter %}
-    {% endfor %}
-  </table>
-  {% include "flexelog/include/pagination.html" %}
-  {% if not page_obj %}
-    <tr><td class="errormsg">{% translate 'No entries found' %}</td></tr>
-  {% endif %}
-  </td></tr>
+  {% include "flexelog/include/entry_list_core.html" %}
 
 </table>
 </form>
