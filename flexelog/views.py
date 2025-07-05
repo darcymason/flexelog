@@ -378,7 +378,7 @@ def get_list_titles_and_fields(logbook):
     return col_titles, col_db_fields
 
 
-@query_debugger
+# @query_debugger
 def logbook_get(request, logbook):    
     cmd = get_param(request, "cmd")
     commands = [_("New"), _("Find")] # _("Select"), ("Import"), ("Config"), _("Help")
@@ -506,7 +506,7 @@ def logbook_get(request, logbook):
     
     # If query string has "id=#", then need to position to page with that id
     # ... assuming it exists.  Check that first. If not, then ignore the setting
-    page_obj = paginator.get_page(req_page_number)
+    page_obj = paginator.get_page(int(req_page_number))
 
     if selected_id:
         try:
@@ -575,6 +575,7 @@ def logbook_get(request, logbook):
         selected_id=selected_id,
         summary_lines=cfg.get(logbook, "Summary lines"),
         sort_attr_field=sort_attr_field,
+        text=get_param(request, "text", default=""),
         is_rsort=is_rsort,
         filters=filters,
         filter_attrs=filter_attrs,

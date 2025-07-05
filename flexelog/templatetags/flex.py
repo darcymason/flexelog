@@ -1,3 +1,4 @@
+from copy import copy
 import textwrap
 from django import template
 from django.conf import settings
@@ -70,18 +71,97 @@ def list_replies(entry):
         link = reverse('flexelog:entry_detail', args=[lb_name, reply.id])
         reply_htmls.append(f'&nbsp;<a href="{link}">{reply.id}</a>')
     return mark_safe("&nbsp;".join(reply_htmls))
- 
 
-def _text_summary_lines(text, width, max_lines):
+
+
+def _nearest_break(text, index, break_tie_left=True):
+    if not text:
+        return 0
+
+    index = max(0, min(index, len(text)))
+
+    word_breaks = [m.start() for m in re.finditer(r"\b", text)]
+    
+    # Add start and end of text if not present
+    if 0 not in word_breaks:
+        word_breaks.insert(0, 0)
+    if len(text) not in word_breaks:
+        word_breaks.append(len(text))
+    
+    word_breaks = sorted(set(word_breaks)) # unique and sorted
+
+    if not word_breaks:
+        return index
+
+    nearest_break = -1
+    min_distance = len(text) + 1
+
+    for wb_i in word_breaks:
+        distance = abs(wb_i - index)
+        if distance < min_distance:
+            min_distance = distance
+            nearest_break = wb_i
+        elif distance == min_distance:
+            # If distances are equal, user tie-break flag
+            if break_tie_left:
+                if wb_i <= index:
+                    nearest_break = wb_i
+            elif wb_i >= index:
+                nearset_break = wb_i
+
+    return nearest_break
+
+
+def _text_summary_lines(text, width, max_lines, pattern):
+    BREAK_WITHIN = 12 # adjust clips to include a work break within this many characters
+    text_wrapper = textwrap.TextWrapper(width, max_lines=max_lines)
+
     if not text:
         return ""
 
-    text_wrapper = textwrap.TextWrapper(
-        width=width,
-        max_lines=max_lines,
-        placeholder="",
-    )
+    if len(text) < width * max_lines:
+        lines = []
+        for line in text.splitlines():
+            lines += text_wrapper.wrap(line)
+            if len(lines) > max_lines:
+                break
+        return lines[:max_lines]
 
+    if pattern:
+        regex = re.compile(rf"(?i)({pattern})")
+        breaks = re.compile(r"\W+")
+        start_end_match = [(m.start(), m.end(), m.group(0)) for m in regex.finditer(text)]
+        
+        max_pre = width // 2 
+        max_post = width // 3
+        clips = [
+            (max(0, start-max_pre), end+max_post)
+            for (start, end, _) in start_end_match
+        ]
+        word_break_clips = []
+        for start_near, end_near in clips:
+            piece_start = max(0, start_near-BREAK_WITHIN)
+            post_piece_start = max(0, end_near - BREAK_WITHIN)
+            break_start = _nearest_break(text[piece_start:start_near + BREAK_WITHIN], start_near-piece_start)
+            break_end = _nearest_break(text[post_piece_start:end_near + BREAK_WITHIN], end_near-post_piece_start, break_tie_left=False)
+            word_break_clips.append((break_start+piece_start, break_end+post_piece_start))
+
+        # Merge overlapping clips of text
+        merged = []
+        start, end = word_break_clips[0]
+        for start2, end2 in word_break_clips[1:]:
+            if start2 <= end:
+                end = max(end, end2)  # use max in case different processing later, e.g. word breaks
+            else:
+                merged.append((start, end))
+                start, end = start2, end2
+        # add last one
+        merged.append((start, end))
+        text = "...".join(text[start:end] for (start, end) in merged)
+        prepend = "" if merged[0][0] == 0 else "..."
+        postpend = "" if merged[-1][1] >= len(text) else "..."
+        text = prepend + text + postpend
+    
     lines = []
     for line in text.splitlines():
         lines += text_wrapper.wrap(line)
@@ -109,7 +189,7 @@ def highlight_text(text, pattern, case_sensitive=False, autoescape=True):
     pattern = rf"{case_sens}({pattern})"
 
     
-    parts = re.split(f"{pattern}", text)  # parentheses so match is output in list
+    parts = re.split(pattern, text)  # parentheses so match is output in list
     return mark_safe(
         "".join(
             format_html(f"{HIGHLIGHT_OPEN}{{}}{HIGHLIGHT_CLOSE}", part) if re.match(pattern, part) else esc(part)
@@ -158,7 +238,7 @@ def entry_listing(entry, columns, selected_id, filter_attrs, casesensitive, mode
             #     text = markdownify(self.text)
             width = cfg.get(entry.lb, "summary line length", valtype=int, default="100")
             max_lines = cfg.get(entry.lb, "summary lines", valtype=int, default="3")
-            lines =  _text_summary_lines(entry.text, width, max_lines)
+            lines =  _text_summary_lines(entry.text, width, max_lines, search_pattern)
             if search_pattern:
                 val = "<br/>".join(highlight_text(line, search_pattern, casesensitive) for line in lines)
             else:
