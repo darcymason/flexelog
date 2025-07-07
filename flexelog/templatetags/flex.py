@@ -119,6 +119,13 @@ def _text_summary_lines(text, width, max_lines, pattern):
     if not text:
         return ""
 
+    # If problem with the search pattern, ignore it    
+    if pattern:
+        try:
+            regex = re.compile(rf"(?i)({pattern})")
+        except:
+            pattern = None
+
     if len(text) < width * max_lines:
         lines = []
         for line in text.splitlines():
@@ -128,7 +135,6 @@ def _text_summary_lines(text, width, max_lines, pattern):
         return lines[:max_lines]
 
     if pattern:
-        regex = re.compile(rf"(?i)({pattern})")
         breaks = re.compile(r"\W+")
         start_end_match = [(m.start(), m.end(), m.group(0)) for m in regex.finditer(text)]
         

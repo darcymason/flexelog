@@ -18,6 +18,19 @@
             ]
         },
         {
+            "name": "old_flexelog_migrate",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "c:\\git\\flexelog\\manage.py",
+            "console": "integratedTerminal",
+            "args": [
+                "old_flexelog_migrate", 
+                "-y",
+                // "-lDarc"
+            ]
+        },
+
+        {
             "name": "Python Debugger: Django",
             "type": "debugpy",
             "request": "launch",
