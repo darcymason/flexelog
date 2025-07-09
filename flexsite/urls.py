@@ -27,5 +27,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("flexelog.urls")),  # flexelog 'takes over' the root url
 ] 
-if not settings.TESTING:
+if not settings.RUNNING_TESTS:
     urlpatterns += debug_toolbar_urls()

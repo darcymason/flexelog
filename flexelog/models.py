@@ -143,6 +143,7 @@ class Entry(models.Model):
     encoding = models.TextField(blank=True, null=True)
     locked_by = models.TextField(blank=True, null=True)
     text = models.TextField(blank=True, null=True)
+    # attachments
 
     def get(self, attr_name, default=None):
         if attr_name.lower() in self.fixed_attr_names:

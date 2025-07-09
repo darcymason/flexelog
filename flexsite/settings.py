@@ -17,7 +17,7 @@ from django.urls import reverse_lazy
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-TESTING = "test" in sys.argv
+RUNNING_TESTS = "test" in sys.argv
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -26,7 +26,7 @@ TESTING = "test" in sys.argv
 SECRET_KEY = "django-insecure-^xsftv8x!jvc++0_pv+5#4-aaz1220)hm!8mtdzn%c%uh&e*^("
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = True  # XXXXX
 
 ALLOWED_HOSTS = []
 
@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     "django_htmx",
 ]
 
-if DEBUG and not TESTING:
+if DEBUG and not RUNNING_TESTS:
     INSTALLED_APPS.append("debug_toolbar")
 
 MIDDLEWARE = [ 
@@ -61,7 +61,7 @@ MIDDLEWARE = [
     "django_htmx.middleware.HtmxMiddleware",
 ]
 
-if not TESTING:
+if DEBUG and not RUNNING_TESTS:
     MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
 
 X_FRAME_OPTIONS = "SAMEORIGIN"  # allow viewing attachments in iframe
@@ -86,20 +86,13 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "flexsite.wsgi.application"
-
-
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
     "default": {                                                                                                                                    
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "flexelog.db",
-        # "NAME": BASE_DIR / "psiport.db",
-        # "NAME": r"c:\temp\gate.db",
-        # "NAME": r"c:\git\xx_flexelog\trivia-216K-entries.db",
-        #"NAME": r"c:\git\xx_flexelog\trivia-8K-entries.db",
-        # "NAME": BASE_DIR / "home.db",
+        "NAME": BASE_DIR / "flexelog demo.db",
     }
 }
 
@@ -127,8 +120,7 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
-
-PASSWORD_RESET_TIMEOUT = 60  # seconds  XXX temp for testing
+PASSWORD_RESET_TIMEOUT = 60*15  # seconds
 LOGIN_URL = reverse_lazy('login')
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = reverse_lazy('login')
@@ -161,12 +153,6 @@ LANGUAGES = [
     ('zh', _("Chinese")),
 ]
 
-TIME_ZONE = "America/Toronto"  # "UTC"
-USE_TZ = True  # Recommend True, dates still displayed in local timezone.
-
-LANGUAGE_CODE = "en-us"
-USE_I18N = True
-
 LOCALE_PATHS = [
     BASE_DIR / "flexelog" / "locale",
 ]
@@ -181,25 +167,18 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Flexelog custom -------
-# Names of Groups auto-created for a new logbook
-# Users are not automatically assigned to those groups
-_view = ("view_entries",)
-_own = ("add_entries", "edit_own_entries", "delete_own_entries",)
-_others = ("edit_others_entries", "delete_others_entries")
-_admin = ("configure_logbook",)
-
-DEFAULT_LOGBOOK_GROUP_PERMISSIONS = {
-    "Logbook {logbook.name} Viewers": _view,
-    "Logbook {logbook.name} Contributors": _view + _own,
-    "Logbook {logbook.name} Editors": _view + _own + _others,
-    "Logbook {logbook.name} Admin": _view + _own + _others + _admin,
-}
-
-
-# ATTACHMENTS:
 if DEBUG:
     MEDIA_ROOT = BASE_DIR / "media"
     MEDIA_URL = "media/"
 
 FILE_UPLOAD_MAX_SIZE = 10485760  # 10 MiB
+
+# USER OVERRIDES / ADDITIONS imported in separate file
+#   so not in version control
+try:
+    from flexsite.settings_local import *
+except ImportError as e:
+    raise Exception(
+        "Please supply a settings_local.py file in the flexsite folder\n"
+        "Copy settings_local_example.py to settings_local.py and edit as needed."
+    ) from e

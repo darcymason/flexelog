@@ -136,30 +136,6 @@ def yes_no(prompt: str) -> bool:
         answer = input(prompt).lower()
     
     return answer.startswith("y")
-    
-
-def gen_entries(old_entries: Generator[OldFlexelogEntry, None, None], logbook: Logbook) -> Generator[Entry, None, None]:
-    for old_entry in old_entries:
-        in_reply_to = None
-        if old_entry.reply_to:
-            try:
-                parent_entry = Entry.objects.get(lb=logbook, id=old_entry.reply_to)
-            except:
-                logger.error(
-                    f"In message {old_entry.id}, 'in_reply_to' message id {old_entry.reply_to} not found. "
-                    "Setting in_reply_to to None in flexelog"
-                )
-            else:
-                in_reply_to = parent_entry
-
-        yield Entry(
-            id=old_entry.id,
-            lb=logbook,
-            date=old_entry.date,
-            attrs=old_entry.attrs,
-            in_reply_to=in_reply_to,
-            text=old_entry.text,
-        )
 
 
 class Command(BaseCommand):
