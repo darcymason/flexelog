@@ -25,7 +25,7 @@ ELOG_DIR = r"{ELOG_DIR}"
 TOP_GROUP = r"{TOP_GROUP_NAME}"
 DATABASE_NAME = "{DATABASE_NAME}"
 
-MEDIA_ROOT = Path(ELOG_DIR) / TOP_GROUP  # could add e.g. 'media', but flexelog adds 'attachments' subfolder anyway
+MEDIA_ROOT = Path(ELOG_DIR) / TOP_GROUP / "media"
 
 # TIME ZONE / LANGUAGE
 TIME_ZONE = "{TIME_ZONE}"
