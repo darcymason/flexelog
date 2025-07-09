@@ -17,12 +17,12 @@ You can edit the file afterwards, but this gives a start by:
   path/to/flexelog/data
       top-group1-name
           top-group-name.db  (assuming sqlite)
-          "attachments" folder
+          "media" folder (where attachments will go)
       [...]   
 * asking for your server's time zone
 
 If not using sqlite, then you will need to edit the DATABASES 
-section of `settings_local.py` yourself.
+section of `settings_local.py` yourself after this script.
 
 The `Top group` can be blank unless you are using multiple independent 
 Django flexelog servers (necessary if migrating PSI elog Top Groups).
@@ -136,6 +136,9 @@ def main():
     with open(SETTINGS_LOCAL_PATH, 'w') as f:
         f.write(template.format(**context))
 
+    print(f"'{SETTINGS_LOCAL_PATH}' file created.")
+    print("Please edit as necessary to change settings.")
+    print("It is not included in source control, so please create backup copies.")
 
 if __name__ == "__main__":
     main()
