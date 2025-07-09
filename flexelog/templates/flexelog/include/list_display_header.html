@@ -5,7 +5,15 @@
     {# XX need urlencoded version of col_name for url #}
     {% if col_field == "text" %}
       {% if mode == "summary" %}
-        <th class="listtitle2">{{ col_name }}</th>
+        <th class="listtitle2">
+            {{ col_name }}&nbsp;&nbsp;&nbsp;
+            <input id="search" type="search" name="text" size="8"
+                value="{{ text }}"
+                hx-get="{% querystring %}"
+                hx-trigger="search, keyup delay:700ms changed"
+                hx-target="body"/>
+            {% comment %} <input type="submit" value="{% translate 'Find' %}"/> {% endcomment %}
+        </th>
       {% endif %}
     {% elif col_field == "attachments" %}
       {% if mode == "summary" %}

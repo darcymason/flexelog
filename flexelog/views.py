@@ -9,6 +9,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout
 from django.core.paginator import Paginator, Page
+from django.db import connection  # for query_debugger
 from django.db.models.functions import Lower
 from django.db.models import Count
 from django.http import HttpResponse, QueryDict
@@ -20,6 +21,7 @@ from django.utils.translation import gettext as _
 from flexelog import subst
 from flexelog.forms import EntryForm, EntryViewerForm, ListingModeFullForm, SearchForm
 from guardian.shortcuts import get_perms
+import time # for query_debugger
 
 from .models import Logbook, LogbookGroup, Entry
 from .elog_cfg import get_config
@@ -27,6 +29,33 @@ from .elog_cfg import get_config
 from urllib.parse import unquote_plus
 
 from flexelog.editor.widgets_toastui import MarkdownViewerWidget
+
+import logging
+logger = logging.getLogger("flexelog")
+
+# From https://stackoverflow.com/a/78769514/1987276
+def query_debugger(view):
+ def wrap(self, request, *args, **kwargs):
+    initial_queries = len(connection.queries)
+    start = time.time()
+    result = view(self, request, *args, **kwargs)
+    execution_time = time.time()-start
+    final_queries = len(connection.queries)
+    total_time = 0.0
+
+    print(f"==============> function : {view.__name__} made {final_queries - initial_queries} queries <========================")
+    for data in connection.queries:
+        print(f"\n({data['time']}) => {data['sql']}")
+        total_time += float(data['time'])
+    print(f"\n===============> Total : {total_time:.3f}(query), {round(execution_time,4)}(function) <==================\n")
+
+    return result
+ return wrap
+
+
+
+
+
 
 def available_logbooks(request) -> list[Logbook]:
     return [
@@ -349,6 +378,7 @@ def get_list_titles_and_fields(logbook):
     return col_titles, col_db_fields
 
 
+# @query_debugger
 def logbook_get(request, logbook):    
     cmd = get_param(request, "cmd")
     commands = [_("New"), _("Find")] # _("Select"), ("Import"), ("Config"), _("Help")
@@ -465,7 +495,7 @@ def logbook_get(request, logbook):
     req_page_number = get_param(request, "page", default="1")
     if req_page_number.lower() == "all":
         req_page_number = 1
-        per_page = cfg.get(logbook, "all display limit")
+        per_page = cfg.get(logbook, "all display limit", valtype=int)
     else:
         per_page = get_param(request, "npp", valtype=int) or cfg.get(
             logbook.name, "entries per page", valtype=int
@@ -476,7 +506,7 @@ def logbook_get(request, logbook):
     
     # If query string has "id=#", then need to position to page with that id
     # ... assuming it exists.  Check that first. If not, then ignore the setting
-    page_obj = paginator.get_page(req_page_number)
+    page_obj = paginator.get_page(int(req_page_number))
 
     if selected_id:
         try:
@@ -545,6 +575,7 @@ def logbook_get(request, logbook):
         selected_id=selected_id,
         summary_lines=cfg.get(logbook, "Summary lines"),
         sort_attr_field=sort_attr_field,
+        text=get_param(request, "text", default=""),
         is_rsort=is_rsort,
         filters=filters,
         filter_attrs=filter_attrs,

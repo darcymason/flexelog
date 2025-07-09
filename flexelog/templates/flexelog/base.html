@@ -2,6 +2,7 @@
 {% load i18n %}
 {% load l10n %}
 {% load tz %}
+{% load django_htmx %}
 
 <!DOCTYPE html>
 <html>
@@ -9,6 +10,7 @@
     <meta name="ROBOTS" content="NOINDEX, NOFOLLOW">
         <title>{% block title %}FlexElog{% endblock %}</title>     
     </meta>
+    {% htmx_script %}
     <link rel="stylesheet" type="text/css" href="{% static 'flexelog/elog.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'flexelog/flexelog.css' %}">
     <link rel="shortcut icon" href="{% static 'flexelog/favicon.ico' %}">
@@ -21,7 +23,7 @@
     {% block more_head_links %}{% endblock %}
 </head>
 
-<body>
+<body hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'>
   {% block body %}{% endblock %}
 </body>
 </html>

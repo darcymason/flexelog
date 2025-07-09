@@ -104,6 +104,9 @@ class Logbook(models.Model):
     def active_logbooks(cls):
         return list(cls.objects.filter(active=True).order_by("order"))
 
+    @property
+    def slug_name(self):
+        return slugify(self.name)
 
 class LogbookGroup(models.Model):
     name = models.CharField(
@@ -140,6 +143,7 @@ class Entry(models.Model):
     encoding = models.TextField(blank=True, null=True)
     locked_by = models.TextField(blank=True, null=True)
     text = models.TextField(blank=True, null=True)
+    # attachments
 
     def get(self, attr_name, default=None):
         if attr_name.lower() in self.fixed_attr_names:
@@ -177,15 +181,15 @@ def upload_path(instance, filename):
     # Making this similar to what PSI elog used but adding logbook name folder.
     # Can't use entry id (if a new entry, id doesn't exist yet). Similarly for the attachment pk.
     # But logbook is for sure known.
-    now = timezone.now()
     return (
         f"attachments/{instance.entry.lb.slug_name}"
-        f"/{now.strftime('%Y')}"  # 4-digit year
-        f"/{now.strftime('%y%m%d_%H%M%S')}_{filename}"  # e.g. '250325_100259_filename.png'
+        f"/{timezone.now().year}"
+        f"/{instance.pk:06d}__{filename}"
     )
 
+
 class Attachment(models.Model):
-    entry = models.ForeignKey(Entry, related_name="attachments", verbose_name=_("entry"), on_delete=models.CASCADE)
+    entry = models.ForeignKey(Entry, related_name="attachments", verbose_name=_("entry"), on_delete=models.CASCADE, null=True)
     attachment_file = models.FileField(
         _("Attachment"), upload_to=upload_path
     )
@@ -202,6 +206,4 @@ class Attachment(models.Model):
     @property
     def filename(self):
         return Path(self.attachment_file.name).name[14:]  # strip leading d6_d6_ datetime
-
-
 
