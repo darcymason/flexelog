@@ -5,3 +5,5 @@ flexelog.code-workspace
 flexelog/node/node_modules/*
 flexelog/node/dist/**/*
 media/attachments/**/*
+flexsite/settings_local.py
+flexsite/settings_local*.py
