@@ -268,7 +268,7 @@ def entry_listing(entry, columns, selected_id, filter_attrs, casesensitive, mode
                 for attachment in entry.attachments.all():
                     attachment_img = attachment_img_fmt.format(
                         img_src_url=static("flexelog/attachment.png"),
-                        attach_name=attachment.filename,
+                        attach_name=attachment.display_filename,
                     )
                     link_icons.append(
                         f"""<a href="{attachment.attachment_file.url}" target="_blank">{attachment_img}</a>""".format(

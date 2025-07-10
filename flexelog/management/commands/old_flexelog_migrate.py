@@ -28,7 +28,7 @@ import logging
 logger = logging.getLogger("flexelog")
 logger.setLevel(logging.DEBUG)
 
-OLD_PATH = Path(r"g:\my drive\elog")
+OLD_PATH = Path(r"c:\old_elogs")
 OLD_ELOGD = OLD_PATH / "elogd.cfg"
 
 
@@ -54,14 +54,6 @@ def _ensure_aware(dt: datetime.datetime):
 def convert_old_entry(logbook, lb_dir, lb_attrs, old_entry):
     # lb_attrs there to possibly convert other dates, booleans, etc
     attrs = dict(old_entry.attrs.items())
-    # # try to convert date:
-    # try:
-    #     date = datetime.datetime.fromisoformat(old_entry.date)
-    # except:
-    #     logger.error(f"Unable to convert the date '{old_entry.date}' for old flexelog entry {old_entry.id}")
-    #     date = old_entry.date  # str
-    # else:
-    #     date = _ensure_aware(date)
 
     logger.debug(f"Converting {logbook.name}/{old_entry.id}")
     entry = Entry(
@@ -75,17 +67,21 @@ def convert_old_entry(logbook, lb_dir, lb_attrs, old_entry):
         # in_reply_to handled below
         text=old_entry.text,
     )
-    if old_entry.reply_to:
+
+    return entry, old_entry.reply_to, old_entry.attachments
+
+def save_entry(entry, logbook, lb_dir, in_reply_to, attachment_names, file_op):
+    if in_reply_to:
         try:
-            entry.in_reply_to = logbook.entries.get(id=old_entry.reply_to)
+            entry.in_reply_to = logbook.entries.get(id=in_reply_to)
         except Entry.DoesNotExist:
-            logger.warning(f"In message {entry.id}, 'in_reply_to' message id {old_entry.reply_to} not found. Setting to None")
+            logger.warning(f"In message {entry.id}, 'in_reply_to' message id {in_reply_to} not found. Setting to None")
     
     # add attachments:
-    if old_entry.attachments:
+    if attachment_names:
         entry.save()  # generate rowid for Attachment model
         # entry.attachments.set([Path(filename).name[14:] for filename in old_entry.attachments])
-        for filename in old_entry.attachments:
+        for filename in attachment_names:
             base_filename = Path(filename).name[14:]
             old_filepath = lb_dir / attachment_year(filename) / filename
             if not old_filepath.exists():
@@ -93,9 +89,8 @@ def convert_old_entry(logbook, lb_dir, lb_attrs, old_entry):
             else:
                 logger.info(f"Creating attachment '{base_filename}' in logbook '{entry.lb.name}'")
                 att = Attachment(entry=entry, attachment_file=base_filename)
-                att.save()  # just to get an id to incorp in filename
-                migrate_attachment(att, entry.lb.slug_name, old_filepath, base_filename, copy=True)  # can choose to move instead
-            att.save()
+                migrate_attachment(att, entry.lb.slug_name, old_filepath, base_filename, file_op=operation)
+                att.save()
     entry.save()
 
 
@@ -115,8 +110,16 @@ def create_users(users: list[dict[str, str]]):
             f"('{user.get_full_name()}', {user.email})"
         )
 
-def migrate_attachment(att, lb_name, old_filepath, new_base_name, copy=True):
-    """Convert old elog attachments into flexelog format"""
+def migrate_attachment(att, lb_name, old_filepath, new_base_name, file_op="link"):
+    """Convert old elog attachments into flexelog format
+    
+    operation can be "link" (hard link, default), "copy" or "move". Link can only
+    be used if the new location is on the same drive as the original.
+
+    Hard links make a pointer to the original file, but are still available even
+    if original file is deleted.
+
+    """
     old_filepath = Path(old_filepath)
     att.save()
     att.attachment_file.name = (
@@ -124,10 +127,13 @@ def migrate_attachment(att, lb_name, old_filepath, new_base_name, copy=True):
         f"/{attachment_year(old_filepath.name)}"
         f"/{att.pk:06d}__{new_base_name}"
     )
-    copy_or_move = shutil.copy if copy else shutil.move
 
     Path(att.attachment_file.path).parent.mkdir(parents=True, exist_ok=True)
-    copy_or_move(old_filepath, att.attachment_file.path)
+    if file_op == "link":
+        Path(att.attachment_file.path).hardlink_to(old_filepath)
+    else:
+        copy_or_move = shutil.copy2 if file_op=="copy" else shutil.move
+        copy_or_move(old_filepath, att.attachment_file.path)
 
 
 def yes_no(prompt: str) -> bool:
@@ -151,6 +157,9 @@ class Command(BaseCommand):
             action=argparse.BooleanOptionalAction,
             default=False,
             help="Make all migrated logbooks read-only.  Useful if just trying flexelog and still adding/deleting entries in old logbooks"
+        )
+        parser.add_argument('--file-op', choices=["link", "copy", "move"], 
+                            help="How to migrate attachments. Default is (hard) symlink.", default="link"
         )
         
     def handle(self, *args, **options):
@@ -261,6 +270,8 @@ class Command(BaseCommand):
                 logbook.readonly = True
             if old_cfg.get(logbook, "Hidden"):
                 logbook.is_unlisted = True
+            logbook.comment = old_cfg.get(logbook, "Comment")
+
             # Check for auth needed - note these will also find [global] entries if specified there
             if old_cfg.get(lb_name, "Password file") or old_cfg.get(lb_name, "Authentication"):
                 logbook.auth_required = True
@@ -281,8 +292,40 @@ class Command(BaseCommand):
                 logbook.entries.all().delete()
             
             _, _, old_db_entries = old_db.get_entries(lb_name)
+
+            # ---------- Migrate entries
+            # Start porting entries, bulk create where possible for speed
+            # If have a reply_to, could be in the batch not committed
+            # If have attachments, need to save entry for attachments to reference
+            batch = []
+
             for old_entry in old_db_entries:
-                convert_old_entry(logbook, lb_dir, old_cfg.lb_attrs[lb_name], old_entry)
+                entry, in_reply_to, attachment_names = convert_old_entry(logbook, lb_dir, old_cfg.lb_attrs[lb_name], old_entry)
+
+                # if a reply or has attachments, commit what we have to make sure referenced entry exists
+                if in_reply_to or attachment_names or len(batch) >= self.BATCH_SIZE:  
+                    created = Entry.objects.bulk_create(batch)  # XX not possible if overwriting existing ones? need bulk_update?
+                    if batch:
+                        entry_ids = [e.id for e in created]
+                        sys.stdout.write(
+                            f"Entries {min(entry_ids)}-{max(entry_ids)} committed. "
+                        )
+                    batch = []
+                if in_reply_to or attachment_names:
+                    save_entry(entry, logbook, lb_dir, in_reply_to, attachment_names, file_op=options['file-op'])
+                    sys.stdout.write(f"Entry {entry.id} committed. ")
+                else:
+                    batch.append(entry)
+            
+            if batch:
+                created = Entry.objects.bulk_create(batch)  # XX not possible if overwriting existing ones? need bulk_update?
+                entry_ids = [e.id for e in created]
+                sys.stdout.write(
+                    f"Entries {min(entry_ids)}-{max(entry_ids)} committed."
+                )
+
+
+
 
             self.stdout.write(self.style.SUCCESS("OK"))
 

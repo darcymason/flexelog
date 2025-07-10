@@ -21,11 +21,11 @@ SECRET_KEY = "{SECRET_KEY}"
 # Path to where you want to store the flexelog database
 # If running completely independent groups of logbooks, use separate "Top Groups"
 # Perhaps e.g. "sales", "engineering" etc.
-ELOG_DIR = "{ELOG_DIR}"
-TOP_GROUP = "{TOP_GROUP_NAME}"
-DATABASE_NAME = "{TOP_GROUP_NAME}.db"
+ELOG_DIR = r"{ELOG_DIR}"
+TOP_GROUP = r"{TOP_GROUP_NAME}"
+DATABASE_NAME = "{DATABASE_NAME}"
 
-MEDIA_ROOT = Path(ELOG_DIR) / TOP_GROUP  # could add e.g. 'media', but flexelog adds 'attachments' subfolder anyway
+MEDIA_ROOT = Path(ELOG_DIR) / TOP_GROUP / "media"
 
 # TIME ZONE / LANGUAGE
 TIME_ZONE = "{TIME_ZONE}"
@@ -37,12 +37,12 @@ USE_I18N = True  # Recommend True, gives translations where available
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    "default": {                                                                                                                                    
+DATABASES = {{
+    "default": {{                                                                                                                                    
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": Path(ELOG_DIR) / TOP_GROUP / DATABASE_NAME,
-    }
-}
+    }}
+}}
 
 
 # -----------------------------
@@ -61,12 +61,12 @@ _own = ("add_entries", "edit_own_entries", "delete_own_entries",)
 _others = ("edit_others_entries", "delete_others_entries")
 _admin = ("configure_logbook",)
 
-DEFAULT_LOGBOOK_GROUP_PERMISSIONS = {
+DEFAULT_LOGBOOK_GROUP_PERMISSIONS = {{
     "Logbook {{logbook.name}} Viewers": _view,
     "Logbook {{logbook.name}} Contributors": _view + _own,
     "Logbook {{logbook.name}} Editors": _view + _own + _others,
     "Logbook {{logbook.name}} Admin": _view + _own + _others + _admin,
-}
+}}
 
 # ATTACHMENTS:
 FILE_UPLOAD_MAX_SIZE = 104_857_600  # 100 MiB

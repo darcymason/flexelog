@@ -18,6 +18,11 @@ logger = logging.getLogger("flexelog")
 
 _cfg = None  # singleton of LogbookConfig class
 
+IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".svg", ".gif"}  # PSI elog
+# from https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img 2023-10
+# accepted by most browsers
+IMAGE_SUFFIXES |= {".apng", ".avif", ".jfif", ".pjpeg", ".pjp", ".webp"}
+
 
 class ConfigError(Exception):
     pass

@@ -180,5 +180,5 @@ try:
 except ImportError as e:
     raise Exception(
         "Please supply a settings_local.py file in the flexsite folder\n"
-        "Copy settings_local_example.py to settings_local.py and edit as needed."
+        "Run `python flexlog_setup.py` or copy `settings_local_template.py` and edit it."
     ) from e
