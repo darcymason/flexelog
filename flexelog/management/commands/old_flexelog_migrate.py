@@ -95,7 +95,7 @@ def convert_old_entry(logbook, lb_dir, lb_attrs, old_entry):
                 att = Attachment(entry=entry, attachment_file=base_filename)
                 att.save()  # just to get an id to incorp in filename
                 migrate_attachment(att, entry.lb.slug_name, old_filepath, base_filename, copy=True)  # can choose to move instead
-            att.save()
+                att.save()
     entry.save()
 
 
