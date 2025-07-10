@@ -32,7 +32,6 @@ classifiers = [
 dependencies = [
     "django >=5.1,<6.0",
     "django-guardian >=3.0,<4.0",
-    "django-tuieditor@git+https://github.com/darcymason/django-tui.editor.git",
     "django-htmx",
     "tzlocal",  # for flexelog_setup time zone default
 ]
@@ -49,6 +48,7 @@ dev = [
     "flit",
     "pre-commit",
     "ruff",
+    "django-debug-toolbar",
 ]
 docs = [
     "mkdocs",

@@ -136,7 +136,7 @@ def main():
     with open(SETTINGS_LOCAL_PATH, 'w') as f:
         f.write(template.format(**context))
 
-    print(f"'{SETTINGS_LOCAL_PATH}' file created.")
+    print(f"\n\n'{SETTINGS_LOCAL_PATH}' file created.")
     print("Please edit as necessary to change settings.")
     print("It is not included in source control, so please create backup copies.")
 
