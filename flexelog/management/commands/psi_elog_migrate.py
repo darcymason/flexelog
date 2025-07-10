@@ -271,7 +271,7 @@ class Command(BaseCommand):
             for psi_entry in psi_logbooks[lb_name].entries():
                 # if a reply, commit what we have to make sure referenced entry exists first
                 # XX is this guaranteed? psi_entries came by original date order, so I think is safe
-                if psi_entry.in_reply_to or len(batch) >= self.BATCH_SIZE:  
+                if psi_entry.in_reply_to or psi_entry.attachments or len(batch) >= self.BATCH_SIZE:  
                     created = Entry.objects.bulk_create(batch)  # XX not possible if overwriting existing ones? need bulk_update?
                     if batch:
                         entry_ids = [e.id for e in created]
@@ -279,8 +279,11 @@ class Command(BaseCommand):
                             f"Entries {min(entry_ids)}-{max(entry_ids)} committed. "
                         )
                     batch = []
-
-                batch.append(convert_psi_entry(logbook, psi_cfg.lb_attrs[lb_name], psi_entry))
+                if psi_entry.in_reply_to or psi_entry.attachments:
+                    save_entry(psi_entry, logbook, lb_dir, in_reply_to, attachment_names)
+                    sys.stdout.write(f"Entry {entry.id} committed. ")
+                else:
+                    batch.append(convert_psi_entry(logbook, psi_cfg.lb_attrs[lb_name], psi_entry))
             
             if batch:
                 created = Entry.objects.bulk_create(batch)  # XX not possible if overwriting existing ones? need bulk_update?
