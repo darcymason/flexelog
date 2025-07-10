@@ -9,7 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
 
 from textwrap import shorten
-from configparser import ConfigParser, UNNAMED_SECTION
+from configparser import ConfigParser
 
 
 MAX_LOGBOOK_NAME = getattr(settings, "MAX_LOGBOOK_NAME", 50)
