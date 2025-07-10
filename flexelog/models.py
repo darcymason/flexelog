@@ -204,6 +204,6 @@ class Attachment(models.Model):
         return self.attachment_file.name
 
     @property
-    def filename(self):
-        return Path(self.attachment_file.name).name[14:]  # strip leading d6_d6_ datetime
+    def display_filename(self):
+        return Path(self.attachment_file.name).name.split("__", maxsplit=1)[1]
 
