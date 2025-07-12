@@ -1,4 +1,5 @@
 from datetime import datetime
+from binaryornot.helpers import is_binary_string
 from pathlib import Path
 from django.db import models
 from django.conf import settings
@@ -10,6 +11,9 @@ from django.contrib.auth.models import User
 
 from textwrap import shorten
 from configparser import ConfigParser
+
+import logging 
+logger = logging.getLogger("flexelog")
 
 
 MAX_LOGBOOK_NAME = getattr(settings, "MAX_LOGBOOK_NAME", 50)
@@ -135,7 +139,7 @@ class Entry(models.Model):
     lb = models.ForeignKey(Logbook, on_delete=models.PROTECT, related_name="entries")
     id = models.IntegerField(blank=False, null=False)
     date = models.DateTimeField()
-    author = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True, related_name="entries") # XX should never delete authors
+    author = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=True, blank=True, related_name="entries") # XX should never delete authors
     last_modified_author = models.ForeignKey(User, on_delete=models.DO_NOTHING, blank=True, null=True, related_name="entries_modified") # XX should never delete authors
     last_modified_date = models.DateTimeField(blank=True, null=True)
     attrs = models.JSONField(default=dict, null=True)
@@ -184,11 +188,17 @@ def upload_path(instance, filename):
     return (
         f"attachments/{instance.entry.lb.slug_name}"
         f"/{timezone.now().year}"
-        f"/{instance.pk:06d}__{filename}"
+        f"/{filename}"
     )
 
 
 class Attachment(models.Model):
+    IMAGE_SUFFIXES = (
+        {".jpg", ".jpeg", ".png", ".svg", ".gif"} |  # PSI elog supported
+        {".apng", ".avif", ".jfif", ".pjpeg", ".pjp", ".webp"}  # also accepted by most browsers
+        # https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img 2023-10
+    )
+
     entry = models.ForeignKey(Entry, related_name="attachments", verbose_name=_("entry"), on_delete=models.CASCADE, null=True)
     attachment_file = models.FileField(
         _("Attachment"), upload_to=upload_path
@@ -205,5 +215,36 @@ class Attachment(models.Model):
 
     @property
     def display_filename(self):
-        return Path(self.attachment_file.name).name.split("__", maxsplit=1)[1]
+        if not self.attachment_file.name:
+            return ""
+        return Path(self.attachment_file.name).name
+    
+    def exists(self):
+        return self.attachment_file.storage.exists(self.attachment_file.name)
+    
+    def is_image(self):
+        """Simple check of extension to see if is a supported image"""
+        if not self.exists():
+            return False
 
+        return Path(self.attachment_file.name).suffix.lower() in self.IMAGE_SUFFIXES
+
+    def suffix(self):
+        if not self.exists():
+            return ""
+        return Path(self.attachment_file.name).suffix.lower()
+
+    def is_ascii(self):
+        if not self.exists():
+            return False
+
+        return not is_binary_string(self.attachment_file.read(1024))
+
+
+    def is_viewable(self):
+        if not self.attachment_file.storage.exists(self.attachment_file.name):
+            return False
+
+        return (
+            self.is_image() or self.is_ascii()
+        ) and self.suffix not in (".ps", ".pdf")

@@ -68,7 +68,14 @@
     </table>
         <tr><td width="100%">
             <table width="100%" cellpadding="0" cellspacing="0">
-            <tr><td><iframe id="frame" src="{{ attachment.attachment_file.url }}" scrolling="yes"></iframe></td></tr>
+            <tr>
+            {% if attachment.is_image %}
+                <td class="attachmentframe"><img src="{{ attachment.attachment_file.url }}"/>
+            {% else %}
+                <td class="messageframe"><object id="frame" data="{{ attachment.attachment_file.url }}"></object>
+            {% endif %}
+            </td></tr>
+            
         </table></td></tr>
     </table>
     {% endfor %}
