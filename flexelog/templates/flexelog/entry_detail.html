@@ -9,10 +9,11 @@
 
 {% block body %}
 <form name="form1" method="GET" action="{% url 'flexelog:entry_detail' logbook.name entry.id %}">
-  {# <input type="hidden" name="page_type" value="{{ page_type }}" /> #}
-  <table class="frame" cellpadding="0" cellspacing="0">
+{# <input type="hidden" name="page_type" value="{{ page_type }}" /> #}
+<table class="frame" cellpadding="0" cellspacing="0">
   {% include "flexelog/include/lb_tabs.html" %}
   {% include "flexelog/include/commands.html" %}
+  <tr><td>
   <table class="listframe" width="100%" cellspacing="0" cellpadding="0">
     {% if entry.replies.count or entry.in_reply_to %}
       <tr><td>
@@ -32,10 +33,10 @@
     </td></tr>
     </td></tr>
     {% if entry.last_modified_date %}
-    <tr><td class="attribhead">{% translate 'Last submission' %}:&nbsp;{% translate 'Entry time' %}:&nbsp;<b>{{ entry.last_modified_date }}</b>
-    {% if entry.last_modified_author %}&nbsp;&nbsp;{% translate 'Username' %}:&nbsp;<b>{{ entry.last_modified_author.get_username }}</b>{% endif %}
-    {% endif %}</td></tr>
-
+        <tr><td class="attribhead">{% translate 'Last submission' %}:&nbsp;{% translate 'Entry time' %}:&nbsp;<b>{{ entry.last_modified_date }}</b>
+        {% if entry.last_modified_author %}&nbsp;&nbsp;{% translate 'Username' %}:&nbsp;<b>{{ entry.last_modified_author.get_username }}</b>{% endif %}
+        </td></tr>
+    {% endif %}
     <tr>
     <td>
     <table width="100%" cellpadding="0" cellspacing="0">
@@ -57,31 +58,10 @@
     </td>
     </tr>
     
-    {% for attachment in entry.attachments.all %}
-    <tr>
-        <table width="100%" cellpadding="0" cellspacing="0">
-            <tr>
-            <td nowrap width="10%" class="attribname">{% translate "Attachment" %} {{ forloop.counter }}:</td>
-            <td class="attribvalue"><a href="{{ attachment.attachment_file.url }}">{{ attachment.display_filename }}</a>
-                &nbsp;<span class="bytes">{{ attachment.attachment_file.size|filesizeformat }}</span></td>
-        </tr>
-    </table>
-        <tr><td width="100%">
-            <table width="100%" cellpadding="0" cellspacing="0">
-            <tr>
-            {% if attachment.is_image %}
-                <td class="attachmentframe"><img src="{{ attachment.attachment_file.url }}"/>
-            {% else %}
-                <td class="messageframe"><object id="frame" data="{{ attachment.attachment_file.url }}"></object>
-            {% endif %}
-            </td></tr>
-            
-        </table></td></tr>
-    </table>
-    {% endfor %}
-    
   </table>
-</table>
+
+   {% include "flexelog/include/attachments.html" %}
+
 </form>
 
 {% endblock body %}

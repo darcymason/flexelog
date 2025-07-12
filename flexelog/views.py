@@ -637,11 +637,14 @@ def new_edit_get(request, logbook, command, entry):
         form = EntryForm.from_entry(entry, page_type)
 
     cfg = get_config()
+    attachments = entry.attachments.all() if entry.attachments else []
     context = logbook_tabs_context(request, logbook)
     context.update(
         entry=entry,
         commands=[],
         Required=cfg.Required(logbook),
+        attachments=attachments,
+        attachment_slots = range(len(attachments)+1, len(attachments)+4)
     )
     context.update(form.get_context())
     return render(request, "flexelog/edit.html", context)
