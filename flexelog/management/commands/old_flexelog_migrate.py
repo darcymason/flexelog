@@ -122,18 +122,18 @@ def migrate_attachment(att, lb_name, old_filepath, new_base_name, file_op="link"
     """
     old_filepath = Path(old_filepath)
     att.save()
-    att.file.name = (
+    att.attachment_file.name = (
         f"attachments/{lb_name}"
         f"/{attachment_year(old_filepath.name)}"
         f"/{att.pk:06d}__{new_base_name}"
     )
 
-    Path(att.file.path).parent.mkdir(parents=True, exist_ok=True)
+    Path(att.attachment_file.path).parent.mkdir(parents=True, exist_ok=True)
     if file_op == "link":
-        Path(att.file.path).hardlink_to(old_filepath)
+        Path(att.attachment_file.path).hardlink_to(old_filepath)
     else:
         copy_or_move = shutil.copy2 if file_op=="copy" else shutil.move
-        copy_or_move(old_filepath, att.file.path)
+        copy_or_move(old_filepath, att.attachment_file.path)
 
 
 def yes_no(prompt: str) -> bool:

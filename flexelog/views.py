@@ -19,7 +19,7 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from flexelog import subst
-from flexelog.forms import EntryForm, EntryViewerForm, ListingModeFullForm, SearchForm
+from flexelog.forms import EntryForm, EntryViewerForm, ListingModeFullForm, SearchForm, AttachmentFormSet
 from guardian.shortcuts import get_perms
 import time # for query_debugger
 
@@ -636,15 +636,15 @@ def new_edit_get(request, logbook, command, entry):
     else:
         form = EntryForm.from_entry(entry, page_type)
 
+    
     cfg = get_config()
-    attachments = entry.attachments.all() if entry.attachments else []
+    
     context = logbook_tabs_context(request, logbook)
     context.update(
         entry=entry,
         commands=[],
         Required=cfg.Required(logbook),
-        attachments=attachments,
-        attachment_slots = range(len(attachments)+1, len(attachments)+4)
+        attachment_formset=AttachmentFormSet(instance=entry),
     )
     context.update(form.get_context())
     return render(request, "flexelog/edit.html", context)
@@ -759,8 +759,11 @@ def entry_detail_get(request, logbook, entry):
         }
         return render(request, "flexelog/show_error.html", context)
     form = EntryViewerForm(data={"text": entry.text or ""})
-    context["form"] = form
-    context["IOptions"] = cfg.IOptions(logbook)
+    context.update(
+        form=form,
+        IOptions=cfg.IOptions(logbook),
+        attachment_formset=AttachmentFormSet(instance=entry),
+    )
     
     return render(request, "flexelog/entry_detail.html", context)
 

@@ -199,7 +199,7 @@ class Attachment(models.Model):
         # https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img 2023-10
     )
 
-    entry = models.ForeignKey(Entry, related_name="attachments", verbose_name=_("entry"), on_delete=models.CASCADE, null=True)
+    entry = models.ForeignKey(Entry, related_name="attachments", verbose_name=_("entry"), on_delete=models.CASCADE)
     attachment_file = models.FileField(
         _("Attachment"), upload_to=upload_path
     )

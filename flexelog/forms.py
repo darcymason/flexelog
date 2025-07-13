@@ -1,3 +1,4 @@
+from django import forms
 from django.conf import settings
 from django.forms import (
     BooleanField,
@@ -14,6 +15,7 @@ from django.forms import (
     Select,
     SplitDateTimeField,
     SplitDateTimeWidget,
+    inlineformset_factory,
 )
 from django.forms import (
     HiddenInput,
@@ -29,7 +31,7 @@ from django.utils.datastructures import MultiValueDict
 
 from flexelog.elog_cfg import Attribute, get_config
 from flexelog.models import User
-from .models import Entry
+from .models import Attachment, Entry
 from flexelog.editor.widgets_toastui import MarkdownEditorWidget, MarkdownViewerWidget
 
 
@@ -287,3 +289,25 @@ class SearchForm(Form):
 class ListingModeFullForm(Form):
     """dummy form to get media loaded on the page"""
     text = MarkdownViewerFormField()
+
+
+class AttachmentForm(forms.ModelForm):
+    # This field will be used for displaying existing attachments with a delete checkbox
+    delete_attachment = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
+
+    class Meta:
+        model = Attachment
+        fields = ['attachment_file'] # manage 'entry' through the formset below
+
+
+AttachmentFormSet = inlineformset_factory(
+    Entry,
+    Attachment,
+    form=AttachmentForm,
+    fields=['attachment_file'],
+    extra=3, # Number of empty forms to display for new attachments
+    can_delete=True,
+    widgets={
+        'attachment_file': forms.FileInput(attrs={'class': 'form-control'}),
+    }
+)

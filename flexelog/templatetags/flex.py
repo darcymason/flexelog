@@ -271,7 +271,7 @@ def entry_listing(entry, columns, selected_id, filter_attrs, casesensitive, mode
                         attach_name=attachment.display_filename,
                     )
                     link_icons.append(
-                        f"""<a href="{attachment.file.url}" target="_blank">{attachment_img}</a>""".format(
+                        f"""<a href="{attachment.attachment_file.url}" target="_blank">{attachment_img}</a>""".format(
                             attachment=attachment, 
                             attachment_img=attachment_img,
                         )
