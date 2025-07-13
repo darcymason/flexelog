@@ -160,7 +160,7 @@ class EntryForm(Form):
         self.fields["attr_names"].initial = attr_str
 
     @classmethod
-    def from_entry(cls, entry: Entry, page_type) -> "EntryForm":
+    def from_entry(cls, entry: Entry, page_type, lb_attrs) -> "EntryForm":
         cfg = get_config()
         # XXX add any extra attrs now in lb config that aren't in this entry
         data = MultiValueDict()
@@ -169,9 +169,10 @@ class EntryForm(Form):
         data["edit_id"] = entry.id
         data["text"] = entry.text
         data["page_type"] = page_type
-        data["attr_names"] = (
-            ",".join(entry.attrs.keys()) if entry.attrs else "{}"
-        )
+        attr_names = list(lb_attrs.keys())
+        if entry.attrs:
+            attr_names += [name for name in entry.attrs.keys() if name not in attr_names]
+        data["attr_names"] = ",".join(attr_names)
         if entry.attrs is not None:
             for attr_name, val in entry.attrs.items():
                 if isinstance(val, list):

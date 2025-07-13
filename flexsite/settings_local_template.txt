@@ -70,3 +70,31 @@ DEFAULT_LOGBOOK_GROUP_PERMISSIONS = {{
 
 # ATTACHMENTS:
 FILE_UPLOAD_MAX_SIZE = 104_857_600  # 100 MiB
+
+
+# When adding new in Admin webpages, starting values for config
+# just to give some examples to edit
+GLOBAL_CONFIG_INITIAL = """\
+Reverse sort = True  # most recent at top
+Display mode = summary,  # default mode for search
+Entries per page = 20
+
+# When listing entries, the columns shown
+#   '*attributes' means all Attributes not explicitly listed otherwise
+#   You can override this in each logbook config, for specific logbook Attributes
+List display = ID, Date, Author, *attributes, Text, Attachments 
+
+# Approximate size of Text summary when listing entries
+Summary lines = 3
+Summary line length= 100,
+"""
+
+LOGBOOK_CONFIG_INITIAL = """\
+Attributes = Project, Category, Subject
+Required attributes = Project, Subject
+Options Project = Flexelog, ClimateChange, Politics
+MOptions Category = Communications, Documentation, Meetings, General
+
+Entries per page = 30  # override global if wish
+Preset on first reply Subject = Re: $Subject
+"""

@@ -3,6 +3,7 @@ from datetime import datetime
 import logging
 from operator import itemgetter
 import operator
+from pathlib import Path
 import textwrap
 from typing import Any
 from django.conf import settings
@@ -270,7 +271,7 @@ def logbook_post(request, logbook):
         # Fill in edit object
         entry.attrs = attrs
         entry.text = form.cleaned_data["text"]
-        if page_type in ("New", "Reply"):
+        if page_type in ("New", "Reply", "Duplicate"):
             entry.date = form.cleaned_data["date"]
             # Find max id for this logbook and add 1
             # XXX is this thread-safe?  
@@ -592,7 +593,11 @@ def new_edit_get(request, logbook, command, entry):
         entry = Entry(lb=logbook)
         entry.author = None if request.user.is_anonymous else request.user
         page_type = "New"
-    if command == _("Edit"):
+        preset_text = cfg.get(logbook, "Preset text", default="")
+        if Path(preset_text).exists():
+            preset_text = open(preset_text, 'r').read()
+        entry.text = preset_text
+    elif command == _("Edit"):
         page_type = "Edit"
         entry.last_modified_author = None if request.user.is_anonymous else request.user
     else:  # _("Reply"), _("Duplicate")
@@ -627,17 +632,7 @@ def new_edit_get(request, logbook, command, entry):
         entry.date = timezone.now()
         # XXX update last modified date
 
-    if command == _("New"):
-        cfg = get_config()
-        form = EntryForm(
-            lb_attrs=cfg.lb_attrs[logbook.name],
-            initial={"date": timezone.now()},
-        )
-    else:
-        form = EntryForm.from_entry(entry, page_type)
-
-    
-    cfg = get_config()
+    form = EntryForm.from_entry(entry, page_type, cfg.lb_attrs[logbook.name])
     
     context = logbook_tabs_context(request, logbook)
     context.update(
