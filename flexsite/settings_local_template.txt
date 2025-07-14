@@ -26,6 +26,11 @@ TOP_GROUP = r"{TOP_GROUP_NAME}"
 DATABASE_NAME = "{DATABASE_NAME}"
 
 MEDIA_ROOT = Path(ELOG_DIR) / TOP_GROUP / "media"
+DELETED_MEDIA = Path(ELOG_DIR) / TOP_GROUP / "deleted_media"
+
+# If user deletes attachment, whether to leave it, delete it, or move to DELETED_MEDIA
+# If false, can run a script to check for any files not in the Attachment table
+ON_ATTACHMENT_DELETE = "Move"  # or "Delete" or "Leave" 
 
 # TIME ZONE / LANGUAGE
 TIME_ZONE = "{TIME_ZONE}"

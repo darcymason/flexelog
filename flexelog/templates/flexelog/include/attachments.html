@@ -1,55 +1,62 @@
 {% load flex %}
 {% load i18n %}
 
-<table id="attachments_table" class="frame" cellpadding="0" cellspacing="0">
+{{ attachment_formset.management_form }}
+<table id="attachments_table" class="frame" width="100%" cellpadding="0" cellspacing="0">
 <!-- table width="100%" border="0" cellpadding="0" cellspacing="0" -->
     {# Display existing attachment #}
+    
     {% for attachment_form in attachment_formset %}
-    {% if attachment_form.instance.pk %} {# This form represents an existing attachment #}
-        <tr><td>
+    {% if attachment_form.instance.pk %} {# existing attachment #}
+        {% comment %} <tr><td>
         <table width="100%" cellpadding="0" cellspacing="0">
-            <tr>
-            <td nowrap width="10%" class="attribname">{% translate "Attachment" %} {{ forloop.counter }}:</td>
+        {% endcomment %}
+        <tr>
+        <td nowrap width="10%" class="attribname">{% translate "Attachment" %} {{ forloop.counter }}:</td>
+        {% if attachment_form.instance.attachment_file %}
             <td nowrap width="20%" class="attribvalue"><a href="{{ attachment_form.instance.attachment_file.url }}" target="_blank">
-                {{ attachment_form.instance.display_filename }}</a>
-                &nbsp;<span class="bytes">{{ attachment_form.instanct.attachment_file.size|filesizeformat }}</span>
+            {{ attachment_form.instance.display_filename }}</a>
+            &nbsp;<span class="bytes">{{ attachment_form.instance.attachment_file.size|filesizeformat }}</span>
+            </td>
+            <td class="attribvalue">
+            {% if editing %}
+            <small class="text-muted">{% translate "Replace file" %}:</small>
+            {{ attachment_form.attachment_file }} {# This allows uploading a new file #}
+            &nbsp;&nbsp;{{ attachment_form.DELETE }}
+            <label class="form-check-label" for="{{ attachment_form.DELETE.id_for_label }}"">{% translate "Delete" %}</label>
+            {% endif %}
             </td>
 
-            <td class="attribvalue">
-                {% if editing %}
-                {{ attachment_form.delete_attachment }}
-                <label class="form-check-label" for="{{ attachment_form.delete_attachment.id_for_label }}">{% translate "Delete" %}</label>
-                {% endif %}
+        {% else %}  {# does this ever get used? - it shouldn't #}
+            <td nowrap width="20%" class="attribvalue">
+            {% translate "No file uploaded" %}
+            <small class="text-muted">Upload file:</small>
+            {{ attachment_form.file }} {# This allows uploading a new file where none existed #}
             </td>
-            
-            {{ attachment_form.id }} {# Hidden input for instance #}
-            {{ attachment_form.attachment_file.as_hidden }} {# existing file path hidden #}
-            </tr>   
+        {% endif %}
+                    
+        {{ attachment_form.id }} {# Hidden input for instance #}
+        {{ attachment_form.attachment_file.as_hidden }} {# existing file path hidden #}
+        {% comment %} </tr>   
         </table>
         </td></tr>
+        {% endcomment %}
+    {% elif editing and not attachment_form.instance.pk %}
+        {% comment %} <table width="100%" cellpadding="0" cellspacing="0"> {% endcomment %}
+        <tr>
+            <td nowrap width="10%" class="attribname">{% translate "New Attachment" %}</td>
+            <td nowrap width="20%" class="attribvalue">
+                {# {{ attachment_form.attachment_file.label_tag }} #}
+                {{ attachment_form.attachment_file }}
+                {% if attachment_form.attachment_file.errors %}<div class="text-danger">{{ attachment_form.attachment_file.errors }}</div>{% endif %}
+            </td>
+            <td class="attribvalue">{{ attachment_form.id.as_hidden }}</td>
+        </tr>
+    {% comment %} </table> {% endcomment %}
     {% endif %}
     {% endfor %}
-    
-    {% if editing %}
-    {% for attachment_form in attachment_formset %}
-        {% if not attachment_form.instance.pk %} {# This form represents a new, empty attachment form #}
-        <table width="100%" cellpadding="0" cellspacing="0">
-            <tr>
-                <td nowrap width="10%" class="attribname">{% translate "New Attachment" %}</td>
-                <td nowrap width="20%" class="attribvalue">
-                    {# {{ attachment_form.attachment_file.label_tag }} #}
-                    {{ attachment_form.attachment_file }}
-                    {% if attachment_form.attachment_file.errors %}<div class="text-danger">{{ attachment_form.attachment_file.errors }}</div>{% endif %}
-                </td>
-                <td class="attribvalue">{{ attachment_form.id.as_hidden }}</td>
-            </tr>
-        {% endif %}
-        </table>
-    {% endfor %}
-    {% endif %}
 
-
-
+</table>
     {% comment %}
     <tr><td>
         <table width="100%" cellpadding="0" cellspacing="0">
@@ -90,4 +97,4 @@
     
     {% endcomment %}
 
-   </table>
+

@@ -201,7 +201,7 @@ class Attachment(models.Model):
 
     entry = models.ForeignKey(Entry, related_name="attachments", verbose_name=_("entry"), on_delete=models.CASCADE)
     attachment_file = models.FileField(
-        _("Attachment"), upload_to=upload_path
+        _("Attachment"), upload_to=upload_path, blank=True, null=True
     )
     uploaded = models.DateTimeField(_("uploaded"), auto_now_add=True)
 

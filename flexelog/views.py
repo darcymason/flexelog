@@ -1,10 +1,12 @@
 from copy import copy
 import logging
 import operator
+from pathlib import Path
 from typing import Any
 from django.conf import settings
 from django.core.paginator import Paginator
-from django.db import connection  # for query_debugger
+from django.db import transaction 
+
 from django.db.models.functions import Lower
 from django.http import HttpResponse
 from django.shortcuts import redirect, render, get_object_or_404
@@ -25,8 +27,10 @@ import logging
 logger = logging.getLogger("flexelog")
 
 # From https://stackoverflow.com/a/78769514/1987276
+# only used occasionally in dev - add decorator around functions
 def query_debugger(view):
     import time
+    from django.db import connection
     def wrap(self, request, *args, **kwargs):
         initial_queries = len(connection.queries)
         start = time.time()
@@ -232,9 +236,16 @@ def logbook_post(request, logbook):
         attr_names = request.POST["attr_names"].split(",")
         lb_attrs = cfg.lb_attrs[logbook.name]
         form = EntryForm(data=request.POST, lb_attrs=lb_attrs)
-        if not form.is_valid():
+        if page_type == "Edit":
+            # need entry for AttachmentFormSet to figure out changes
+            entry = Entry.objects.get(lb=logbook, id=request.POST.get("edit_id"))  # XXX catch errors
+        else:
+            entry = None
+        attachment_formset = AttachmentFormSet(request.POST, request.FILES, instance=entry)
+        if not (form.is_valid() and attachment_formset.is_valid()):
             context = logbook_tabs_context(request, logbook)
             context.update(form.get_context())
+            context.update(attachment_formset=attachment_formset)
             
             return render(request, "flexelog/edit.html", context)
 
@@ -265,7 +276,40 @@ def logbook_post(request, logbook):
             # XXX is this thread-safe?  
             max_entry = logbook.entries.order_by("-id").first()
             entry.id = max_entry.id + 1 if max_entry else 1
-        entry.save(force_insert=is_new_entry)  # XXX Could trap exists error and try again id +=1
+
+        with transaction.atomic():
+            entry.save(force_insert=is_new_entry)  # XXX Could trap exists error and try again id +=1
+            
+            # Handle existing attachments marked for deletion
+            for form_data in attachment_formset.deleted_forms:
+                if form_data.instance.pk: # attachment exists
+                    # Delete, Move, or leave
+                    if form_data.instance.attachment_file:
+                        attachment_path = Path(form_data.instance.attachment_file.name)
+                        file_path = Path(settings.MEDIA_ROOT) / attachment_path
+                        action = getattr(settings, "ON_ATTACHMENT_DELETE", "").lower()
+                        if action == "delete":
+                            file_path.unlink(missing_ok=True)
+                        elif action == "move":
+                            delete_path = getattr(settings, "DELETED_MEDIA")
+                            if delete_path is None:
+                                logger.error("ON_ATTACHMENT_DELETE is 'Move' but no 'DELETED_MEDIA' setting")
+                                continue
+                            
+                            new_filepath = Path(delete_path) / attachment_path
+                            new_filepath.parent.mkdir(parents=True, exist_ok=True)
+                            file_path.rename(new_filepath)                           
+                                 
+                    form_data.instance.delete() # Delete from db        
+            # Process attachments (including existing ones)
+            # Ensure existing attachments are not re-saved if their file input is empty
+            instances = attachment_formset.save() # commit=False)
+            # for instance in instances:
+            #     if instance.pk and not request.FILES.get(attachment_formset.prefix + '-' + str(instance.id) + '-file'):
+            #         continue # Skip if exists, no new file uploaded
+            #     instance.entry = entry
+            #     instance.save()
+
         redirect_url = reverse("flexelog:entry_detail", args=[logbook.name, entry.id])
         return redirect(redirect_url)
     # XXX need to cover other cases?
