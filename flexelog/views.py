@@ -240,7 +240,7 @@ def logbook_post(request, logbook):
             # need entry for AttachmentFormSet to figure out changes
             entry = Entry.objects.get(lb=logbook, id=request.POST.get("edit_id"))  # XXX catch errors
         else:
-            entry = None
+            entry = None  # fill in later
         attachment_formset = AttachmentFormSet(request.POST, request.FILES, instance=entry)
         if not (form.is_valid() and attachment_formset.is_valid()):
             context = logbook_tabs_context(request, logbook)
@@ -266,7 +266,7 @@ def logbook_post(request, logbook):
                     entry.in_reply_to = Entry.objects.get(lb=logbook, id=form.cleaned_data["in_reply_to"])
                 except Entry.DoesNotExist:
                     entry.in_reply_to = None
-            
+            attachment_formset.instance = entry
         # Fill in edit object
         entry.attrs = attrs
         entry.text = form.cleaned_data["text"]
@@ -279,36 +279,7 @@ def logbook_post(request, logbook):
 
         with transaction.atomic():
             entry.save(force_insert=is_new_entry)  # XXX Could trap exists error and try again id +=1
-            
-            # Handle existing attachments marked for deletion
-            for form_data in attachment_formset.deleted_forms:
-                if form_data.instance.pk: # attachment exists
-                    # Delete, Move, or leave
-                    if form_data.instance.attachment_file:
-                        attachment_path = Path(form_data.instance.attachment_file.name)
-                        file_path = Path(settings.MEDIA_ROOT) / attachment_path
-                        action = getattr(settings, "ON_ATTACHMENT_DELETE", "").lower()
-                        if action == "delete":
-                            file_path.unlink(missing_ok=True)
-                        elif action == "move":
-                            delete_path = getattr(settings, "DELETED_MEDIA")
-                            if delete_path is None:
-                                logger.error("ON_ATTACHMENT_DELETE is 'Move' but no 'DELETED_MEDIA' setting")
-                                continue
-                            
-                            new_filepath = Path(delete_path) / attachment_path
-                            new_filepath.parent.mkdir(parents=True, exist_ok=True)
-                            file_path.rename(new_filepath)                           
-                                 
-                    form_data.instance.delete() # Delete from db        
-            # Process attachments (including existing ones)
-            # Ensure existing attachments are not re-saved if their file input is empty
-            instances = attachment_formset.save() # commit=False)
-            # for instance in instances:
-            #     if instance.pk and not request.FILES.get(attachment_formset.prefix + '-' + str(instance.id) + '-file'):
-            #         continue # Skip if exists, no new file uploaded
-            #     instance.entry = entry
-            #     instance.save()
+            attachment_formset.save()
 
         redirect_url = reverse("flexelog:entry_detail", args=[logbook.name, entry.id])
         return redirect(redirect_url)

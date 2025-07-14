@@ -2,6 +2,8 @@ from datetime import datetime
 from binaryornot.helpers import is_binary_string
 from pathlib import Path
 from django.db import models
+from django.db.models.signals import pre_save, post_delete
+from django.dispatch import receiver
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils import timezone
@@ -14,7 +16,6 @@ from configparser import ConfigParser
 
 import logging 
 logger = logging.getLogger("flexelog")
-
 
 MAX_LOGBOOK_NAME = getattr(settings, "MAX_LOGBOOK_NAME", 50)
 RESERVED_LB_NAMES = ["admin", "user", "accounts"]
@@ -187,7 +188,7 @@ def upload_path(instance, filename):
     # But logbook is for sure known.
     return (
         f"attachments/{instance.entry.lb.slug_name}"
-        f"/{timezone.now().year}"
+        f"/{instance.entry.id:05d}"
         f"/{filename}"
     )
 
@@ -201,7 +202,7 @@ class Attachment(models.Model):
 
     entry = models.ForeignKey(Entry, related_name="attachments", verbose_name=_("entry"), on_delete=models.CASCADE)
     attachment_file = models.FileField(
-        _("Attachment"), upload_to=upload_path, blank=True, null=True
+        _("Attachment"), upload_to=upload_path, blank=True, null=True, max_length=400
     )
     uploaded = models.DateTimeField(_("uploaded"), auto_now_add=True)
 
@@ -213,38 +214,96 @@ class Attachment(models.Model):
     def __str__(self):
         return self.attachment_file.name
 
+    def delete(self, *args, **kwargs):
+        """
+        Overrides delete to possibly move the file to a 'deleted_media' directory.
+        """
+        if self.attachment_file:
+            # Delete, Move, or leave
+            delete_or_move(self.attachment_file)
+        super().delete(*args, **kwargs)
+    
     @property
     def display_filename(self):
         if not self.attachment_file.name:
             return ""
         return Path(self.attachment_file.name).name
     
-    def exists(self):
+    def file_exists(self):
         return self.attachment_file.storage.exists(self.attachment_file.name)
     
     def is_image(self):
         """Simple check of extension to see if is a supported image"""
-        if not self.exists():
+        if not self.file_exists():
             return False
 
         return Path(self.attachment_file.name).suffix.lower() in self.IMAGE_SUFFIXES
 
     def suffix(self):
-        if not self.exists():
+        if not self.file_exists():
             return ""
         return Path(self.attachment_file.name).suffix.lower()
 
     def is_ascii(self):
-        if not self.exists():
+        if not self.file_exists():
             return False
 
         return not is_binary_string(self.attachment_file.read(1024))
 
 
     def is_viewable(self):
-        if not self.attachment_file.storage.exists(self.attachment_file.name):
+        if not self.file_exists():
             return False
 
         return (
             self.is_image() or self.is_ascii()
         ) and self.suffix not in (".ps", ".pdf")
+
+def delete_or_move(attachment_file):
+    attachment_path = Path(attachment_file.name)  # .name is relative path incl subfolders
+    file_path = Path(settings.MEDIA_ROOT) / attachment_path
+    if not file_path.exists():
+        return
+    action = getattr(settings, "ON_ATTACHMENT_DELETE", "").lower()
+    if action == "delete":
+        file_path.unlink(missing_ok=True)
+    elif action == "move":
+        delete_path = getattr(settings, "DELETED_MEDIA")
+        if delete_path is None:
+            logger.error("ON_ATTACHMENT_DELETE is 'Move' but no 'DELETED_MEDIA' setting")
+        else:          
+            new_filepath = Path(delete_path) / attachment_path
+            new_filepath.parent.mkdir(parents=True, exist_ok=True)
+            i = 0
+            while new_filepath.exists():
+                i += 1
+                new_filepath = new_filepath.with_name(new_filepath.stem + f"_{i}" + new_filepath.suffix)
+            file_path.rename(new_filepath)                           
+
+
+@receiver(pre_save, sender=Attachment)
+def auto_delete_file_on_replace(sender, instance, **kwargs):
+    """
+    Deletes old file from filesystem when corresponding `Attachment` object
+    is updated with new file.
+    """
+    if not instance.pk: # Object is new, no old file to delete
+        return False
+
+    try:
+        old_file = sender.objects.get(pk=instance.pk).attachment_file
+    except sender.DoesNotExist:
+        return False
+
+    new_file = instance.attachment_file
+    if old_file and old_file != new_file:
+        delete_or_move(old_file)
+
+
+@receiver(post_delete, sender=Attachment)
+def auto_delete_file_on_delete(sender, instance, **kwargs):
+    """
+    Deletes/move/leaves file when corresponding `Attachment` object is deleted.
+    """
+    # Below function also checks for existance before deleting
+    delete_or_move(instance.attachment_file)

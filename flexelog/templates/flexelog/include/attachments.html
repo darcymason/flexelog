@@ -16,7 +16,8 @@
         {% if attachment_form.instance.attachment_file %}
             <td nowrap width="20%" class="attribvalue"><a href="{{ attachment_form.instance.attachment_file.url }}" target="_blank">
             {{ attachment_form.instance.display_filename }}</a>
-            &nbsp;<span class="bytes">{{ attachment_form.instance.attachment_file.size|filesizeformat }}</span>
+            {% if attachment_form.instance.file_exists %} &nbsp;<span class="bytes">{{ attachment_form.instance.attachment_file.size|filesizeformat }}</span>
+            {% endif %}
             </td>
             <td class="attribvalue">
             {% if editing %}
