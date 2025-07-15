@@ -257,7 +257,8 @@ class Attachment(models.Model):
 
         return (
             self.is_image() or self.is_ascii()
-        ) and self.suffix not in (".ps", ".pdf")
+            and self.suffix not in (".ps", ".pdf")
+        ) 
 
 def delete_or_move(attachment_file):
     attachment_path = Path(attachment_file.name)  # .name is relative path incl subfolders

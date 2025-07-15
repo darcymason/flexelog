@@ -7,16 +7,17 @@
     {# Display existing attachment #}
     
     {% for attachment_form in attachment_formset %}
-    {% if attachment_form.instance.pk %} {# existing attachment #}
+    {% with attachment_form.instance as attachment %}
+    {% if attachment.pk %} {# existing attachment #}
         {% comment %} <tr><td>
         <table width="100%" cellpadding="0" cellspacing="0">
         {% endcomment %}
         <tr>
         <td nowrap width="10%" class="attribname">{% translate "Attachment" %} {{ forloop.counter }}:</td>
-        {% if attachment_form.instance.attachment_file %}
-            <td nowrap width="20%" class="attribvalue"><a href="{{ attachment_form.instance.attachment_file.url }}" target="_blank">
-            {{ attachment_form.instance.display_filename }}</a>
-            {% if attachment_form.instance.file_exists %} &nbsp;<span class="bytes">{{ attachment_form.instance.attachment_file.size|filesizeformat }}</span>
+        {% if attachment.attachment_file %}
+            <td nowrap width="20%" class="attribvalue"><a href="{{ attachment.attachment_file.url }}" target="_blank">
+            {{ attachment.display_filename }}</a>
+            {% if attachment.file_exists %} &nbsp;<span class="bytes">{{ attachment.attachment_file.size|filesizeformat }}</span>
             {% endif %}
             </td>
             <td class="attribvalue">
@@ -27,6 +28,21 @@
             <label class="form-check-label" for="{{ attachment_form.DELETE.id_for_label }}"">{% translate "Delete" %}</label>
             {% endif %}
             </td>
+        
+            {% if attachment.is_viewable %}
+            <tr><td colspan="3">
+                <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                    {% if attachment.is_image %}
+                        <td class="attachmentframe"><img src="{{ attachment.attachment_file.url }}"  /></td>
+                    {% else %}
+                        <td class="messageframe"><object id="frame" class="object_preview" data="{{ attachment.attachment_file.url }}"></object></td>
+                    {% endif %}
+                    </tr>
+                </table>
+            </td></tr>
+            {% endif %}
+    
 
         {% else %}  {# does this ever get used? - it shouldn't #}
             <td nowrap width="20%" class="attribvalue">
@@ -35,14 +51,14 @@
             {{ attachment_form.file }} {# This allows uploading a new file where none existed #}
             </td>
         {% endif %}
-                    
+                
         {{ attachment_form.id }} {# Hidden input for instance #}
         {{ attachment_form.attachment_file.as_hidden }} {# existing file path hidden #}
         {% comment %} </tr>   
         </table>
         </td></tr>
         {% endcomment %}
-    {% elif editing and not attachment_form.instance.pk %}
+    {% elif editing and not attachment.pk %}
         {% comment %} <table width="100%" cellpadding="0" cellspacing="0"> {% endcomment %}
         <tr>
             <td nowrap width="10%" class="attribname">{% translate "New Attachment" %}</td>
@@ -55,6 +71,7 @@
         </tr>
     {% comment %} </table> {% endcomment %}
     {% endif %}
+    {% endwith %}    
     {% endfor %}
 
 </table>
