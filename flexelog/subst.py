@@ -1,4 +1,4 @@
-# subst.py
+# Copyright 2025 flexelog authors. See LICENSE file for details.
 
 import datetime
 from pathlib import Path

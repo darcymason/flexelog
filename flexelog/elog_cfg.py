@@ -1,3 +1,4 @@
+# Copyright 2025 flexelog authors. See LICENSE file for details.
 from collections import defaultdict
 import configparser
 import csv

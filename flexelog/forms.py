@@ -1,3 +1,4 @@
+# Copyright 2025 flexelog authors. See LICENSE file for details.
 from django import forms
 from django.conf import settings
 from django.forms import (

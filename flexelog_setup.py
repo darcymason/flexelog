@@ -1,3 +1,4 @@
+# Copyright 2025 flexelog authors. See LICENSE file for details.
 import sys
 from pathlib import Path
 from django.core.management.utils import get_random_secret_key

@@ -1,3 +1,4 @@
+# Copyright 2025 flexelog authors. See LICENSE file for details.
 """
 WSGI config for flexsite project.
 

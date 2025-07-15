@@ -1,3 +1,4 @@
+# Copyright 2025 flexelog authors. See LICENSE file for details.
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.admin import StackedInline

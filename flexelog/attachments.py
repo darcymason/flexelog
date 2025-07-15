@@ -1,5 +1,5 @@
 
-
+# Copyright 2025 flexelog authors. See LICENSE file for details.
 from pathlib import Path
 
 from flexelog.elog_cfg import IMAGE_SUFFIXES

@@ -1,3 +1,4 @@
+# Copyright 2025 flexelog authors. See LICENSE file for details.
 from datetime import datetime
 from binaryornot.helpers import is_binary_string
 from pathlib import Path

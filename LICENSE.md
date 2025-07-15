@@ -1,4 +1,4 @@
-Copyright 2024, Darcy Mason and flexelog contributors
+Copyright 2025, Darcy Mason and flexelog contributors
 
 flexelog is based on [PSI's elog](https://elog.psi.ch/elog/) and is
 released under a GPL license (see below)

@@ -1,12 +1,12 @@
 # FlexElog #
 
 FlexElog is a fast, configurable electronic logbook program patterned after [PSI's elog](https://elog.psi.ch/elog/),
-but with a fast database backend, a new editor with support for Markdown, inline images, charts and (in progress) laTeX capabilities.  You can migrate an existing PSI elog setup to flexelog, or you can start with a new elog configuration and create a new set of logbooks.
+but with a fast database backend, a new editor with support for Markdown, inline images, charts and LaTeX capabilities.  You can migrate an existing PSI elog setup to flexelog, or you can start with a new elog configuration and create a new set of logbooks.
 
-Flexelog is written in pure Python for easy portability while maintaining great speed, as the work done in Python (as opposed to libraries) is not the time-sensitive parts.  It's built on the mature Django web platform to help ensure security and flexibility.  It also makes admin management of elogs and users/groups easier.
+Flexelog is written in pure Python, built on the mature Django web platform to help ensure security and flexibility, and access to rich admin webpages.
 
 Compared with PSI elog, flexelog keeps:
-- very similar (elogd.cfg style) configuration 'lamguage'
+- very similar (elogd.cfg style) configuration 'language'
 - the same look and url patterns for common features
 - web pages look almost identical, including...
 - same CSS styles
@@ -50,10 +50,9 @@ Planned features in the short term include:
 ## Current major differences from PSI elog
 
 General differences not yet available:
-* no 'Top Groups'
-* no threaded views
+* no 'Top Groups', but achievable with separate django instances 
 * no email capabilities
-* multi-editing through Select command
+* no multi-editing through Select command
 
 
 ## Development
