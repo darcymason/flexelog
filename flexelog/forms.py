@@ -1,3 +1,4 @@
+from django import forms
 from django.conf import settings
 from django.forms import (
     BooleanField,
@@ -14,6 +15,7 @@ from django.forms import (
     Select,
     SplitDateTimeField,
     SplitDateTimeWidget,
+    inlineformset_factory,
 )
 from django.forms import (
     HiddenInput,
@@ -29,7 +31,7 @@ from django.utils.datastructures import MultiValueDict
 
 from flexelog.elog_cfg import Attribute, get_config
 from flexelog.models import User
-from .models import Entry
+from .models import Attachment, Entry
 from flexelog.editor.widgets_toastui import MarkdownEditorWidget, MarkdownViewerWidget
 
 
@@ -158,7 +160,7 @@ class EntryForm(Form):
         self.fields["attr_names"].initial = attr_str
 
     @classmethod
-    def from_entry(cls, entry: Entry, page_type) -> "EntryForm":
+    def from_entry(cls, entry: Entry, page_type, lb_attrs) -> "EntryForm":
         cfg = get_config()
         # XXX add any extra attrs now in lb config that aren't in this entry
         data = MultiValueDict()
@@ -167,9 +169,10 @@ class EntryForm(Form):
         data["edit_id"] = entry.id
         data["text"] = entry.text
         data["page_type"] = page_type
-        data["attr_names"] = (
-            ",".join(entry.attrs.keys()) if entry.attrs else "{}"
-        )
+        attr_names = list(lb_attrs.keys())
+        if entry.attrs:
+            attr_names += [name for name in entry.attrs.keys() if name not in attr_names]
+        data["attr_names"] = ",".join(attr_names)
         if entry.attrs is not None:
             for attr_name, val in entry.attrs.items():
                 if isinstance(val, list):
@@ -287,3 +290,25 @@ class SearchForm(Form):
 class ListingModeFullForm(Form):
     """dummy form to get media loaded on the page"""
     text = MarkdownViewerFormField()
+
+
+class AttachmentForm(forms.ModelForm):
+    # This field will be used for displaying existing attachments with a delete checkbox
+    delete_attachment = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
+
+    class Meta:
+        model = Attachment
+        fields = ['attachment_file'] # manage 'entry' through the formset below
+
+
+AttachmentFormSet = inlineformset_factory(
+    Entry,
+    Attachment,
+    form=AttachmentForm,
+    fields=['attachment_file'],
+    extra=3, # Number of empty forms to display for new attachments
+    can_delete=True,
+    widgets={
+        'attachment_file': forms.FileInput(attrs={'class': 'form-control'}),
+    }
+)

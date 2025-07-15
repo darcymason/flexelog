@@ -1,0 +1,118 @@
+{% load flex %}
+{% load i18n %}
+
+{{ attachment_formset.management_form }}
+<table id="attachments_table" class="frame" width="100%" cellpadding="0" cellspacing="0">
+<!-- table width="100%" border="0" cellpadding="0" cellspacing="0" -->
+    {# Display existing attachment #}
+    
+    {% for attachment_form in attachment_formset %}
+    {% with attachment_form.instance as attachment %}
+    {% if attachment.pk %} {# existing attachment #}
+        {% comment %} <tr><td>
+        <table width="100%" cellpadding="0" cellspacing="0">
+        {% endcomment %}
+        <tr>
+        <td nowrap width="10%" class="attribname">{% translate "Attachment" %} {{ forloop.counter }}:</td>
+        {% if attachment.attachment_file %}
+            <td nowrap width="20%" class="attribvalue"><a href="{{ attachment.attachment_file.url }}" target="_blank">
+            {{ attachment.display_filename }}</a>
+            {% if attachment.file_exists %} &nbsp;<span class="bytes">{{ attachment.attachment_file.size|filesizeformat }}</span>
+            {% endif %}
+            </td>
+            <td class="attribvalue">
+            {% if editing %}
+            <small class="text-muted">{% translate "Replace file" %}:</small>
+            {{ attachment_form.attachment_file }} {# This allows uploading a new file #}
+            &nbsp;&nbsp;{{ attachment_form.DELETE }}
+            <label class="form-check-label" for="{{ attachment_form.DELETE.id_for_label }}"">{% translate "Delete" %}</label>
+            {% endif %}
+            </td>
+        
+            {% if attachment.is_viewable %}
+            <tr><td colspan="3">
+                <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                    {% if attachment.is_image %}
+                        <td class="attachmentframe"><img src="{{ attachment.attachment_file.url }}"  /></td>
+                    {% else %}
+                        <td class="messageframe"><object id="frame" class="object_preview" data="{{ attachment.attachment_file.url }}"></object></td>
+                    {% endif %}
+                    </tr>
+                </table>
+            </td></tr>
+            {% endif %}
+    
+
+        {% else %}  {# does this ever get used? - it shouldn't #}
+            <td nowrap width="20%" class="attribvalue">
+            {% translate "No file uploaded" %}
+            <small class="text-muted">Upload file:</small>
+            {{ attachment_form.file }} {# This allows uploading a new file where none existed #}
+            </td>
+        {% endif %}
+                
+        {{ attachment_form.id }} {# Hidden input for instance #}
+        {{ attachment_form.attachment_file.as_hidden }} {# existing file path hidden #}
+        {% comment %} </tr>   
+        </table>
+        </td></tr>
+        {% endcomment %}
+    {% elif editing and not attachment.pk %}
+        {% comment %} <table width="100%" cellpadding="0" cellspacing="0"> {% endcomment %}
+        <tr>
+            <td nowrap width="10%" class="attribname">{% translate "New Attachment" %}</td>
+            <td nowrap width="20%" class="attribvalue">
+                {# {{ attachment_form.attachment_file.label_tag }} #}
+                {{ attachment_form.attachment_file }}
+                {% if attachment_form.attachment_file.errors %}<div class="text-danger">{{ attachment_form.attachment_file.errors }}</div>{% endif %}
+            </td>
+            <td class="attribvalue">{{ attachment_form.id.as_hidden }}</td>
+        </tr>
+    {% comment %} </table> {% endcomment %}
+    {% endif %}
+    {% endwith %}    
+    {% endfor %}
+
+</table>
+    {% comment %}
+    <tr><td>
+        <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+            <td nowrap width="10%" class="attribname">{% translate "Attachment" %} {{ forloop.counter }}:</td>
+            <td class="attribvalue"><a href="{{ attachment.attachment_file.url }}">{{ attachment.display_filename }}</a>
+                &nbsp;<span class="bytes">{{ attachment.attachment_file.size|filesizeformat }}</span></td>
+            </tr>   
+        </table>
+    </td></tr>
+    <tr><td>
+        <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+            {% if attachment.is_image %}
+                <td class="attachmentframe"><img src="{{ attachment.attachment_file.url }}" height="200px" /></td>
+            {% else %}
+                <td class="messageframe"><object id="frame" data="{{ attachment.attachment_file.url }}"></object></td>
+            {% endif %}
+            </tr>
+        </table>
+    </td></tr>
+
+    {% endfor %}
+
+
+   {% if editing %}
+    <tr><td>
+        <table width="100%" cellpadding="0" cellspacing="0">
+        {% for i in attachment_slots %}
+        <tr>
+        <td nowrap class="attribname">{% translate "Attachment" %} {{ i }}:</td>
+        <td class="attribvalue"><input type="file" size="60" maxlength="200" name="attfile{{i}}"></td>
+        </tr>
+        {% endfor %}
+        </table>
+    </td></tr>
+   {% endif %}
+    
+    {% endcomment %}
+
+

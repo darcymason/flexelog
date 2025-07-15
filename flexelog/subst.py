@@ -1,6 +1,8 @@
 # subst.py
 
 import datetime
+from pathlib import Path
+import textwrap
 from django.utils.translation import gettext as _
 from django.utils import formats, timezone
 
@@ -93,3 +95,24 @@ def subst(subst_text: str, logbook: Logbook, user: User, entry: Entry | None = N
     subst_text = re.sub(rf"\$version", version("flexelog"), subst_text, flags=re.I)
     
     return subst_text
+
+
+def apply_presets(cfg, logbook, user, entry, *, is_new=False, is_reply=False, is_first_reply=False):
+    if is_new:
+        preset_text = cfg.get(logbook, "Preset text", default="")
+        if preset_text and Path(preset_text).exists():
+            preset_text = open(preset_text, 'r').read()
+        entry.text = subst(preset_text, logbook, user, entry)
+    
+    if is_first_reply and entry.attrs:
+        for attr_name in entry.attrs.keys():
+            if cfg_subst := cfg.get(logbook, f"Preset on first reply {attr_name}"):
+                entry.attrs[attr_name] = subst(cfg_subst, logbook, user, entry=entry)
+    
+    if is_reply and cfg.get(logbook, "Quote on reply", valtype=bool):
+        entry.text = (
+            f"\n{_('Quote')}:\n"
+            + textwrap.indent(entry.text or "", "> ", lambda _: True)
+            + "\n"
+        )
+    # XXX other presets to follow

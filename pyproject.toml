@@ -30,10 +30,11 @@ classifiers = [
 ]
 
 dependencies = [
+    "binaryornot <1.0",  # for attachment previews
     "django >=5.1,<6.0",
     "django-guardian >=3.0,<4.0",
-    "django-htmx",
-    "tzlocal",  # for flexelog_setup time zone default
+    "django-htmx >=1.23,<2.0",
+    "tzlocal >=5.3,<6.0",  # for flexelog_setup time zone default
 ]
 
 [project.urls]

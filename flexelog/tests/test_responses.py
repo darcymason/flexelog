@@ -59,6 +59,20 @@ emptylog_config = dedent(
 )
 
 
+empty_attachment_data = {
+    'attachments-TOTAL_FORMS': '3',
+    'attachments-INITIAL_FORMS': '0',
+    'attachments-MIN_NUM_FORMS': '0',
+    'attachments-MAX_NUM_FORMS': '1000',
+    'attachments-0-attachment_file': '',
+    'attachments-0-id':  '',
+    'attachments-1-attachment_file': '',
+    'attachments-1-id':  '',
+    'attachments-2-attachment_file': '',
+    'attachments-2-id':  '',
+}
+    
+
 class TestResponsesEmptyDb(TestCase):
     """No ElogConfig or Logbooks set up - check error messages"""
     def test_index_no_logbooks(self):
@@ -113,7 +127,7 @@ class TestEmptyLogbook(TestCase):
             'edit_id': '',
             'reply_to': '',
             'text': 'Test New entry empty logbook',
-        }
+        } | empty_attachment_data
         url = reverse("flexelog:logbook", kwargs={"lb_name": "EmptyLog"})
         response = self.client.post(url, data=data)
 
@@ -220,7 +234,7 @@ class TestResponsesNoAuth(TestCase):
             'edit_id': '',
             'reply_to': '',
             'text': 'Test New entry',
-        }
+        } | empty_attachment_data
         url = reverse("flexelog:logbook", kwargs={"lb_name": "Log+1"})
         response = self.client.post(url, data=data)
 

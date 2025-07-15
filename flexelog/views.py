@@ -1,59 +1,52 @@
 from copy import copy
-from datetime import datetime
 import logging
-from operator import itemgetter
 import operator
-import textwrap
+from pathlib import Path
 from typing import Any
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import login, logout
-from django.core.paginator import Paginator, Page
-from django.db import connection  # for query_debugger
+from django.core.paginator import Paginator
+from django.db import transaction 
+
 from django.db.models.functions import Lower
-from django.db.models import Count
-from django.http import HttpResponse, QueryDict
+from django.http import HttpResponse
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from flexelog import subst
-from flexelog.forms import EntryForm, EntryViewerForm, ListingModeFullForm, SearchForm
+from flexelog.forms import EntryForm, EntryViewerForm, ListingModeFullForm, SearchForm, AttachmentFormSet
+from flexelog.subst import apply_presets
 from guardian.shortcuts import get_perms
-import time # for query_debugger
 
 from .models import Logbook, LogbookGroup, Entry
 from .elog_cfg import get_config
 
 from urllib.parse import unquote_plus
 
-from flexelog.editor.widgets_toastui import MarkdownViewerWidget
-
 import logging
 logger = logging.getLogger("flexelog")
 
 # From https://stackoverflow.com/a/78769514/1987276
+# only used occasionally in dev - add decorator around functions
 def query_debugger(view):
- def wrap(self, request, *args, **kwargs):
-    initial_queries = len(connection.queries)
-    start = time.time()
-    result = view(self, request, *args, **kwargs)
-    execution_time = time.time()-start
-    final_queries = len(connection.queries)
-    total_time = 0.0
+    import time
+    from django.db import connection
+    def wrap(self, request, *args, **kwargs):
+        initial_queries = len(connection.queries)
+        start = time.time()
+        result = view(self, request, *args, **kwargs)
+        execution_time = time.time()-start
+        final_queries = len(connection.queries)
+        total_time = 0.0
 
-    print(f"==============> function : {view.__name__} made {final_queries - initial_queries} queries <========================")
-    for data in connection.queries:
-        print(f"\n({data['time']}) => {data['sql']}")
-        total_time += float(data['time'])
-    print(f"\n===============> Total : {total_time:.3f}(query), {round(execution_time,4)}(function) <==================\n")
+        print(f"==============> function : {view.__name__} made {final_queries - initial_queries} queries <========================")
+        for data in connection.queries:
+            print(f"\n({data['time']}) => {data['sql']}")
+            total_time += float(data['time'])
+        print(f"\n===============> Total : {total_time:.3f}(query), {round(execution_time,4)}(function) <==================\n")
 
-    return result
- return wrap
-
-
-
+        return result
+    return wrap
 
 
 
@@ -243,9 +236,16 @@ def logbook_post(request, logbook):
         attr_names = request.POST["attr_names"].split(",")
         lb_attrs = cfg.lb_attrs[logbook.name]
         form = EntryForm(data=request.POST, lb_attrs=lb_attrs)
-        if not form.is_valid():
+        if page_type == "Edit":
+            # need entry for AttachmentFormSet to figure out changes
+            entry = Entry.objects.get(lb=logbook, id=request.POST.get("edit_id"))  # XXX catch errors
+        else:
+            entry = None  # fill in later
+        attachment_formset = AttachmentFormSet(request.POST, request.FILES, instance=entry)
+        if not (form.is_valid() and attachment_formset.is_valid()):
             context = logbook_tabs_context(request, logbook)
             context.update(form.get_context())
+            context.update(attachment_formset=attachment_formset)
             
             return render(request, "flexelog/edit.html", context)
 
@@ -266,17 +266,21 @@ def logbook_post(request, logbook):
                     entry.in_reply_to = Entry.objects.get(lb=logbook, id=form.cleaned_data["in_reply_to"])
                 except Entry.DoesNotExist:
                     entry.in_reply_to = None
-            
+            attachment_formset.instance = entry
         # Fill in edit object
         entry.attrs = attrs
         entry.text = form.cleaned_data["text"]
-        if page_type in ("New", "Reply"):
+        if page_type in ("New", "Reply", "Duplicate"):
             entry.date = form.cleaned_data["date"]
             # Find max id for this logbook and add 1
             # XXX is this thread-safe?  
             max_entry = logbook.entries.order_by("-id").first()
             entry.id = max_entry.id + 1 if max_entry else 1
-        entry.save(force_insert=is_new_entry)  # XXX Could trap exists error and try again id +=1
+
+        with transaction.atomic():
+            entry.save(force_insert=is_new_entry)  # XXX Could trap exists error and try again id +=1
+            attachment_formset.save()
+
         redirect_url = reverse("flexelog:entry_detail", args=[logbook.name, entry.id])
         return redirect(redirect_url)
     # XXX need to cover other cases?
@@ -588,11 +592,16 @@ def logbook_get(request, logbook):
 def new_edit_get(request, logbook, command, entry):
     # XXXX check request.user permissions for each of these, for the logbook
     cfg = get_config()
-    if command == _("New"):
+    is_new = command == _("New")
+    is_edit = command == _("Edit")
+    is_reply = command == _("Reply")
+    is_duplicate = command == _("Duplicate")
+    is_first_reply = False  # if a Reply, determine later
+    if is_new:
         entry = Entry(lb=logbook)
         entry.author = None if request.user.is_anonymous else request.user
         page_type = "New"
-    if command == _("Edit"):
+    elif is_edit:
         page_type = "Edit"
         entry.last_modified_author = None if request.user.is_anonymous else request.user
     else:  # _("Reply"), _("Duplicate")
@@ -601,47 +610,33 @@ def new_edit_get(request, logbook, command, entry):
         entry.author = None if request.user.is_anonymous else request.user
         entry.pk = None
         entry.id = None
-        entry.in_reply_to = None  # for Duplicate, Reply set below
+        entry.in_reply_to = None  # for Duplicate; Reply set below
         # XXXX entry.author = <current user>
         page_type = "Duplicate"
-        if command == _("Reply"):
+        if is_reply:
             page_type = "Reply"
             try:
                 entry.in_reply_to = Entry.objects.get(lb=logbook, id=parent_entry.id)
             except:
                 pass  # leave as None
             # Check Preset on first reply <attribute> = string
-            if not parent_entry.in_reply_to and entry.attrs:
-                for attr_name in entry.attrs.keys():
-                    if cfg_subst := cfg.get(logbook, f"Preset on first reply {attr_name}"):
-                        entry.attrs[attr_name] = subst.subst(cfg_subst, logbook, user=request.user, entry=entry)
-            # XXX check other 'Preset on reply' config
-            # XX the Quote here can be set by Preset config
-            entry.text = (
-                f"\n{_('Quote')}:\n"
-                + textwrap.indent(entry.text or "", "> ", lambda _: True)
-                + "\n"
-            )
+            is_first_reply = not parent_entry.in_reply_to
 
     if command != _("Edit"):
         entry.date = timezone.now()
         # XXX update last modified date
 
-    if command == _("New"):
-        cfg = get_config()
-        form = EntryForm(
-            lb_attrs=cfg.lb_attrs[logbook.name],
-            initial={"date": timezone.now()},
-        )
-    else:
-        form = EntryForm.from_entry(entry, page_type)
+    kwargs = dict(is_new=is_new, is_reply=is_reply, is_first_reply=is_first_reply)
+    apply_presets(cfg, logbook, request.user, entry, **kwargs)
 
-    cfg = get_config()
+    form = EntryForm.from_entry(entry, page_type, cfg.lb_attrs[logbook.name])
+    
     context = logbook_tabs_context(request, logbook)
     context.update(
         entry=entry,
         commands=[],
         Required=cfg.Required(logbook),
+        attachment_formset=AttachmentFormSet(instance=entry),
     )
     context.update(form.get_context())
     return render(request, "flexelog/edit.html", context)
@@ -756,8 +751,11 @@ def entry_detail_get(request, logbook, entry):
         }
         return render(request, "flexelog/show_error.html", context)
     form = EntryViewerForm(data={"text": entry.text or ""})
-    context["form"] = form
-    context["IOptions"] = cfg.IOptions(logbook)
+    context.update(
+        form=form,
+        IOptions=cfg.IOptions(logbook),
+        attachment_formset=AttachmentFormSet(instance=entry),
+    )
     
     return render(request, "flexelog/entry_detail.html", context)
 
