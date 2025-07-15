@@ -2,6 +2,7 @@
 from datetime import datetime
 from binaryornot.helpers import is_binary_string
 from pathlib import Path
+import bbcode
 from django.db import models
 from django.db.models.signals import pre_save, post_delete
 from django.dispatch import receiver
@@ -180,6 +181,18 @@ class Entry(models.Model):
             models.Index(fields=["lb", "-id"]),
             models.Index(fields=["lb", "-date"])
         ]
+    
+    @property
+    def markdown_text(self):
+        """Return text, or converted ELCode or plain"""
+        if not self.encoding:
+            return self.text
+        encoding = self.encoding.lower()
+        if encoding == "plain":
+            return "<!-- Plain encoding -->\n```\n" + self.text + "\n```"
+        if encoding == "elcode":
+            return bbcode.render_html(self.text)
+        return self.text
 
 
 def upload_path(instance, filename):

@@ -253,3 +253,8 @@ Flexelog additional CSS
     font-weight:bold;
     background-color: #ffff66;
   }
+
+/* New in flexelog */
+  .encoding {
+    background-color: #ffffcc;
+  }

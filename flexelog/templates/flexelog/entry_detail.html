@@ -51,6 +51,9 @@
     </tr>
 
     {# EDITOR/VIEWER #}
+    {% if encoding and encoding != "markdown" %}
+      <tr><td class="encoding">{% translate "Encoding" %}: {{ encoding }}</td></tr>
+    {% endif %}
     <tr>
     <td class="messageframe">
 
