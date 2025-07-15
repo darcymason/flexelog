@@ -2,7 +2,7 @@
 from datetime import datetime
 from binaryornot.helpers import is_binary_string
 from pathlib import Path
-import bbcode
+from flexelog.elcode import elcode2html
 from django.db import models
 from django.db.models.signals import pre_save, post_delete
 from django.dispatch import receiver
@@ -184,14 +184,14 @@ class Entry(models.Model):
     
     @property
     def markdown_text(self):
-        """Return text, or converted ELCode or plain"""
+        """Return text, plain wrapped in code block, or ELCode converted to HTML"""
         if not self.encoding:
             return self.text
         encoding = self.encoding.lower()
         if encoding == "plain":
             return "<!-- Plain encoding -->\n```\n" + self.text + "\n```"
         if encoding == "elcode":
-            return bbcode.render_html(self.text)
+            return elcode2html(self.text)
         return self.text
 
 
