@@ -4,7 +4,17 @@
 import bbcode # ELCode almost identical to BBcode
 from django.utils.translation import gettext as _
 
-elcode_parser = bbcode.Parser()
+# from https://stackoverflow.com/questions/20805668/
+FONT_SIZES = ["xx-small", "x-small", "small", "medium", "large", "x-large", "xx-large", "-webkit-xxx-large"]
+
+elcode_parser = bbcode.Parser(escape_html=False)
+
+# Make the add_formatter a decorator
+# Functions decorated must be "render_<tag>"
+def register(func):
+    tag = func.__name__.split("_")[1]
+    elcode_parser.add_formatter(tag, func)
+    return func
 
 
 def elcode2html(elcode: str) -> str:
@@ -18,11 +28,12 @@ def elcode2html(elcode: str) -> str:
     return elcode_parser.format(escaped_elcode).replace("[\0", r"\[")
 
 # bbcode parser covers most things, but we have to add some
+@register
 def render_table(tag_name, value, options, parent, context):
     row_split = "|-"
     col_split = "|"
 
-    quoted_opts = {k: f'''"{v.replace('"', '')}"''' if v else '' for k,v in options.items()}
+    quoted_opts = {k: f'''"{str(v).replace('"', '')}"''' if v else '' for k,v in options.items()}
 
     opt_list = [
         f'{opt}{"=" if opt_val else ""}{opt_val}'
@@ -44,30 +55,28 @@ def render_table(tag_name, value, options, parent, context):
         for row_string in row_strings
     )
     return f'<table {" ".join(opt_list)}>\n{table_contents}\n</table>\n'
-elcode_parser.add_formatter("table", render_table)
 
-
+@register
 def render_email(tag_name, value, options, parent, context):
     return f'<a href="mailto:{value}">{value}</a>'
-elcode_parser.add_formatter("email", render_email)
 
-
+@register
 def render_font(tag_name, value, options, parent, context):
     if 'font' not in options:
         return value
     
     return f"""<span style="font-family:{options['font']}">{value}</span>"""
 
-elcode_parser.add_formatter("font", render_font)
 
 # Override bbcode quote handling to "Quote" or add author
+@register
 def render_quote(tag_name, value, options, parent, context):
     if "quote" in options:
         header = _("%s wrote") % options['quote']
     else:
         header = _("Quote")
     return f"{header}:<br/><blockquote>{value}</blockquote>"
-elcode_parser.add_formatter("quote", render_quote)
+
 
 elcode_parser.add_simple_formatter('line', '<hr />', standalone=True)
 
@@ -75,6 +84,21 @@ for h_tag in ("h1 h2 h3 h4 h5 h6".split()):
     elcode_parser.add_simple_formatter(h_tag, f"<{h_tag}>%(value)s</{h_tag}>")
 
 elcode_parser.add_simple_formatter("anchor", f'<a name="%(value)s"></a>')
+
+@register
+def render_size(tag_name, value, options, parent, context):
+    no_op = f"[{tag_name}]{value}[/{tag_name}]"
+    if "size" not in options:
+        return no_op
+    try:
+        size = int(options["size"])
+    except:
+        return no_op
+    
+    # clamp size to available indexes
+    size = max(0, min(size, 7))
+    return f"""<span style="font-size:{FONT_SIZES[size]}">{value}</span>"""
+
 
 if __name__ == "__main__":
     s = """\
@@ -91,8 +115,4 @@ if __name__ == "__main__":
     print(elcode_parser.format(s))
 
     s = "[FONT=Arial]New font here[/FONT]"
-    print(elcode2html(s))
-
-    print()
-    s = "[QUOTE=Mr. Jack]Here is previous written stuff[/quote]"
     print(elcode2html(s))

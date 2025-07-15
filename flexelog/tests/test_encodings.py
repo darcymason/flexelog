@@ -31,4 +31,7 @@ class TestELCode(TestCase):
         self.assertEqual(elcode2html(elcode), f"Mr. Jack wrote:<br/><blockquote>{content}</blockquote>")
 
     def test_size(self):
-        pass
+        content = "Here is size 3"
+        elcode = f"[size=3]{content}[/size]"
+        expected = f'<span style="font-size:medium">{content}</span>'
+        self.assertEqual(elcode2html(elcode), expected)
