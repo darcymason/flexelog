@@ -7,7 +7,7 @@ from django.utils.translation import gettext as _
 # from https://stackoverflow.com/questions/20805668/
 FONT_SIZES = ["xx-small", "x-small", "small", "medium", "large", "x-large", "xx-large", "-webkit-xxx-large"]
 
-elcode_parser = bbcode.Parser(escape_html=False)
+elcode_parser = bbcode.Parser(escape_html=False, replace_links=False)
 
 # Make the add_formatter a decorator
 # Functions decorated must be "render_<tag>"
@@ -15,6 +15,15 @@ def register(func):
     tag = func.__name__.split("_")[1]
     elcode_parser.add_formatter(tag, func)
     return func
+
+def options_string(options):
+    # Quote any options, don't do "= val" if val is blank
+    #  Don't repeat quotes if already there
+    quoted_opts = {k: f'''"{str(v).replace('"', '')}"''' if v else '' for k,v in options.items()}
+    return " ".join(
+        f'{opt}{"=" if opt_val else ""}{opt_val}' # val already quoted above
+        for opt, opt_val in quoted_opts.items()
+    )
 
 
 def elcode2html(elcode: str) -> str:
@@ -33,13 +42,6 @@ def render_table(tag_name, value, options, parent, context):
     row_split = "|-"
     col_split = "|"
 
-    quoted_opts = {k: f'''"{str(v).replace('"', '')}"''' if v else '' for k,v in options.items()}
-
-    opt_list = [
-        f'{opt}{"=" if opt_val else ""}{opt_val}'
-        for opt, opt_val in quoted_opts.items()
-    ]
-
     cells = [
         [col.strip() for col in row.split(col_split)]
         for row in value.split(row_split)
@@ -54,7 +56,7 @@ def render_table(tag_name, value, options, parent, context):
         f"<tr>{row_string}</tr>"
         for row_string in row_strings
     )
-    return f'<table {" ".join(opt_list)}>\n{table_contents}\n</table>\n'
+    return f'<table {options_string(options)}>\n{table_contents}\n</table>\n'
 
 @register
 def render_email(tag_name, value, options, parent, context):
@@ -98,6 +100,25 @@ def render_size(tag_name, value, options, parent, context):
     # clamp size to available indexes
     size = max(0, min(size, 7))
     return f"""<span style="font-size:{FONT_SIZES[size]}">{value}</span>"""
+
+
+@register
+def render_img(tag_name, value, options, parent, context):
+    # Handle [img=<src>]something[/img]
+    #   but checked after and PSI elog doesn't seem to allow this anyway.
+    img = options.pop("img", None)
+    if not img:  # should be the case
+        img = value
+        # XX could check for elog:/1 style reference to attachments,
+        # need `entry` passed into context, and would only work
+        # for viewing, not for editing
+    if "alt" not in options:
+        try:
+            options["alt"] = img.split("/")[-1]
+        except:
+            pass
+    other_attrs = options_string(options)
+    return f"""<img src="{img}" {other_attrs}>"""
 
 
 if __name__ == "__main__":

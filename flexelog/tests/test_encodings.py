@@ -35,3 +35,10 @@ class TestELCode(TestCase):
         elcode = f"[size=3]{content}[/size]"
         expected = f'<span style="font-size:medium">{content}</span>'
         self.assertEqual(elcode2html(elcode), expected)
+
+    def test_img(self):
+        content = "http://example.com/image.png"
+        # use the value itself as url
+        elcode = f"[img]{content}[/img]"
+        expected = f'<img src="{content}" alt="image.png">'
+        self.assertEqual(elcode2html(elcode), expected)
