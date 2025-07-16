@@ -24,6 +24,26 @@ class TestELCode(TestCase):
         )
         got = elcode2html(elcode)
         self.assertEqual(expected, got)
+    
+    def test_table_containing_elcode(self):
+        elcode = dedent(
+            """\
+            [TABLE border=1]
+            [color=red]A[/color]|B|C
+            |-
+            1|2|[size=3]3[/size]
+            """
+        )
+        expected = dedent(
+            """\
+            <table border="1">
+            <tr><td><span style="color:red;">A</span></td><td>B</td><td>C</td></tr>
+            <tr><td>1</td><td>2</td><td><span style="font-size:medium">3</span></td></tr>
+            </table>
+            """
+        )
+        got = elcode2html(elcode)
+        self.assertEqual(expected, got)
 
     def test_quote(self):
         content = "Here is previous written stuff"
