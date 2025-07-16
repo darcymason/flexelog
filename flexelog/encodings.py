@@ -1,8 +1,9 @@
 # Copyright 2025 flexelog authors. See LICENSE file for details.
-"""Handling of PSI elog's ELCode encoding"""
+"""Handling of PSI elog's ELCode and html encodings"""
 
 import bbcode # ELCode almost identical to BBcode
 from django.utils.translation import gettext as _
+from markdownify import MarkdownConverter
 
 # from https://stackoverflow.com/questions/20805668/
 FONT_SIZES = ["xx-small", "x-small", "small", "medium", "large", "x-large", "xx-large", "-webkit-xxx-large"]
@@ -121,6 +122,28 @@ def render_img(tag_name, value, options, parent, context):
     return f"""<img src="{img}" {other_attrs}>"""
 
 
+# -------------------------------
+# HTML to markdown
+# -------------------------------
+class MDConverter(MarkdownConverter):
+    """
+    Create a custom MarkdownConverter that handles some tags important to us
+    """
+    def convert_span(self, el, text, parent_tags):
+        # keep <span> but only for style attribute, else strip it
+        style = el.attrs.get('style', None)
+        if style:
+            return f"""<span style="{style}">{text}</span>"""
+        else:
+            return text
+
+md_converter = MDConverter()
+
+def html2md(text: str) -> str:
+    """Take html encoding and turn into markdown"""
+    return md_converter.convert(text)
+
+
 if __name__ == "__main__":
     s = """\
     A|B|C
@@ -130,10 +153,17 @@ if __name__ == "__main__":
     4|5|6
     |-Seven|Eight|Nine
     """
-    print(render_table("table", s, {"border": "1", "nowrap": "", "cellspacing":20}, None, None))
+    # print(render_table("table", s, {"border": "1", "nowrap": "", "cellspacing":20}, None, None))
 
-    s = "[h1]Heading 1[/h1]"
-    print(elcode_parser.format(s))
+    # s = "[h1]Heading 1[/h1]"
+    # print(elcode_parser.format(s))
 
-    s = "[FONT=Arial]New font here[/FONT]"
-    print(elcode2html(s))
+    # s = "[FONT=Arial]New font here[/FONT]"
+    # html = elcode2html(s)
+    # print(html)
+    print("-------------------------")
+    print("Markdown from html")
+    print(html2md(html))
+    html = "<b>Bold</b>"
+    print(f"Simple conversion of {html}: {html2md(html)}")
+

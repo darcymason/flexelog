@@ -2,7 +2,7 @@
 from datetime import datetime
 from binaryornot.helpers import is_binary_string
 from pathlib import Path
-from flexelog.elcode import elcode2html
+from flexelog.encodings import elcode2html
 from django.db import models
 from django.db.models.signals import pre_save, post_delete
 from django.dispatch import receiver

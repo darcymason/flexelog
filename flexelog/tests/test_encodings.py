@@ -1,6 +1,6 @@
 from django.test import TestCase
 from textwrap import dedent
-from flexelog.elcode import elcode2html
+from flexelog.encodings import elcode2html, html2md
 
 class TestELCode(TestCase):
     """Test ELCode conversions"""
@@ -62,3 +62,32 @@ class TestELCode(TestCase):
         elcode = f"[img]{content}[/img]"
         expected = f'<img src="{content}" alt="image.png">'
         self.assertEqual(elcode2html(elcode), expected)
+
+
+class TestHTML(TestCase):
+    """Test HTML conversions"""
+
+    def test_span(self):
+        """<span> html is preserved, but only style attribute"""
+        html = dedent(
+            """\
+            <p><span style="color:#FF8C00" on_change="danger();">Dark orange</span></p>
+
+            <p><span style="background-color:#AFEEEE">background pale turquoise</span></p>
+
+            <p><span style="font-family:comic sans ms,cursive"><span style="font-size:11px">Comic 11</span></span></p>
+            """
+        )
+
+        expected = dedent(
+            """\
+            <span style="color:#FF8C00">Dark orange</span>
+
+            <span style="background-color:#AFEEEE">background pale turquoise</span>
+
+            <span style="font-family:comic sans ms,cursive"><span style="font-size:11px">Comic 11</span></span>
+            """
+        )
+        got = html2md(html)
+
+        self.assertEqual(expected.strip(), got)
