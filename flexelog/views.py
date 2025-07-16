@@ -751,9 +751,11 @@ def entry_detail_get(request, logbook, entry):
             "message": _('User "%s" has no access to this logbook') % request.user.get_username()
         }
         return render(request, "flexelog/show_error.html", context)
-    form = EntryViewerForm(data={"text": entry.text or ""})
+    
+    form = EntryViewerForm(data={"text": entry.markdown_text or ""})
     context.update(
         form=form,
+        encoding=entry.encoding,
         IOptions=cfg.IOptions(logbook),
         attachment_formset=AttachmentFormSet(instance=entry),
     )
