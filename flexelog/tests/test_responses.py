@@ -36,6 +36,7 @@ log_1_config = dedent(
     Required Attributes = Category, Subject
     Page Title = Log 1 - $Subject
     Quick filter = Category, Status
+    Preset on first reply Subject = Re: $Subject
     """ 
 )
 
@@ -176,8 +177,19 @@ class TestResponsesNoAuth(TestCase):
             attrs={"Subject": "Second entry", "Category": ["Cat 2"], "Status": "Done"},
             text = "Log 1 entry 2",
         )
+
+        cls.entry_elcode = Entry(
+            lb=cls.lb1,
+            id=3,
+            date=timezone.make_aware(datetime(2025,1,1,10,0,0)),
+            attrs={"Subject": "ELCode entry", "Category": ["Cat 2"], "Status": "Done"},
+            text = "[font=Comic]Different font[/font][size=6]Different size[/size]",
+            encoding="elcode",
+        )
+
         cls.entry1.save()
         cls.entry2.save()
+        cls.entry_elcode.save()
         cls.lb1.save()
         cls.lb2.save()
 
@@ -192,6 +204,7 @@ class TestResponsesNoAuth(TestCase):
             r"<tr>.*<th.*Logbook.*<th.*Entries.*<th.*Last submission.*</tr>"
             r".*<tr>.*<td.*Log 1.*</td>.*<td.*2.*</td>"
             r".*<tr>.*<td.*Log2.*</td>.*<td.*0.*</td>"
+            # plus more for third entry...
         )
         self.assertTrue(re.search(pattern, rstr, re.DOTALL))
 
@@ -204,6 +217,7 @@ class TestResponsesNoAuth(TestCase):
         # Note Reverse Sort is config'd
         pattern = (
             r"<th.*ID.*Date.*Status.*Category.*Subject.*Text.*</th>"
+            r".*<tr.*3.*Done.*Cat 2.*ELCode entry.*font.*</tr>"
             r".*<tr.*2.*Done.*Cat 2.*Second entry.*Log 1 entry 2.*</tr>"
             r".*<tr.*1.*Started.*Cat 1 \| Cat 2.*First entry.*</tr>"
         )
@@ -221,8 +235,24 @@ class TestResponsesNoAuth(TestCase):
             r".*<tr.*>.*<textarea.*>.*Log 1 entry 2.*</textarea>.*</tr>"
         )
         self.assertTrue(re.search(pattern, rstr, re.DOTALL))
+    def test_entry_detail_elcode(self):
+        url = reverse("flexelog:entry_detail", kwargs={"lb_name": "Log+1", "entry_id": "3"})
+        response = self.client.get(url)
+        rstr = response.content.decode()
+        # print(rstr)
+        pattern = (
+            r'&lt;span style=&quot;font-family:Comic'  # why is it escaped?  But still works??
+            r'.*&lt;span style=&quot;font-size:xx-large'
+        )
+        self.assertTrue(re.search(pattern, rstr, re.DOTALL))
 
-    def test_new_entry(self):
+    def test_reply_get(self):
+        """Test a new entry updates Subject Re: preset"""
+        url = reverse("flexelog:entry_detail", kwargs={"lb_name": "Log+1", "entry_id": 1})
+        response = self.client.get(url + "?cmd=Reply")
+        self.assertContains(response, "Re: First entry")
+
+    def test_new_entry_post(self):
         data = {
             'cmd': 'Submit',
             'date': '2025-05-23 22:05:40',
@@ -244,4 +274,4 @@ class TestResponsesNoAuth(TestCase):
 
         self.assertEqual(entry.attrs, {'Status': 'Started', 'Category': ['Cat 2'], 'Subject': 'Test edit'})
         self.assertEqual(entry.text, data['text'])
-        self.assertEqual(entry.id, 3)
+        self.assertEqual(entry.id, 4)

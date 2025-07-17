@@ -142,28 +142,3 @@ md_converter = MDConverter()
 def html2md(text: str) -> str:
     """Take html encoding and turn into markdown"""
     return md_converter.convert(text)
-
-
-if __name__ == "__main__":
-    s = """\
-    A|B|C
-    |-
-    1|2|3
-    |-
-    4|5|6
-    |-Seven|Eight|Nine
-    """
-    # print(render_table("table", s, {"border": "1", "nowrap": "", "cellspacing":20}, None, None))
-
-    # s = "[h1]Heading 1[/h1]"
-    # print(elcode_parser.format(s))
-
-    # s = "[FONT=Arial]New font here[/FONT]"
-    # html = elcode2html(s)
-    # print(html)
-    print("-------------------------")
-    print("Markdown from html")
-    print(html2md(html))
-    html = "<b>Bold</b>"
-    print(f"Simple conversion of {html}: {html2md(html)}")
-
