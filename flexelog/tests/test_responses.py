@@ -236,6 +236,25 @@ class TestResponsesNoAuth(TestCase):
         )
         self.assertTrue(re.search(pattern, rstr, re.DOTALL))
 
+
+    def test_logbook_entry_list_mode_full_page_num(self):
+        """Test html returned from mode=full listing of a log books entries"""
+        url = reverse("flexelog:logbook", kwargs={"lb_name": "Log+1"})
+        response = self.client.get(url + "?mode=full&page=2")
+        self.assertContains(response, "blah")
+
+    def test_logbook_entry_list_sort_and_sel_id(self):
+        """Test entries list with sort=(moptions attr) and selected id"""
+        url = reverse("flexelog:logbook", kwargs={"lb_name": "Log+1"})
+        response = self.client.get(url + "?sort=Category&id=2")
+        self.assertContains(response, "blah")
+
+    def test_logbook_entry_list_sort_reserved_attr_page_all(self):
+        """Test entries list with rsort=Date and page=all"""
+        url = reverse("flexelog:logbook", kwargs={"lb_name": "Log+1"})
+        response = self.client.get(url + "?rsort=Date&page=all")
+        self.assertContains(response, "blah")
+
     def test_entry_list_with_search_text(self):
         """Test html returned from listing of a log books entries"""
         url = reverse("flexelog:logbook", kwargs={"lb_name": "Log+1"})

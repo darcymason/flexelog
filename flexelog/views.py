@@ -534,7 +534,15 @@ def logbook_get(request, logbook):
         # Tried bisect, but was quite slow. Instead just count number before it in sort order
         sort_cmp = "gt" if is_rsort else "lt"
         id_cmp = "gt" if cfg_reverse else "lt"
-        lo = logbook.entries.filter(**filter_fields, **{f"{sort_attr_field}__{sort_cmp}": sel_sort_val}).count()
+        # For moption attributes, can't filter by list comparison,
+        # so just to get boundary, find one lt or gt item 0
+        if isinstance(sel_sort_val, list):
+            item_sel = "__0"
+            temp_sel_sort_val = sel_sort_val[0]
+        else:
+            item_sel = ""
+            temp_sel_sort_val = sel_sort_val
+        lo = logbook.entries.filter(**filter_fields, **{f"{sort_attr_field}{item_sel}__{sort_cmp}": temp_sel_sort_val}).count()
         exact_field_find_id = {f"{sort_attr_field}":sel_sort_val, f"id__{id_cmp}": selected_id}
         inner_index = logbook.entries.filter(**filter_fields, **exact_field_find_id).count()  # __gt if -id sort
         
