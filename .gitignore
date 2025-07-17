@@ -7,3 +7,4 @@ flexelog/node/dist/**/*
 media/attachments/**/*
 flexsite/settings_local.py
 flexsite/settings_local*.py
+.coverage

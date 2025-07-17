@@ -8,10 +8,9 @@ from django.utils import formats, timezone
 
 from importlib.metadata import version
 import re
-from flexelog.elog_cfg import get_config
 from flexelog.models import Logbook, Entry, User
 
-def subst(subst_text: str, logbook: Logbook, user: User, entry: Entry | None = None):
+def subst(cfg, logbook: Logbook, subst_text: str, user: User, entry: Entry | None = None):
     # Full list from PSI elog help
     # Implemented:
     # $<attribute>: The entered value of the attribute itself
@@ -56,7 +55,6 @@ def subst(subst_text: str, logbook: Logbook, user: User, entry: Entry | None = N
     if "$" not in subst_text:
         return subst_text
     
-    cfg = get_config()
     if entry:
         for attr_name, val in entry.attrs.items():
             if isinstance(val, list):
@@ -102,12 +100,12 @@ def apply_presets(cfg, logbook, user, entry, *, is_new=False, is_reply=False, is
         preset_text = cfg.get(logbook, "Preset text", default="")
         if preset_text and Path(preset_text).exists():
             preset_text = open(preset_text, 'r').read()
-        entry.text = subst(preset_text, logbook, user, entry)
+        entry.text = subst(cfg, logbook, preset_text, user, entry)
     
     if is_first_reply and entry.attrs:
         for attr_name in entry.attrs.keys():
             if cfg_subst := cfg.get(logbook, f"Preset on first reply {attr_name}"):
-                entry.attrs[attr_name] = subst(cfg_subst, logbook, user, entry=entry)
+                entry.attrs[attr_name] = subst(cfg, logbook, cfg_subst, user, entry=entry)
     
     if is_reply and cfg.get(logbook, "Quote on reply", valtype=bool):
         entry.text = (

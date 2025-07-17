@@ -358,7 +358,7 @@ class LogbookConfig:
             try:
                 return_vals.append(valtype(v))
             except:
-                print(
+                logger.warning(
                     f"Error converting value {val} with valtype {valtype}. Ignored."
                 )
 

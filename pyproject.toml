@@ -58,7 +58,7 @@ docs = [
 test = [
 ]
 
-all = dev + docs + test
+all = ["flexelog[dev,docs,test]"]
 
 [tool.black]
 target-version = ['py312']
