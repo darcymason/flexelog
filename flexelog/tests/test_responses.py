@@ -1,13 +1,15 @@
 from datetime import datetime
+from io import BytesIO
 import re
 from django.conf import settings
+from django.core.files.base import ContentFile
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import translation, timezone
 
 from textwrap import dedent
 
-from flexelog.models import Logbook, ElogConfig, Entry
+from flexelog.models import Logbook, ElogConfig, Entry, Attachment
 from flexelog.elog_cfg import LogbookConfig, get_config
 
 
@@ -183,13 +185,24 @@ class TestResponsesNoAuth(TestCase):
             id=3,
             date=timezone.make_aware(datetime(2025,1,1,10,0,0)),
             attrs={"Subject": "ELCode entry", "Category": ["Cat 2"], "Status": "Done"},
-            text = "[font=Comic]Different font[/font][size=6]Different size[/size]",
+            text = "This entry has fonts [font=Comic]Different font[/font][size=6]Different size[/size]" + " blah "*50, # make long enough to get shortened text tested
             encoding="elcode",
         )
 
+
         cls.entry1.save()
+
+        # Create an entry 2 attachment for testing
+        cls.att_buffer = BytesIO()
+        cls.att_buffer.write(b"Test plain text file")
+        cls.entry2.in_reply_to = cls.entry1
+        cls.entry2.save()
+        cls.attachment1 = Attachment(entry=cls.entry2)
+        cls.attachment1.attachment_file.save('memory_file.txt', ContentFile(cls.att_buffer.getvalue()), save=True)
+        cls.attachment1.save()
         cls.entry2.save()
         cls.entry_elcode.save()
+
         cls.lb1.save()
         cls.lb2.save()
 
@@ -223,6 +236,14 @@ class TestResponsesNoAuth(TestCase):
         )
         self.assertTrue(re.search(pattern, rstr, re.DOTALL))
 
+    def test_entry_list_with_search_text(self):
+        """Test html returned from listing of a log books entries"""
+        url = reverse("flexelog:logbook", kwargs={"lb_name": "Log+1"})
+        response = self.client.get(url + "?text=entry")
+
+        # Note Reverse Sort is config'd
+        self.assertContains(response, '<span class="highlight">entry</span>')
+
     def test_entry_detail(self):
         url = reverse("flexelog:entry_detail", kwargs={"lb_name": "Log+1", "entry_id": "2"})
         response = self.client.get(url)
@@ -235,6 +256,12 @@ class TestResponsesNoAuth(TestCase):
             r".*<tr.*>.*<textarea.*>.*Log 1 entry 2.*</textarea>.*</tr>"
         )
         self.assertTrue(re.search(pattern, rstr, re.DOTALL))
+
+    def test_entry_detail_id_not_exists(self):
+        url = reverse("flexelog:entry_detail", kwargs={"lb_name": "Log+1", "entry_id": "9999"})
+        response = self.client.get(url)
+        self.assertContains(response, "This entry has been deleted")
+
     def test_entry_detail_elcode(self):
         url = reverse("flexelog:entry_detail", kwargs={"lb_name": "Log+1", "entry_id": "3"})
         response = self.client.get(url)
@@ -275,3 +302,21 @@ class TestResponsesNoAuth(TestCase):
         self.assertEqual(entry.attrs, {'Status': 'Started', 'Category': ['Cat 2'], 'Subject': 'Test edit'})
         self.assertEqual(entry.text, data['text'])
         self.assertEqual(entry.id, 4)
+
+    def test_entry_delete(self):
+        """Delete a new entry that has an attachment"""
+        entry = Entry(
+            lb=self.lb1,
+            id=42,
+            date=timezone.make_aware(datetime(2025,1,1,10,42,0)),
+            attrs={"Subject": "Gonna delete me", "Category": ["Cat 2"], "Status": "Done"},
+            text = "This entry has an attachment",
+            encoding="plain",
+        )
+        entry.save()
+        attachment1 = Attachment(entry=entry)
+        attachment1.attachment_file.save('delete-me.txt', ContentFile(self.att_buffer.getvalue()), save=True)
+        attachment1.save()
+        url = reverse("flexelog:entry_detail", kwargs={"lb_name": "Log+1", "entry_id": 42})
+        response = self.client.post(url, data={"cmd": "Delete", "confirm": "Yes"})
+
