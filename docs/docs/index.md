@@ -4,15 +4,27 @@
 
 ### Installation
 #### Set up Virtual environment and copy the source code
-* create a virtual environment
+* create a virtual environment (optional, but recommended)
+  `python -m venv .venv`
 * activate the venv
-* clone the repository -- git clone <XXX addr>
-* cd flexelog
-* pip install -e .
+  (linux)   `source .venv/bin/activate` 
+  (Windows) `.venv\Scripts\activate.bat` 
+
+* clone the repository
+  (Windows):  download git from https://git-scm.com/ and install
+  `git clone --depth=1 https://github.com/darcymason/flexelog.git`
+* `cd flexelog`
+* `python -m pip install -e .`
 
 This will install the django server and various other packages
 
+#### Running the demo
+
+
 #### Configure database / time / language settings
+* in the `flexelog` folder (with `manage.py` in it), run:
+  `python flexelog_setup`
+* answer the questions, press Enter to accept the default shown
 * choose whether to use sqlite (default) or some other database system
 * edit `settings.py` to:
   * point to your own database engine or file (under `DATABASES`)
