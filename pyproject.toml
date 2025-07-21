@@ -35,6 +35,8 @@ dependencies = [
     "django-guardian >=3.0,<4.0",
     "django-htmx >=1.23,<2.0",
     "tzlocal >=5.3,<6.0",  # for flexelog_setup time zone default
+    "bbcode >=1.1.0,<2.0",
+    "markdownify >=1.1.0,<2.0",    
 ]
 
 [project.urls]
