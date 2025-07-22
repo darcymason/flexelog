@@ -8,4 +8,4 @@ media/attachments/**/*
 flexsite/settings_*.py
 .coverage
 run_*
-flexsite/settings_demo.py
+flexsite/settings.py

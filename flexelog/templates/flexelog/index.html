@@ -45,7 +45,7 @@
         {% endfor %}
     {% empty %}
     <tr><td>{% translate "No logbook defined on this server" %}</td></tr>
-    <tr><td>&nbsp;&nbsp;<a href="{% url 'admin:index' %}">{% translate "Admin" %}</a></tr></td>
+    <tr><td>&nbsp;&nbsp;<a href="{% url 'admin:index' %}"><span class="highlight">{% translate "Admin" %}</span></a></tr></td>
 
     {% endfor %}
     </table>

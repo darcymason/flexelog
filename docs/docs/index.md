@@ -20,11 +20,20 @@ This will install the django server and various other packages
 
 #### Running the demo
 
+After the steps above, you can run a minimal example elog 
+* ensure virtual environment is activated, if used (see above)
+* (Windows): run_demo.bat
+* (linux, MacOS): ./run_demo
+* the admin login is user 'demo', password 'demo--demo'
 
 #### Configure database / time / language settings
+
+##### Basic sqlite database setup
 * in the `flexelog` folder (with `manage.py` in it), run:
-  `python flexelog_setup`
+  `python flexelog_setup.py`
 * answer the questions, press Enter to accept the default shown
+* choose yes to initialize the database
+
 * choose whether to use sqlite (default) or some other database system
 * edit `settings.py` to:
   * point to your own database engine or file (under `DATABASES`)
