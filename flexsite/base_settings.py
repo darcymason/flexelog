@@ -93,7 +93,7 @@ WSGI_APPLICATION = "flexsite.wsgi.application"
 DATABASES = {
     "default": {                                                                                                                                    
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "flexelog demo.db",
+        "NAME": BASE_DIR / "flexelog_demo.db",
     }
 }
 
@@ -173,13 +173,3 @@ if DEBUG:
     MEDIA_URL = "media/"
 
 FILE_UPLOAD_MAX_SIZE = 10485760  # 10 MiB
-
-# USER OVERRIDES / ADDITIONS imported in separate file
-#   so not in version control
-try:
-    from flexsite.settings_local import *
-except ImportError as e:
-    raise Exception(
-        "Please supply a settings_local.py file in the flexsite folder\n"
-        "Run `python flexlog_setup.py` or copy `settings_local_template.py` and edit it."
-    ) from e

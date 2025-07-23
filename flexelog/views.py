@@ -29,25 +29,25 @@ logger = logging.getLogger("flexelog")
 
 # From https://stackoverflow.com/a/78769514/1987276
 # only used occasionally in dev - add decorator around functions
-def query_debugger(view):
-    import time
-    from django.db import connection
-    def wrap(self, request, *args, **kwargs):
-        initial_queries = len(connection.queries)
-        start = time.time()
-        result = view(self, request, *args, **kwargs)
-        execution_time = time.time()-start
-        final_queries = len(connection.queries)
-        total_time = 0.0
+# def query_debugger(view):
+#     import time
+#     from django.db import connection
+#     def wrap(self, request, *args, **kwargs):
+#         initial_queries = len(connection.queries)
+#         start = time.time()
+#         result = view(self, request, *args, **kwargs)
+#         execution_time = time.time()-start
+#         final_queries = len(connection.queries)
+#         total_time = 0.0
 
-        print(f"==============> function : {view.__name__} made {final_queries - initial_queries} queries <========================")
-        for data in connection.queries:
-            print(f"\n({data['time']}) => {data['sql']}")
-            total_time += float(data['time'])
-        print(f"\n===============> Total : {total_time:.3f}(query), {round(execution_time,4)}(function) <==================\n")
+#         print(f"==============> function : {view.__name__} made {final_queries - initial_queries} queries <========================")
+#         for data in connection.queries:
+#             print(f"\n({data['time']}) => {data['sql']}")
+#             total_time += float(data['time'])
+#         print(f"\n===============> Total : {total_time:.3f}(query), {round(execution_time,4)}(function) <==================\n")
 
-        return result
-    return wrap
+#         return result
+#     return wrap
 
 
 
@@ -534,7 +534,15 @@ def logbook_get(request, logbook):
         # Tried bisect, but was quite slow. Instead just count number before it in sort order
         sort_cmp = "gt" if is_rsort else "lt"
         id_cmp = "gt" if cfg_reverse else "lt"
-        lo = logbook.entries.filter(**filter_fields, **{f"{sort_attr_field}__{sort_cmp}": sel_sort_val}).count()
+        # For moption attributes, can't filter by list comparison,
+        # so just to get boundary, find one lt or gt item 0
+        if isinstance(sel_sort_val, list):
+            item_sel = "__0"
+            temp_sel_sort_val = sel_sort_val[0]
+        else:
+            item_sel = ""
+            temp_sel_sort_val = sel_sort_val
+        lo = logbook.entries.filter(**filter_fields, **{f"{sort_attr_field}{item_sel}__{sort_cmp}": temp_sel_sort_val}).count()
         exact_field_find_id = {f"{sort_attr_field}":sel_sort_val, f"id__{id_cmp}": selected_id}
         inner_index = logbook.entries.filter(**filter_fields, **exact_field_find_id).count()  # __gt if -id sort
         
@@ -761,31 +769,3 @@ def entry_detail_get(request, logbook, entry):
     )
     
     return render(request, "flexelog/entry_detail.html", context)
-
-
-def test(request, lb_name, entry_id):
-    cfg = get_config()
-    try:
-        logbook = Logbook.objects.get(name=lb_name)
-    except Logbook.DoesNotExist:
-        # 'Logbook "%s" does not exist on remote server'
-        raise  # XXX
-    entry = get_object_or_404(Entry, lb=logbook, id=entry_id)
-    lb_attributes = cfg.lb_attrs[logbook.name]
-    attr_names = entry.attrs.keys() if entry.attrs else []
-    # Error: translate: "Attribute <b>%s</b> not supplied" for required
-
-    # form = EntryForm(instance=entry, initial={"date": timezone.now()})  # instance=entry for edit existing
-    initial = {"date": timezone.now()}
-    form = EntryForm(lb_attrs=lb_attributes, initial=initial)
-    context = form.get_context()
-    context.update(
-        {
-            "logbook": logbook,
-            "logbooks": available_logbooks(request),  # XX will need to restrict to what user auth is, not show deactivated ones
-            "main_tab": cfg.get(logbook, "main tab", valtype=str, default=""),
-            "cfg_css": cfg.get(logbook, "css", valtype=str, default=""),
-            "content": entry.text,
-        }
-    )
-    return render(request, "flexelog/xx_test_viewer.html", context)

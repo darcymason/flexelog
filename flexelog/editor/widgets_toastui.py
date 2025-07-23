@@ -57,32 +57,3 @@ class MarkdownViewerWidget(forms.Textarea):
     class Media:
         css = common_css
         js = common_js
-
-
-class MarkdownMultiViewerWidget(forms.Textarea):
-    # For Full listing mode
-    template_name = 'flexelog/editor/viewer-toastui.html'
-
-    def __init__(self, attrs=None):
-        default_attrs = {'class': 'tui-editor-contents', 'hidden': True}
-        if attrs:
-            default_attrs.update(attrs)
-        super().__init__(default_attrs)
-
-    class Media:
-        css = common_css
-        js = common_js
-
-
-# class StaticMarkdownViewerWidget(forms.Textarea):
-#     template_name = 'flexelog/editor/static_viewer.html'
-
-#     def __init__(self, attrs=None):
-#         default_attrs = {'class': 'tui-editor-contents'}
-#         if attrs:
-#             default_attrs.update(attrs)
-#         super().__init__(default_attrs)
-
-#     class Media:
-#         css =  # ...
-#         js = ()

@@ -152,12 +152,7 @@ class Entry(models.Model):
     text = models.TextField(blank=True, null=True)
     # attachments
 
-    def get(self, attr_name, default=None):
-        if attr_name.lower() in self.fixed_attr_names:
-            return getattr(self, attr_name.lower())
-        else:
-            return self.attrs.get(attr_name.lower(), default=default) if self.attrs else default
-   
+ 
     def __str__(self):
         return (
             f"{self.lb.name} {self.id}: {self.date} {shorten(str(self.attrs) or "", 20)} "

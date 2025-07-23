@@ -89,7 +89,8 @@ class TestConditionalConfig(TestCase):
 
 class TestSubstitutions(TestCase):
     def setUp(self):
-        self.logbook = Logbook(name="test")
+        self.cfg = LogbookConfig("[test]\n")
+        self.logbook = Logbook(name="test")  # note config doesn't contain header in live operation
         self.entry = Entry(lb=self.logbook)
         self.entry.attrs = {}
         self.user = User(username="sam", last_name="Carter", first_name="Samantha", email="sam@example.com")
@@ -97,7 +98,7 @@ class TestSubstitutions(TestCase):
         self.entry.attrs = {"subject": "Subject of entry"}
         subst_text = "Re: $Subject"
         expected = "Re: Subject of entry"
-        got = subst.subst(subst_text, logbook=self.logbook, user=self.user, entry=self.entry)
+        got = subst.subst(self.cfg, self.logbook, subst_text, user=self.user, entry=self.entry)
         self.assertEqual(got, expected)
     def test_other_subst(self):
         subst_text = (
@@ -106,7 +107,7 @@ class TestSubstitutions(TestCase):
             "made an entry in logbook '$logbook' "
             "using flexelog v$version"
         )
-        got = subst.subst(subst_text, logbook=self.logbook, user=self.user, entry=self.entry)
+        got = subst.subst(self.cfg, self.logbook, subst_text, user=self.user, entry=self.entry)
         self.assertTrue("$" not in got)
         # XX could actually check some substituted values to be more complete
         

@@ -13,7 +13,7 @@ urlpatterns = [
     path("", views.index, name="index"),
     path("<str:lb_name>/", views.logbook_view, name="logbook"),
     path("<str:lb_name>/<int:entry_id>/", views.entry_detail, name="entry_detail"),
-    path("test/<str:lb_name>/<int:entry_id>/", views.test, name="test"),
+    # path("test/<str:lb_name>/<int:entry_id>/", views.test, name="test"),
     path("attachments/<str:lb_name>/<int:entry_id>/<str:filename>", views.attachments, name="attachments"),
 ]
 
