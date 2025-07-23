@@ -101,6 +101,6 @@ Required attributes = Project, Subject
 Options Project = Flexelog, ClimateChange, Politics
 MOptions Category = Communications, Documentation, Meetings, General
 
-Entries per page = 30  # override global if wish
+Entries per page = 30
 Preset on first reply Subject = Re: $Subject
 """
