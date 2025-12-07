@@ -93,9 +93,9 @@ def main():
 
     # Create a script to launch this elog --------------------
     on_windows = sys.platform.startswith("win")
-    run_filename = f"run_{top_group}" + ".bat" if on_windows else ""
+    run_filename = f"run_{top_group}" + (".bat" if on_windows else "")
     py = sys.executable
-    settings_arg = "" if single_site else f'--settings=flexsite.settings_{top_group}'
+    settings_args = [] if single_site else [f'--settings=flexsite.settings_{top_group}']
     run_statement = RUN_TEMPLATE.format(
         py=py,
         settings_arg=settings_arg,
@@ -116,17 +116,17 @@ def main():
                 db_filepath.unlink()
             else:
                 sys.exit(-1)
-        migrate_stmt = f"{py} manage.py migrate {settings_arg}"
-        super_stmt = f"{py} manage.py createsuperuser {settings_arg}"
+        migrate_cmd = [py, "manage.py", "migrate", *settings_args]
+        super_cmd = [py, "manage.py", "createsuperuser", *settings_args]
         print("----------")
-        print(f"Running `{migrate_stmt}`")
-        compl_proc = subprocess.run([py, "manage.py", "migrate", settings_arg])
+        print(f"Running `{' '.join(migrate_cmd)}`")
+        compl_proc = subprocess.run(migrate_cmd)
         if compl_proc.returncode != 0:
             print(f"Command exited with code {compl_proc.returncode}")
             sys.exit(-1)
         print("----------")
-        print(f"Running `{super_stmt}`")
-        compl_proc = subprocess.run(super_stmt)
+        print(f"Running `{' '.join(super_cmd)}`")
+        compl_proc = subprocess.run(super_cmd)
         if compl_proc.returncode != 0:
             print(f"Command exited with code {compl_proc.returncode}")
             sys.exit(-1)
