@@ -98,7 +98,7 @@ def main():
     settings_args = [] if single_site else [f'--settings=flexsite.settings_{top_group}']
     run_statement = RUN_TEMPLATE.format(
         py=py,
-        settings_arg=settings_arg,
+        settings_arg=" ".join(settings_args),
         port=port,
     )
 
@@ -119,13 +119,13 @@ def main():
         migrate_cmd = [py, "manage.py", "migrate", *settings_args]
         super_cmd = [py, "manage.py", "createsuperuser", *settings_args]
         print("----------")
-        print(f"Running `{' '.join(migrate_cmd)}`")
+        print("Running:", " ".join(migrate_cmd))
         compl_proc = subprocess.run(migrate_cmd)
         if compl_proc.returncode != 0:
             print(f"Command exited with code {compl_proc.returncode}")
             sys.exit(-1)
         print("----------")
-        print(f"Running `{' '.join(super_cmd)}`")
+        print("Running:", " ".join(super_cmd))
         compl_proc = subprocess.run(super_cmd)
         if compl_proc.returncode != 0:
             print(f"Command exited with code {compl_proc.returncode}")
